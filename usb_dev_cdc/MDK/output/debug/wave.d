@@ -1,0 +1,11 @@
+.\output\debug\wave.o: ..\MultMenu\menu\wave.c
+.\output\debug\wave.o: ..\MultMenu\menu\wave.h
+.\output\debug\wave.o: ..\MultMenu\menu\menuConfig.h
+.\output\debug\wave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\output\debug\wave.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h
+.\output\debug\wave.o: ..\u8g2Drive\u8g2Lib\inc\u8x8.h
+.\output\debug\wave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\output\debug\wave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\output\debug\wave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
+.\output\debug\wave.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\output\debug\wave.o: ..\MultMenu\disp\dispDirver.h

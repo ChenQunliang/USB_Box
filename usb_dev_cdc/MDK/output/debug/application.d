@@ -1,0 +1,12 @@
+.\output\debug\application.o: ..\MultMenu\application\application.c
+.\output\debug\application.o: ..\MultMenu\application\application.h
+.\output\debug\application.o: ..\MultMenu\menu\menu.h
+.\output\debug\application.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\output\debug\application.o: ..\MultMenu\menu\menuConfig.h
+.\output\debug\application.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h
+.\output\debug\application.o: ..\u8g2Drive\u8g2Lib\inc\u8x8.h
+.\output\debug\application.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\output\debug\application.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\output\debug\application.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
+.\output\debug\application.o: ..\MultMenu\disp\dispDirver.h
+.\output\debug\application.o: ..\MultMenu\menu\image.h

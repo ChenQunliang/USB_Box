@@ -1,0 +1,12 @@
+.\output\debug\parameter.o: ..\MultMenu\menu\parameter.c
+.\output\debug\parameter.o: ..\MultMenu\menu\parameter.h
+.\output\debug\parameter.o: ..\MultMenu\menu\menuConfig.h
+.\output\debug\parameter.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\output\debug\parameter.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h
+.\output\debug\parameter.o: ..\u8g2Drive\u8g2Lib\inc\u8x8.h
+.\output\debug\parameter.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+.\output\debug\parameter.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\output\debug\parameter.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
+.\output\debug\parameter.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\output\debug\parameter.o: ..\MultMenu\menu\menu.h
+.\output\debug\parameter.o: ..\MultMenu\disp\dispDirver.h
