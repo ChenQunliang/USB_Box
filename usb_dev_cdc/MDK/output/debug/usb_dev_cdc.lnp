@@ -20,7 +20,6 @@
 ".\output\debug\startup_hc32f460.o"
 ".\output\debug\ev_hc32f460_lqfp100_v2.o"
 ".\output\debug\main.o"
-".\output\debug\tim0.o"
 ".\output\debug\encodtima.o"
 ".\output\debug\image.o"
 ".\output\debug\menu.o"

@@ -6,8 +6,8 @@ extern uint16_t g_u16_key_timer;
 extern uint16_t g_u16_mis_timer;
 extern uint16_t g_u16_osd_timer;
 __IO uint8_t m_u8SpeedUpd = 0U;
-// const uint8_t usFlashInitVal[4] __attribute__((at(0x00007FFC))) = {0x23,0x01,0x89,0x67};//¶¨Î»ÔÚflashÖÐ
-// ³ý0´íÎó
+// const uint8_t usFlashInitVal[4] __attribute__((at(0x00007FFC))) = {0x23,0x01,0x89,0x67};//ï¿½ï¿½Î»ï¿½ï¿½flashï¿½ï¿½
+// ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½
 static void fault_test_by_div0(void)
 {
     volatile int *SCB_CCR = (volatile int *)0xE000ED14; // SCB->CCR
@@ -30,19 +30,14 @@ int32_t main(void)
     EFM_FWMC_Cmd(ENABLE);
     BSP_CLK_Init();
     BSP_LED_Init();
-//    USER_BUTTON_Init();
-//    USER_SWITCHS_Init();
 #if (LL_TMR0_ENABLE == DDL_ON)
-    TMR02_A_Config();
     TMR02_B_Config();
-    TMR01_A_Config();
 #endif
-    mculib_key_exti_init();
 #if (LL_PRINT_ENABLE == DDL_ON)
     DDL_PrintfInit(BSP_PRINTF_DEVICE, BSP_PRINTF_BAUDRATE, BSP_PRINTF_Preinit);
 #endif
 #ifdef DEMO
-    /*backtrace ¿â³õÊ¼»¯*/
+    /*backtrace ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½*/
     cm_backtrace_init("usb_dev_cdc", HARDWARE_VERSION, SOFTWARE_VERSION);
 #endif
 #if (LL_PRINT_ENABLE == DDL_ON)
@@ -52,28 +47,23 @@ int32_t main(void)
     TmrAConfig();
     TMRA_Start(TMRA_POS_UNIT);
     Menu_Init(&menu);
-    
+
     for (;;)
     {
-        
-
-        
-//        mculib_i2c_write_16bidx8bval(0xB2, 0x785, 0x02); //luman peaking   02
-//        mculib_i2c_write_16bidx8bval(0xB2, 0x0264, 0x03); //03
-        if (m_u8SpeedUpd) // 
-        {   
+        if (m_u8SpeedUpd) //
+        {
             Menu_Loop(&menu);
             m_u8SpeedUpd = 0;
-//            test = rand()%360;
+            //            test = rand()%360;
         }
         else
-        {   
-            if (g_u16_sys_timer >= SYS_TIMEOUT_100MS)        // 100ms
+        {
+            if (g_u16_sys_timer >= SYS_TIMEOUT_100MS) // 100ms
             {
                 g_u16_sys_timer = 0;
             }
             if (g_u16_key_timer >= SYS_TIMEOUT_50MS) // 50MS
-            {   
+            {
                 g_u16_key_timer = 0;
             }
             if (g_u16_mis_timer >= SYS_TIMEOUT_100MS) // 100ms
@@ -82,10 +72,9 @@ int32_t main(void)
             }
             if (g_u16_osd_timer >= SYS_TIMEOUT_500MS) // 500MS   OSD
             {
-                
+
                 g_u16_osd_timer = 0;
             }
         }
-
     }
 }

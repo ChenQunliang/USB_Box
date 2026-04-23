@@ -29,14 +29,24 @@ int32_t I2C_Master_Initialize(void)
   int32_t i32Ret;
   stc_i2c_init_t stcI2cInit;
   float32_t fErr;
+  uint8_t retry;
 
-  I2C_DeInit(U8G2_I2C_UNIT);
+  for (retry = 0; retry < 3; retry++)
+  {
+    I2C_DeInit(U8G2_I2C_UNIT);
 
-  (void)I2C_StructInit(&stcI2cInit);
-  stcI2cInit.u32ClockDiv = U8G2_I2C_CLK_DIVX;
-  stcI2cInit.u32Baudrate = U8G2_I2C_BAUDRATE;
-  stcI2cInit.u32SclTime = 3UL;
-  i32Ret = I2C_Init(U8G2_I2C_UNIT, &stcI2cInit, &fErr);
+    (void)I2C_StructInit(&stcI2cInit);
+    stcI2cInit.u32ClockDiv = U8G2_I2C_CLK_DIVX;
+    stcI2cInit.u32Baudrate = U8G2_I2C_BAUDRATE;
+    stcI2cInit.u32SclTime = 3UL;
+    i32Ret = I2C_Init(U8G2_I2C_UNIT, &stcI2cInit, &fErr);
+
+    if (LL_OK == i32Ret)
+    {
+      break; // 初始化成功，退出重试
+    }
+    DDL_DelayMS(50); // 初始化失败，等待后重试
+  }
 
   I2C_BusWaitCmd(U8G2_I2C_UNIT, ENABLE);
 
@@ -220,6 +230,11 @@ static uint8_t u8x8_gpio_and_delay(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, v
 
 void u8g2Init(u8g2_t *u8g2)
 {
+  /* 上电延时：确保OLED模块内部电源稳定后再初始化
+   * 长时间断电后OLED完全放电，需要更长的稳定时间
+   * 否则可能导致I2C通信失败、黑屏 */
+  DDL_DelayMS(200);
+
 #ifdef SOFTWARE_I2C
   MyI2C_Init();
   u8g2_Setup_ssd1306_i2c_128x64_noname_f(u8g2, U8G2_R0, u8x8_byte_sw_i2c, u8x8_gpio_and_delay);

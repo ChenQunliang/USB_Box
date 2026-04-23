@@ -23,7 +23,7 @@
 #include "hc32_ll.h"
 #include "ev_hc32f460_lqfp100_v2.h"
 #include "EncodTimA.h"
-#include "tim0.h"
+//#include "tim0.h"
 
 // #include "flash.h"
 
@@ -36,10 +36,15 @@
 #define USER 1
 #define FLASH_LEAF_ADDR(x) (uint32_t)(0x7a000U + (0x2000U * (x)))
 
-#define LED_TIME 50
-#define LED_ERR 0
+#define LED_TIME 35
 
-/* ��ʱ������*/
+#define LED_ERR_RED     0x80
+#define LED_ERR_GREEN   0x40
+#define LED_ERR_BLUE    0x20
+#define LED_OK          0x10
+
+
+
 extern __IO uint8_t m_u8SpeedUpd;
 
 #define EXAMPLE_PERIPH_WE_IIC (LL_PERIPH_GPIO | LL_PERIPH_EFM | LL_PERIPH_FCG | \

@@ -503,11 +503,6 @@
               <FilePath>..\src\main.c</FilePath>
             </File>
             <File>
-              <FileName>tim0.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\tim0.c</FilePath>
-            </File>
-            <File>
               <FileName>EncodTimA.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\EncodTimA.c</FilePath>
@@ -1311,11 +1306,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>tim0.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\tim0.c</FilePath>
             </File>
             <File>
               <FileName>EncodTimA.c</FileName>

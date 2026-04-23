@@ -37,12 +37,10 @@
 .\output\debug\encodtima.o: ../../drivers/hc32_ll_driver/inc/hc32_ll_i2s.h
 .\output\debug\encodtima.o: ../../drivers/hc32_ll_driver/inc/hc32_ll_spi.h
 .\output\debug\encodtima.o: ..\headers\EncodTimA.h
-.\output\debug\encodtima.o: ..\headers\tim0.h
-.\output\debug\encodtima.o: ..\headers\main.h
-.\output\debug\encodtima.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menu.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\encodtima.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h
 .\output\debug\encodtima.o: ..\u8g2Drive\u8g2Lib\inc\u8x8.h
 .\output\debug\encodtima.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\output\debug\encodtima.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
+.\output\debug\encodtima.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
