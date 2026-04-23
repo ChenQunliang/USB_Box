@@ -794,42 +794,74 @@ void Create_element(xpItem item, element_t *element)
  */
 static Menu_Direction BtnScan(void)
 {
-  static unsigned char TMRA_DIR;
-  static uint32_t u32CycleCnt, u32CycleCnt_last;
-  u32CycleCnt = TMRA_GetCountValue(TMRA_POS_UNIT); // 获取编码数值
+  static uint32_t u32CycleCnt_last = 0;
+  static uint8_t debounce_count = 0;
+  static uint8_t last_direction = 0;
+  static uint8_t confirmed_direction = 0;
 
+  uint32_t u32CycleCnt = TMRA_GetCountValue(TMRA_POS_UNIT); // 获取编码数值
+
+  // 按键检测（保持原逻辑）
   if (Key_Read(0)) // 按键按下
   {
     u32CycleCnt_last = u32CycleCnt;
+    debounce_count = 0;
+    last_direction = 0;
     return MENU_ENTER;
   }
-  else if (u32CycleCnt != u32CycleCnt_last)
+
+  // 编码器值发生变化
+  if (u32CycleCnt != u32CycleCnt_last)
   {
-    uint8_t data = TMRA_GetCountDir(TMRA_POS_UNIT);
-    switch (data)
+    uint8_t current_direction = TMRA_GetCountDir(TMRA_POS_UNIT);
+
+    // 方向有效判断
+    if (current_direction == TMRA_DIR_UP || current_direction == TMRA_DIR_DOWN)
     {
-    case TMRA_DIR_UP:
-      u32CycleCnt_last = u32CycleCnt;
-      return MENU_DOWN;
+      // 方向相同，增加计数
+      if (current_direction == last_direction)
+      {
+        debounce_count++;
+      }
+      else
+      {
+        // 方向变化，重置计数
+        debounce_count = 1;
+        last_direction = current_direction;
+      }
 
-    case TMRA_DIR_DOWN:
-      u32CycleCnt_last = u32CycleCnt;
-      return MENU_UP;
+      // 连续2次检测到相同方向，确认为有效操作
+      if (debounce_count >= 2)
+      {
+        confirmed_direction = current_direction;
+        debounce_count = 0;
+        u32CycleCnt_last = u32CycleCnt; // 只在确认有效后更新
 
-      //        case MENU_ENTER:
-      //            return MENU_ENTER;
-      // case 4:
-      //     require_jump(&menu, menu.now_item->page.location->item.head);
-      //     return MENU_ENTER;
-      // case 5:
-      //     require_jump(&menu, &HomeHead_Item);
-      //     return MENU_ENTER;
-    default:
-      break;
+        // 返回对应方向
+        if (confirmed_direction == TMRA_DIR_UP)
+        {
+          return MENU_DOWN;
+        }
+        else if (confirmed_direction == TMRA_DIR_DOWN)
+        {
+          return MENU_UP;
+        }
+      }
+    }
+    else
+    {
+      // 无效方向，重置状态
+      debounce_count = 0;
+      last_direction = 0;
     }
   }
+  else
+  {
+    // 编码器值无变化，重置消抖状态
+    debounce_count = 0;
+    last_direction = 0;
+  }
 
-  u32CycleCnt_last = u32CycleCnt;
   return MENU_NONE;
 }
 

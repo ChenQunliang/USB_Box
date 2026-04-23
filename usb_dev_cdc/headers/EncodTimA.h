@@ -24,7 +24,7 @@
  */
 #define GPIO_PIN_0X GPIO_PIN_05
 
-#define PHASE_DIFF_CNT (PHASE_DIFF_CNT_X2)
+#define PHASE_DIFF_CNT (PHASE_DIFF_CNT_X4)
 #define TIMA 1
 #define B_CLK 1
 #define A_CLK 1

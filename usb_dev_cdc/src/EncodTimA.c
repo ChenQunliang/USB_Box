@@ -27,16 +27,16 @@ void TmrAConfig(void)
     // TMRA_CLR_COND_SYM_TRIG_RISING
     /* 3.1. Enable The TMRA_POS_UNIT counter reset when phase Z rising edge */
     // ENABLE
-    TMRA_HWClearCondCmd(TMRA_POS_UNIT, TMRA_CLR_COND_SYM_TRIG_RISING, ENABLE); // Çå³ýÌõ¼þ
+    TMRA_HWClearCondCmd(TMRA_POS_UNIT, TMRA_CLR_COND_SYM_TRIG_RISING, ENABLE); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     /* 5. Enable Filter if needed. */
 #if A_CLK
-    TMRA_SetFilterClockDiv(TMRA_POS_UNIT, TMRA_PIN_CLKA, TMRA_FILTER_CLK_DIV64);
+    TMRA_SetFilterClockDiv(TMRA_POS_UNIT, TMRA_PIN_CLKA, TMRA_FILTER_CLK_DIV4);
     TMRA_FilterCmd(TMRA_POS_UNIT, TMRA_PIN_CLKA, ENABLE);
 #endif
 
 #if B_CLK // 1 4 16 64
-    TMRA_SetFilterClockDiv(TMRA_POS_UNIT, TMRA_PIN_CLKB, TMRA_FILTER_CLK_DIV64);
+    TMRA_SetFilterClockDiv(TMRA_POS_UNIT, TMRA_PIN_CLKB, TMRA_FILTER_CLK_DIV4);
     TMRA_FilterCmd(TMRA_POS_UNIT, TMRA_PIN_CLKB, ENABLE);
 #endif
 
