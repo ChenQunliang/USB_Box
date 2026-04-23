@@ -30,49 +30,23 @@ int32_t I2C_Master_Initialize(void)
   stc_i2c_init_t stcI2cInit;
   float32_t fErr;
 
-  I2C_DeInit(I2C_UNIT);
+  I2C_DeInit(U8G2_I2C_UNIT);
 
   (void)I2C_StructInit(&stcI2cInit);
-  stcI2cInit.u32ClockDiv = I2C_CLK_DIVX;
-  stcI2cInit.u32Baudrate = I2C_BAUDRATE;
+  stcI2cInit.u32ClockDiv = U8G2_I2C_CLK_DIVX;
+  stcI2cInit.u32Baudrate = U8G2_I2C_BAUDRATE;
   stcI2cInit.u32SclTime = 3UL;
-  i32Ret = I2C_Init(I2C_UNIT, &stcI2cInit, &fErr);
+  i32Ret = I2C_Init(U8G2_I2C_UNIT, &stcI2cInit, &fErr);
 
-  I2C_BusWaitCmd(I2C_UNIT, ENABLE);
+  I2C_BusWaitCmd(U8G2_I2C_UNIT, ENABLE);
 
   return i32Ret;
 }
-//static int32_t I2C_Master_Transmit(uint16_t u16DevAddr, uint8_t const au8Data[], uint32_t u32Size, uint32_t u32Timeout)
-//{
-//  int32_t i32Ret;
-//  I2C_Cmd(I2C_UNIT, ENABLE);
 
-//  I2C_SWResetCmd(I2C_UNIT, ENABLE);
-//  I2C_SWResetCmd(I2C_UNIT, DISABLE);
-//  i32Ret = I2C_Start(I2C_UNIT, u32Timeout);
-//  if (LL_OK == i32Ret)
-//  {
-//#if (I2C_ADDR_MD == I2C_ADDR_MD_10BIT)
-//    i32Ret = I2C_Trans10BitAddr(I2C_UNIT, u16DevAddr, I2C_DIR_TX, u32Timeout);
-//#else
-//    i32Ret = I2C_TransAddr(I2C_UNIT, u16DevAddr, I2C_DIR_TX, u32Timeout);
-//#endif
-
-//    if (LL_OK == i32Ret)
-//    {
-//      i32Ret = I2C_TransData(I2C_UNIT, au8Data, u32Size, u32Timeout);
-//    }
-//  }
-
-//  (void)I2C_Stop(I2C_UNIT, u32Timeout);
-//  I2C_Cmd(I2C_UNIT, DISABLE);
-
-//  return i32Ret;
-//}
 
 static uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
-{   
-   static int32_t i32Ret;
+{
+  static int32_t i32Ret;
   uint8_t *data = (uint8_t *)arg_ptr;
   switch (msg)
   {
@@ -80,8 +54,8 @@ static uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void
   {
     if (LL_OK == i32Ret)
     {
-        i32Ret = I2C_TransData(I2C_UNIT, data, arg_int, TIMEOUT);
-//        printf("IIC_Send State%d\n",i32Ret);
+      i32Ret = I2C_TransData(U8G2_I2C_UNIT, data, arg_int, U8G2_TIMEOUT);
+      //        printf("IIC_Send State%d\n",i32Ret);
     }
     //    while (arg_int-- > 0)
     //    {
@@ -93,44 +67,43 @@ static uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void
   }
   break;
   case U8X8_MSG_BYTE_INIT:
-    /* ÎªÆô¶¯ i2c ×ÓÏµÍ³Ìí¼Ó×Ô¶¨Òå´úÂë */
+    /* Îªï¿½ï¿½ï¿½ï¿½ i2c ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
     {
-      
+
       if (LL_OK != I2C_Master_Initialize())
       {
         printf("IIC_Init Err \n");
       }
-//      else 
-//        printf("IIC_Init \n");
+      //      else
+      //        printf("IIC_Init \n");
     }
     break;
   case U8X8_MSG_BYTE_SET_DC:
   { /* ignored for i2c */
-//      printf("IIC_Dc \n");
+    //      printf("IIC_Dc \n");
   }
   break;
   case U8X8_MSG_BYTE_START_TRANSFER:
-  { 
-    
-    
-    I2C_Cmd(I2C_UNIT, ENABLE);
-    I2C_SWResetCmd(I2C_UNIT, ENABLE);
-    I2C_SWResetCmd(I2C_UNIT, DISABLE);
-    i32Ret = I2C_Start(I2C_UNIT, TIMEOUT);
-//    printf("IIC_Start state%d\n",i32Ret);
+  {
+
+    I2C_Cmd(U8G2_I2C_UNIT, ENABLE);
+    I2C_SWResetCmd(U8G2_I2C_UNIT, ENABLE);
+    I2C_SWResetCmd(U8G2_I2C_UNIT, DISABLE);
+    i32Ret = I2C_Start(U8G2_I2C_UNIT, U8G2_TIMEOUT);
+    //    printf("IIC_Start state%d\n",i32Ret);
     if (LL_OK == i32Ret)
     {
-      i32Ret = I2C_TransAddr(I2C_UNIT, DEVICE_ADDR , I2C_DIR_TX, TIMEOUT);
-//      printf("\nAddr%d\n",i32Ret);
+      i32Ret = I2C_TransAddr(U8G2_I2C_UNIT, U8G2_DEVICE_ADDR, I2C_DIR_TX, U8G2_TIMEOUT);
+      //      printf("\nAddr%d\n",i32Ret);
     }
   }
   break;
   case U8X8_MSG_BYTE_END_TRANSFER:
   {
-    (void)I2C_Stop(I2C_UNIT, TIMEOUT);
-    I2C_Cmd(I2C_UNIT, DISABLE);
-//    printf("IIC_End state%d\n" ,i32Ret);  
-      i32Ret = 1;
+    (void)I2C_Stop(U8G2_I2C_UNIT, U8G2_TIMEOUT);
+    I2C_Cmd(U8G2_I2C_UNIT, DISABLE);
+    //    printf("IIC_End state%d\n" ,i32Ret);
+    i32Ret = 1;
   }
   break;
   default:
@@ -176,10 +149,10 @@ static uint8_t u8x8_gpio_and_delay_hw(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int
 
 static void HardWare_I2C2_GPIOInit(void)
 {
-  FCG_Fcg1PeriphClockCmd(I2C_FCG_USE, ENABLE);
+  FCG_Fcg1PeriphClockCmd(U8G2_I2C_FCG_USE, ENABLE);
   LL_PERIPH_WE(EXAMPLE_PERIPH_WE_IIC);
-  GPIO_SetFunc(I2C_SCL_PORT, I2C_SCL_PIN, I2C_GPIO_SCL_FUNC);
-  GPIO_SetFunc(I2C_SDA_PORT, I2C_SDA_PIN, I2C_GPIO_SDA_FUNC);
+  GPIO_SetFunc(U8G2_I2C_SCL_PORT, U8G2_I2C_SCL_PIN, U8G2_I2C_GPIO_SCL_FUNC);
+  GPIO_SetFunc(U8G2_I2C_SDA_PORT, U8G2_I2C_SDA_PIN, U8G2_I2C_GPIO_SDA_FUNC);
   printf("IIC_GPIO_Init \n");
 }
 

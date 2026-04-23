@@ -1,0 +1,420 @@
+version: "4.1"
+name: usb_dev_cdc
+type: ARM
+deviceName: null
+packDir: null
+srcDirs: []
+virtualFolder:
+  name: <virtual_root>
+  files: []
+  folders:
+    - name: driver
+      files:
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_clk.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_efm.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_gpio.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_interrupts.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_keyscan.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_pwc.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_sram.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_usart.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_utility.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_crc.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_fcg.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_tmr0.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_i2c.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_fcm.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_tmra.c
+        - path: ../../drivers/hc32_ll_driver/src/hc32_ll_qspi.c
+      folders: []
+    - name: cmsis
+      files:
+        - path: ../../drivers/cmsis/Device/HDSC/hc32f4xx/Source/system_hc32f460.c
+        - path: startup_hc32f460.s
+      folders: []
+    - name: ev_hc32f460_lqfp100_v2
+      files:
+        - path: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2.c
+      folders: []
+    - name: src
+      files:
+        - path: ../src/main.c
+        - path: ../src/tim0.c
+        - path: ../src/EncodTimA.c
+      folders: []
+    - name: MULTMENU
+      files: []
+      folders:
+        - name: MENU
+          files:
+            - path: ../MultMenu/menu/image.c
+            - path: ../MultMenu/menu/menu.c
+            - path: ../MultMenu/menu/menuConfig.c
+            - path: ../MultMenu/menu/parameter.c
+            - path: ../MultMenu/menu/text.c
+            - path: ../MultMenu/menu/wave.c
+          folders: []
+        - name: DISP
+          files:
+            - path: ../MultMenu/disp/dispDirver.c
+          folders: []
+        - name: APPLICATION
+          files:
+            - path: ../MultMenu/application/AirPlane.c
+            - path: ../MultMenu/application/application.c
+            - path: ../MultMenu/application/DinoGame.c
+          folders: []
+    - name: SRC
+      files: []
+      folders:
+        - name: U8G2DRIVE
+          files:
+            - path: ../u8g2Drive/hc32_u8g2.c
+          folders:
+            - name: U8G2LIB
+              files: []
+              folders:
+                - name: SRC
+                  files:
+                    - path: ../u8g2Drive/u8g2Lib/src/mui.c
+                    - path: ../u8g2Drive/u8g2Lib/src/mui_u8g2.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_bitmap.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_box.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_buffer.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_button.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_circle.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_cleardisplay.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_d_memory.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_d_setup.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_font.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_fonts.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_hvline.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_input_value.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_intersection.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_kerning.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_line.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_ll_hvline.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_message.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_polygon.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_selection_list.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8g2_setup.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8log.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8log_u8g2.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8log_u8x8.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_8x8.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_byte.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_cad.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_capture.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_d_ssd1306_128x64_noname.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_debounce.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_display.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_fonts.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_gpio.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_input_value.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_message.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_selection_list.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_setup.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_string.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_u8toa.c
+                    - path: ../u8g2Drive/u8g2Lib/src/u8x8_u16toa.c
+                  folders: []
+    - name: cm_backtrace
+      files:
+        - path: ../cm_backtrace/cm_backtrace.c
+        - path: ../cm_backtrace/fault_handler/keil/cmb_fault.S
+      folders: []
+dependenceList: []
+outDir: build
+miscInfo: {}
+targets:
+  usb_dev_cdc_Debug:
+    cppPreprocessAttrs:
+      defineList:
+        - __DEBUG
+        - HC32F460
+        - USE_DDL_DRIVER
+        - _PLATFORM_ARM_
+      incList:
+        - ../../drivers/cmsis/Device/HDSC/hc32f4xx/Include
+        - ../../drivers/cmsis/Include
+        - ../../drivers/hc32_ll_driver/inc
+        - ../../drivers/bsp/ev_hc32f460_lqfp100_v2
+        - ../../midwares/hc32/usb
+        - ../../midwares/hc32/usb/usb_device_lib/device_core
+        - ../../midwares/hc32/usb/usb_device_lib/device_class/single_cdc
+        - ../cm_backtrace
+        - ../MultMenu
+        - ../MultMenu/application
+        - ../MultMenu/disp
+        - ../MultMenu/menu
+        - ../u8g2Drive
+        - ../u8g2Drive/u8g2Lib
+        - ../u8g2Drive/u8g2Lib/inc
+        - ../u8g2Drive/u8g2Lib/src
+        - ../src
+        - ../headers
+        - .cmsis/include
+        - RTE/_usb_dev_cdc_Debug
+      libList: []
+    excludeList: []
+    settings: {}
+    toolchain: AC5
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M4
+        floatingPointHardware: single
+        options:
+          version: 4
+          afterBuildTasks:
+            - name: "[Copy linker output for Keil User Commands]"
+              abortAfterFailed: true
+              command: mkdir ${KEIL_OUTPUT_DIR} & copy "${OutDir}\${ProjectName}.axf" "${KEIL_OUTPUT_DIR}\${ProjectName}.axf"
+              disable: false
+            - name: fromelf  --bin -o "$L@L.bin" "#L"
+              abortAfterFailed: true
+              command: fromelf  --bin -o "${KEIL_OUTPUT_DIR}\${ProjectName}.bin" "${KEIL_OUTPUT_DIR}\${ProjectName}.axf"
+              disable: false
+          asm-compiler:
+            defines: []
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            C_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            c99-mode: true
+            one-elf-section-per-function: true
+            optimization: level-0
+            warnings: all-warnings
+          global:
+            output-debug-info: enable
+            use-microLIB: true
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            misc-controls: --keep=*Handler
+            output-format: elf
+            ro-base: "0x0"
+            rw-base: "0x1FFF8000"
+            xo-base: ""
+        scatterFilePath: config/linker/HC32F460xE.sct
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x2f000"
+                startAddr: "0x1fff8000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x1000"
+                startAddr: "0x200f0000"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x60000"
+                startAddr: "0x10000"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x3c0"
+                startAddr: "0x3000c00"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+    uploader: JLink
+  usb_dev_cdc_Release:
+    cppPreprocessAttrs:
+      defineList:
+        - HC32F460
+        - USE_DDL_DRIVER
+      incList:
+        - ../source
+        - ../../../../../../drivers/cmsis/Device/HDSC/hc32f4xx/Include
+        - ../../../../../../drivers/cmsis/Include
+        - ../../../../../../drivers/hc32_ll_driver/inc
+        - ../../../../../../drivers/bsp/ev_hc32f460_lqfp100_v2
+        - ../../../../../../midwares/hc32/usb
+        - ../../../../../../midwares/hc32/usb/usb_device_lib/device_core
+        - ../../../../../../midwares/hc32/usb/usb_device_lib/device_class/single_cdc
+        - .cmsis/include
+        - RTE/_usb_dev_cdc_Release
+      libList: []
+    excludeList: []
+    toolchain: AC5
+    toolchainConfigMap:
+      AC5:
+        archExtensions: ""
+        cpuType: Cortex-M4
+        floatingPointHardware: none
+        options:
+          version: 4
+          afterBuildTasks: []
+          asm-compiler:
+            defines: []
+          beforeBuildTasks: []
+          c/cpp-compiler:
+            CXX_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            C_FLAGS: --diag_suppress=1 --diag_suppress=1295
+            c99-mode: true
+            one-elf-section-per-function: true
+            optimization: level-3
+            optimize-for-time: true
+            warnings: all-warnings
+          global:
+            output-debug-info: enable
+            use-microLIB: true
+          linker:
+            $outputTaskExcludes:
+              - .bin
+            misc-controls: --keep=*Handler
+            output-format: elf
+            ro-base: "0x0"
+            rw-base: "0x1FFF8000"
+            xo-base: ""
+        scatterFilePath: config/linker/HC32F460xE.sct
+        storageLayout:
+          RAM:
+            - id: 1
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 3
+              isChecked: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              noInit: false
+              tag: RAM
+            - id: 1
+              isChecked: true
+              mem:
+                size: "0x2f000"
+                startAddr: "0x1fff8000"
+              noInit: false
+              tag: IRAM
+            - id: 2
+              isChecked: false
+              mem:
+                size: "0x1000"
+                startAddr: "0x200f0000"
+              noInit: false
+              tag: IRAM
+          ROM:
+            - id: 1
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 3
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x0"
+                startAddr: "0x0"
+              tag: ROM
+            - id: 1
+              isChecked: true
+              isStartup: true
+              mem:
+                size: "0x80000"
+                startAddr: "0x0"
+              tag: IROM
+            - id: 2
+              isChecked: false
+              isStartup: false
+              mem:
+                size: "0x3fc"
+                startAddr: "0x3000c00"
+              tag: IROM
+        useCustomScatterFile: false
+    uploadConfigMap:
+      JLink:
+        baseAddr: ""
+        bin: ""
+        cpuInfo:
+          cpuName: "null"
+          vendor: "null"
+        otherCmds: ""
+        proType: 1
+        speed: 8000
+    uploader: JLink

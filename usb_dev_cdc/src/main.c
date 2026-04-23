@@ -30,8 +30,8 @@ int32_t main(void)
     EFM_FWMC_Cmd(ENABLE);
     BSP_CLK_Init();
     BSP_LED_Init();
-    USER_BUTTON_Init();
-    USER_SWITCHS_Init();
+//    USER_BUTTON_Init();
+//    USER_SWITCHS_Init();
 #if (LL_TMR0_ENABLE == DDL_ON)
     TMR02_A_Config();
     TMR02_B_Config();

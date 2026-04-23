@@ -25,70 +25,54 @@
 #include "EncodTimA.h"
 #include "tim0.h"
 
-
-//#include "flash.h"
+// #include "flash.h"
 
 #include "menu.h"
 
-#ifdef  DEMO
+#ifdef DEMO
 #include "cm_backtrace.h"
 #endif
 #define DEFAULT 0
-#define USER    1
-#define FLASH_LEAF_ADDR(x)          (uint32_t)(0x7a000U+(0x2000U * (x)))
+#define USER 1
+#define FLASH_LEAF_ADDR(x) (uint32_t)(0x7a000U + (0x2000U * (x)))
 
-#define HARDWARE_VERSION               "V1.0.0"
-#define SOFTWARE_VERSION               "V0.1.0"
-
-#define LED_TIME 0
+#define LED_TIME 50
 #define LED_ERR 0
 
+/* ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+extern __IO uint8_t m_u8SpeedUpd;
 
-
-/* ¶¨Ê±Æ÷¼ÆÊý*/
-extern __IO  uint8_t m_u8SpeedUpd ;
-
-
-
-
-#define EXAMPLE_PERIPH_WE_IIC               (LL_PERIPH_GPIO | LL_PERIPH_EFM | LL_PERIPH_FCG | \
-                                         LL_PERIPH_PWC_CLK_RMU | LL_PERIPH_SRAM)
-#define EXAMPLE_PERIPH_WP_IIC               (LL_PERIPH_EFM | LL_PERIPH_FCG | LL_PERIPH_SRAM)
+#define EXAMPLE_PERIPH_WE_IIC (LL_PERIPH_GPIO | LL_PERIPH_EFM | LL_PERIPH_FCG | \
+                               LL_PERIPH_PWC_CLK_RMU | LL_PERIPH_SRAM)
+#define EXAMPLE_PERIPH_WP_IIC (LL_PERIPH_EFM | LL_PERIPH_FCG | LL_PERIPH_SRAM)
 
 /* Define I2C unit used for the example */
-#define I2C_UNIT                        (CM_I2C2)
-#define I2C_FCG_USE                     (FCG1_PERIPH_I2C2)
+#define U8G2_I2C_UNIT (CM_I2C2)
+#define U8G2_I2C_FCG_USE (FCG1_PERIPH_I2C2)
 /* Define slave device address for example */
-#define DEVICE_ADDR                     (0x3C)
+#define U8G2_DEVICE_ADDR (0x3C)
 /* I2C address mode */
-#define I2C_ADDR_MD_7BIT                (0U)
-#define I2C_ADDR_MD_10BIT               (1U)
+#define U8G2_I2C_ADDR_MD_7BIT (0U)
+#define U8G2_I2C_ADDR_MD_10BIT (1U)
 /* Config I2C address mode: I2C_ADDR_MD_7BIT or I2C_ADDR_MD_10BIT */
-#define I2C_ADDR_MD                     (I2C_ADDR_MD_7BIT)
+#define U8G2_I2C_ADDR_MD (U8G2_I2C_ADDR_MD_7BIT)
 
 /* Define port and pin for SDA and SCL */
-#define I2C_SCL_PORT                    (GPIO_PORT_A)
-#define I2C_SCL_PIN                     (GPIO_PIN_04)
+#define U8G2_I2C_SCL_PORT (GPIO_PORT_A)
+#define U8G2_I2C_SCL_PIN (GPIO_PIN_04)
 
-#define I2C_SDA_PORT                    (GPIO_PORT_A)
-#define I2C_SDA_PIN                     (GPIO_PIN_05)
+#define U8G2_I2C_SDA_PORT (GPIO_PORT_A)
+#define U8G2_I2C_SDA_PIN (GPIO_PIN_05)
 
-#define I2C_GPIO_SDA_FUNC               (GPIO_FUNC_50)
-#define I2C_GPIO_SCL_FUNC               (GPIO_FUNC_51)
+#define U8G2_I2C_GPIO_SDA_FUNC (GPIO_FUNC_50)
+#define U8G2_I2C_GPIO_SCL_FUNC (GPIO_FUNC_51)
 
+#define U8G2_TIMEOUT (0x40000)
 
-#define TIMEOUT                         (0x40000)
-
-/* Define Write and read data length for the example */
-#define TEST_DATA_LEN                   (256U)
 /* Define i2c baudrate */
 
-#define I2C_CLK_DIVX                    I2C_CLK_DIV2
-#define I2C_BAUDRATE                    (400000)
-
-
-
-
+#define U8G2_I2C_CLK_DIVX I2C_CLK_DIV2
+#define U8G2_I2C_BAUDRATE (400000)
 
 #endif /* __MAIN_H__ */
 
