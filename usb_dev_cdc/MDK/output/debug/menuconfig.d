@@ -47,3 +47,4 @@
 .\output\debug\menuconfig.o: ..\headers\EncodTimA.h
 .\output\debug\menuconfig.o: ..\headers\main.h
 .\output\debug\menuconfig.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
+.\output\debug\menuconfig.o: ..\headers\i2c.h

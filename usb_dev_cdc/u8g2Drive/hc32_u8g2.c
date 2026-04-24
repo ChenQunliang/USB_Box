@@ -24,7 +24,7 @@
 
 #ifdef HARDWARE_I2C
 
-int32_t I2C_Master_Initialize(void)
+static int32_t U8G2_I2C_Master_Initialize(void)
 {
   int32_t i32Ret;
   stc_i2c_init_t stcI2cInit;
@@ -53,7 +53,6 @@ int32_t I2C_Master_Initialize(void)
   return i32Ret;
 }
 
-
 static uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
   static int32_t i32Ret;
@@ -80,7 +79,7 @@ static uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void
     /* Ϊ���� i2c ��ϵͳ�����Զ������ */
     {
 
-      if (LL_OK != I2C_Master_Initialize())
+      if (LL_OK != U8G2_I2C_Master_Initialize())
       {
         printf("IIC_Init Err \n");
       }

@@ -840,11 +840,11 @@ static Menu_Direction BtnScan(void)
         // 返回对应方向
         if (confirmed_direction == TMRA_DIR_UP)
         {
-          return MENU_DOWN;
+          return MENU_UP;
         }
         else if (confirmed_direction == TMRA_DIR_DOWN)
         {
-          return MENU_UP;
+          return MENU_DOWN;
         }
       }
     }

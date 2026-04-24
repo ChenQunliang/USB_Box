@@ -23,6 +23,7 @@
 #include "hc32_ll.h"
 #include "ev_hc32f460_lqfp100_v2.h"
 #include "EncodTimA.h"
+#include "i2c.h"
 //#include "tim0.h"
 
 // #include "flash.h"
@@ -64,10 +65,10 @@ extern __IO uint8_t m_u8SpeedUpd;
 
 /* Define port and pin for SDA and SCL */
 #define U8G2_I2C_SCL_PORT (GPIO_PORT_A)
-#define U8G2_I2C_SCL_PIN (GPIO_PIN_04)
+#define U8G2_I2C_SCL_PIN (GPIO_PIN_06)
 
 #define U8G2_I2C_SDA_PORT (GPIO_PORT_A)
-#define U8G2_I2C_SDA_PIN (GPIO_PIN_05)
+#define U8G2_I2C_SDA_PIN (GPIO_PIN_07)
 
 #define U8G2_I2C_GPIO_SDA_FUNC (GPIO_FUNC_50)
 #define U8G2_I2C_GPIO_SCL_FUNC (GPIO_FUNC_51)

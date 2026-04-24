@@ -21,6 +21,7 @@
 ".\output\debug\ev_hc32f460_lqfp100_v2.o"
 ".\output\debug\main.o"
 ".\output\debug\encodtima.o"
+".\output\debug\i2c.o"
 ".\output\debug\image.o"
 ".\output\debug\menu.o"
 ".\output\debug\menuconfig.o"

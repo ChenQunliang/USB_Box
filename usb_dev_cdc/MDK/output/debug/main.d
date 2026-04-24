@@ -38,6 +38,7 @@
 .\output\debug\main.o: ..\headers\EncodTimA.h
 .\output\debug\main.o: ..\headers\main.h
 .\output\debug\main.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
+.\output\debug\main.o: ..\headers\i2c.h
 .\output\debug\main.o: ..\MultMenu\menu\menu.h
 .\output\debug\main.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\main.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h

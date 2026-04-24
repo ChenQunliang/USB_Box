@@ -37,6 +37,8 @@
 .\output\debug\encodtima.o: ../../drivers/hc32_ll_driver/inc/hc32_ll_i2s.h
 .\output\debug\encodtima.o: ../../drivers/hc32_ll_driver/inc/hc32_ll_spi.h
 .\output\debug\encodtima.o: ..\headers\EncodTimA.h
+.\output\debug\encodtima.o: ..\headers\i2c.h
+.\output\debug\encodtima.o: ..\headers\main.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menu.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\encodtima.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h

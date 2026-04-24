@@ -39,6 +39,7 @@
 .\output\debug\dinogame.o: ..\headers\EncodTimA.h
 .\output\debug\dinogame.o: ..\headers\main.h
 .\output\debug\dinogame.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
+.\output\debug\dinogame.o: ..\headers\i2c.h
 .\output\debug\dinogame.o: ..\MultMenu\menu\menu.h
 .\output\debug\dinogame.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\dinogame.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h
