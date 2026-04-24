@@ -6,8 +6,6 @@
 /* Define I2C unit used for the example */
 #define V_I2C_UNIT (CM_I2C1)
 #define V_I2C_FCG_USE (FCG1_PERIPH_I2C1)
-/* Define slave device address for example */
-#define V_DEVICE_ADDR (0x42)
 /* I2C address mode */
 #define V_I2C_ADDR_MD_7BIT (0U)
 #define V_I2C_ADDR_MD_10BIT (1U)
@@ -19,8 +17,8 @@
 #define V_I2C_SCL_PIN (GPIO_PIN_04)
 #define V_I2C_SDA_PORT (GPIO_PORT_A)
 #define V_I2C_SDA_PIN (GPIO_PIN_05)
-#define V_I2C_GPIO_SCL_FUNC (GPIO_FUNC_49)
 #define V_I2C_GPIO_SDA_FUNC (GPIO_FUNC_48)
+#define V_I2C_GPIO_SCL_FUNC (GPIO_FUNC_49)
 
 #define V_TIMEOUT (0x40000UL)
 

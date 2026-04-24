@@ -46,3 +46,4 @@
 .\output\debug\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\output\debug\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
 .\output\debug\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\output\debug\main.o: ..\headers\tv5725.h

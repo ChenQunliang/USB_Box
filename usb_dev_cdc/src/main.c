@@ -1,5 +1,6 @@
 #include "main.h"
 #include "stdlib.h"
+#include "tv5725.h"
 
 extern uint16_t g_u16_sys_timer;
 extern uint16_t g_u16_key_timer;
@@ -46,6 +47,11 @@ int32_t main(void)
 
     TmrAConfig();
     TMRA_Start(TMRA_POS_UNIT);
+
+    LL_PERIPH_WE(LL_PERIPH_GPIO);
+    i2c_init();
+    tv5725_init();
+
     Menu_Init(&menu);
 
     for (;;)

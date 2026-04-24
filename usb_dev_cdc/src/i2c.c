@@ -203,8 +203,5 @@ void i2c_init(void)
             DDL_DelayMS(500);
         }
     }
-
-    //    I2C_SlaveAddrConfig(CM_I2C1,I2C_ADDR0,I2C_ADDR_7BIT,DEVICE_ADDR);   //set address
-    //    I2C_SlaveAddrCmd(CM_I2C1,I2C_ADDR0,ENABLE);
     printf("I2C_init ok\n");
 }
