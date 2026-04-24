@@ -42,6 +42,8 @@ virtualFolder:
         - path: ../src/main.c
         - path: ../src/tim0.c
         - path: ../src/EncodTimA.c
+        - path: ../src/i2c.c
+        - path: ../src/tv5725.c
       folders: []
     - name: MULTMENU
       files: []

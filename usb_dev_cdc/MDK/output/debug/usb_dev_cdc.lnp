@@ -22,6 +22,7 @@
 ".\output\debug\main.o"
 ".\output\debug\encodtima.o"
 ".\output\debug\i2c.o"
+".\output\debug\tv5725.o"
 ".\output\debug\image.o"
 ".\output\debug\menu.o"
 ".\output\debug\menuconfig.o"

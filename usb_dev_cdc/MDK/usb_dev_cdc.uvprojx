@@ -512,6 +512,11 @@
               <FileType>1</FileType>
               <FilePath>..\src\i2c.c</FilePath>
             </File>
+            <File>
+              <FileName>tv5725.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\tv5725.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1321,6 +1326,11 @@
               <FileName>i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>tv5725.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\tv5725.c</FilePath>
             </File>
           </Files>
         </Group>
