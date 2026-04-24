@@ -323,154 +323,397 @@ int32_t tv5725_init(void)
     return LL_OK;
 }
 
-/*
- * Initialize the input path: ADC, PLLAD, Sync Processor, Input Formatter.
- * Configures for analog RGB (R0/G0/B0) input via ADC.
- */
-int32_t tv5725_input_path_init(void)
+/* ====================================================================
+   Preset loader — writes a complete register preset array to the chip.
+   Preset format (matches GBSCpro layout):
+     Segment 0: 48 bytes (0x40-0x5F bank0+bank1, 0x90-0x9F bank2)
+     Segment 1: 48 bytes (0x00-0x2F bank0-2)
+     Segment 3: 128 bytes (0x00-0x7F bank0-7)
+     Segment 4: 96 bytes (0x00-0x5F bank0-5)
+     Segment 5: 112 bytes (0x00-0x6F bank0-6)
+   Total: 432 bytes
+   ==================================================================== */
+
+void tv5725_load_preset(const uint8_t *preset)
 {
-    /* ---- ADC clock control (S5_00) ----
-       PLLAD input from OSC (27MHz), PA_ADC from PLLAD CLKO2 */
+    uint16_t idx = 0;
+    uint8_t bank[16];
+    uint8_t i;
+
+    /* ---- Segment 0: 2 banks at 0x40, 1 bank at 0x90 ---- */
+    tv5725_set_segment(0x00);
+    for (i = 0; i < 2; i++)
+    {
+        (void)memcpy(bank, &preset[idx], 16);
+        (void)tv5725_write_buf(0x00, (uint8_t)(0x40 + i * 16), bank, 16);
+        idx += 16;
+    }
+    /* OSD bank at 0x90 */
+    (void)memcpy(bank, &preset[idx], 16);
+    (void)tv5725_write_buf(0x00, 0x90, bank, 16);
+    idx += 16;
+
+    /* ---- Segment 1: 3 banks at 0x00-0x2F ---- */
+    for (i = 0; i < 3; i++)
+    {
+        (void)memcpy(bank, &preset[idx], 16);
+        (void)tv5725_write_buf(0x01, (uint8_t)(i * 16), bank, 16);
+        idx += 16;
+    }
+
+    /* ---- Load mode-detect section (segment 1, 0x60-0x83) ---- */
+    {
+        extern const uint8_t preset_md_section[];
+        tv5725_set_segment(0x01);
+        for (i = 0; i < 2; i++)
+        {
+            (void)memcpy(bank, &preset_md_section[i * 16], 16);
+            (void)tv5725_write_buf(0x01, (uint8_t)(0x60 + i * 16), bank, 16);
+        }
+        /* Last 4 bytes at 0x80 */
+        (void)memcpy(bank, &preset_md_section[32], 4);
+        (void)tv5725_write_buf(0x01, 0x80, bank, 4);
+    }
+
+    /* ---- Segment 2: load deinterlacer preset ---- */
+    {
+        extern const uint8_t preset_deinterlacer[];
+        tv5725_set_segment(0x02);
+        for (i = 0; i < 4; i++)
+        {
+            (void)memcpy(bank, &preset_deinterlacer[i * 16], 16);
+            (void)tv5725_write_buf(0x02, (uint8_t)(i * 16), bank, 16);
+        }
+    }
+
+    /* ---- Segment 3: 8 banks at 0x00-0x7F ---- */
+    for (i = 0; i < 8; i++)
+    {
+        (void)memcpy(bank, &preset[idx], 16);
+        (void)tv5725_write_buf(0x03, (uint8_t)(i * 16), bank, 16);
+        idx += 16;
+    }
+    /* Clear PIP area (0x80-0x8F) */
+    (void)memset(bank, 0, sizeof(bank));
+    tv5725_set_segment(0x03);
+    (void)tv5725_write_buf(0x03, 0x80, bank, 16);
+
+    /* ---- Segment 4: 6 banks at 0x00-0x5F ---- */
+    for (i = 0; i < 6; i++)
+    {
+        (void)memcpy(bank, &preset[idx], 16);
+        (void)tv5725_write_buf(0x04, (uint8_t)(i * 16), bank, 16);
+        idx += 16;
+    }
+
+    /* ---- Segment 5: 7 banks at 0x00-0x6F ---- */
+    for (i = 0; i < 7; i++)
+    {
+        (void)memcpy(bank, &preset[idx], 16);
+        (void)tv5725_write_buf(0x05, (uint8_t)(i * 16), bank, 16);
+        idx += 16;
+    }
+}
+
+/* -------------------------------------------------------------------
+   Frame buffer pipeline control
+   ------------------------------------------------------------------- */
+
+void tv5725_sdram_init(void)
+{
+    tv5725_reg_write(TV5725_SDRAM_RESET_CONTROL, 0x02);
+    tv5725_reg_write(TV5725_SDRAM_RESET_SIGNAL, 1);
+    tv5725_reg_write(TV5725_SDRAM_RESET_SIGNAL, 0);
+    tv5725_reg_write(TV5725_SDRAM_RESET_CONTROL, 0x82);
+}
+
+void tv5725_capture_start(void)
+{
+    tv5725_reg_write(TV5725_WFF_ENABLE, 1);
+    tv5725_reg_write(TV5725_RFF_ENABLE, 1);
+    tv5725_reg_write(TV5725_CAPTURE_ENABLE, 1);
+}
+
+void tv5725_capture_stop(void)
+{
+    tv5725_reg_write(TV5725_CAPTURE_ENABLE, 0);
+    tv5725_reg_write(TV5725_WFF_ENABLE, 0);
+    tv5725_reg_write(TV5725_RFF_ENABLE, 0);
+}
+
+/* -------------------------------------------------------------------
+   Color matrix patches
+   ------------------------------------------------------------------- */
+
+void tv5725_apply_rgb_patches(void)
+{
+    /* ADC: R/G/B direct (not YUV remap) */
+    tv5725_reg_write(TV5725_ADC_RYSEL_R, 0);
+    tv5725_reg_write(TV5725_ADC_RYSEL_G, 0);
+    tv5725_reg_write(TV5725_ADC_RYSEL_B, 0);
+
+    /* Bypass decoder CSC */
+    tv5725_reg_write(TV5725_DEC_MATRIX_BYPS, 0);
+    tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
+
+    /* VDS color matrix: identity gains, zero offsets */
+    tv5725_reg_write(TV5725_VDS_Y_GAIN,   0x80);
+    tv5725_reg_write(TV5725_VDS_UCOS_GAIN, 0x1C);
+    tv5725_reg_write(TV5725_VDS_VCOS_GAIN, 0x29);
+    tv5725_reg_write(TV5725_VDS_Y_OFST,   0x00);
+    tv5725_reg_write(TV5725_VDS_U_OFST,   0x00);
+    tv5725_reg_write(TV5725_VDS_V_OFST,   0x00);
+}
+
+void tv5725_apply_yuv_patches(void)
+{
+    /* ADC: remap for YUV (G=Y, R=Pr, B=Pb) */
+    tv5725_reg_write(TV5725_ADC_RYSEL_R, 1);
+    tv5725_reg_write(TV5725_ADC_RYSEL_G, 0);
+    tv5725_reg_write(TV5725_ADC_RYSEL_B, 1);
+
+    /* Enable decoder CSC for YUV→RGB */
+    tv5725_reg_write(TV5725_DEC_MATRIX_BYPS, 1);
+    tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
+
+    /* VDS color matrix */
+    tv5725_reg_write(TV5725_VDS_Y_GAIN,   128);
+    tv5725_reg_write(TV5725_VDS_UCOS_GAIN, 28);
+    tv5725_reg_write(TV5725_VDS_VCOS_GAIN, 41);
+    tv5725_reg_write(TV5725_VDS_Y_OFST,   0x0E);
+    tv5725_reg_write(TV5725_VDS_U_OFST,   0x03);
+    tv5725_reg_write(TV5725_VDS_V_OFST,   0x04);
+}
+
+/* -------------------------------------------------------------------
+   Output path initialization (uses preset + post-init)
+   ------------------------------------------------------------------- */
+
+int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv)
+{
+    /* 1. Load full register preset for the target resolution */
+    tv5725_load_preset(preset);
+
+    /* 2. Initialize SDRAM */
+    tv5725_sdram_init();
+
+    /* 3. Post-preset steps (from GBSCpro doPostPresetLoadSteps) */
+
+    /* Enable DAC outputs */
+    tv5725_reg_write(TV5725_DAC_RGBS_PWDNZ, 1);
+    tv5725_reg_write(TV5725_DAC_RGBS_SPD, 0);
+    tv5725_reg_write(TV5725_DAC_RGBS_S0ENZ, 0);
+    tv5725_reg_write(TV5725_DAC_RGBS_S1EN, 1);
+
+    /* Enable sync output */
+    tv5725_reg_write(TV5725_PAD_SYNC_OUT_ENZ, 0);
+    tv5725_reg_write(TV5725_OUT_SYNC_CNTRL, 1);
+
+    /* Apply color matrix based on input type */
+    if (input_is_yuv)
+        tv5725_apply_yuv_patches();
+    else
+        tv5725_apply_rgb_patches();
+
+    /* ADC auto-offset: periodic, no delay, step=0 */
+    tv5725_reg_write(TV5725_ADC_AUTO_OFST_PRD, 1);
+    tv5725_reg_write(TV5725_ADC_AUTO_OFST_DELAY, 0);
+    tv5725_reg_write(TV5725_ADC_AUTO_OFST_STEP, 0);
+    tv5725_reg_write(TV5725_ADC_AUTO_OFST_TEST, 1);
+    tv5725_reg_write(TV5725_ADC_AUTO_OFST_RANGE_REG, 0x00);
+
+    /* GPIO control (s0_52, s0_53 from preset already set) */
+
+    /* 4. Start frame buffer pipeline */
+    tv5725_capture_start();
+
+    return LL_OK;
+}
+
+/* ====================================================================
+   Input mode configuration
+   ==================================================================== */
+
+/* Current input mode */
+static tv5725_input_mode_t g_tv5725_input_mode = TV5725_INPUT_AUTO;
+
+/*
+ * Common ADC and input clock setup, shared by all input modes.
+ */
+static void tv5725_input_config_adc_common(void)
+{
+    /* ADC clock: PLLAD from OSC, PA_ADC from PLLAD CLKO2 */
     tv5725_reg_write(TV5725_ADC_CLK_PA, 0x00);
     tv5725_reg_write(TV5725_ADC_CLK_PLLAD, 1);
     tv5725_reg_write(TV5725_ADC_CLK_ICLK2X, 0);
     tv5725_reg_write(TV5725_ADC_CLK_ICLK1X, 0);
 
-    /* ---- ADC input select & SOG (S5_02) ----
-       Select R0/G0/B0 input, disable SOG */
+    /* Select R0/G0/B0 input */
     tv5725_reg_write(TV5725_ADC_INPUT_SEL, 0x00);
-    tv5725_reg_write(TV5725_ADC_SOGEN, 0);
 
-    /* ---- ADC power & clamp (S5_03) ----
-       Power up ADC, clamp to midscale, 110MHz filter */
+    /* Power up ADC, clamp to midscale, 110MHz filter */
     tv5725_reg_write(TV5725_ADC_POWDZ, 1);
     tv5725_reg_write(TV5725_ADC_RYSEL_R, 1);
     tv5725_reg_write(TV5725_ADC_RYSEL_G, 1);
     tv5725_reg_write(TV5725_ADC_RYSEL_B, 1);
     tv5725_reg_write(TV5725_ADC_FLTR, 0x01);
 
-    /* ADC offset: 0 for R/G/B (S5_06~S5_08) */
+    /* Offset = 0, gain = 0x80 for all channels */
     tv5725_write_seg_byte(0x05, 0x06, 0x00);
     tv5725_write_seg_byte(0x05, 0x07, 0x00);
     tv5725_write_seg_byte(0x05, 0x08, 0x00);
-
-    /* ADC gain: default 0x80 for R/G/B (S5_09~S5_0B) */
     tv5725_write_seg_byte(0x05, 0x09, 0x80);
     tv5725_write_seg_byte(0x05, 0x0A, 0x80);
     tv5725_write_seg_byte(0x05, 0x0B, 0x80);
 
-    /* ---- PLLAD configuration ----
-       Power up, bypass, FS=0 for HSYNC-based clock recovery */
+    /* PLLAD: power up, bypass mode */
     tv5725_reg_write(TV5725_PLLAD_PDZ, 1);
     tv5725_reg_write(TV5725_PLLAD_BPS, 1);
     tv5725_reg_write(TV5725_PLLAD_FS, 0);
+}
 
-    /* ---- Sync Processor ----
-       External sync from HSIN1/VSIN1 */
+/*
+ * Configure input path for RGBS (RGB + composite sync, e.g. arcade / BNC).
+ * R/G/B → ADC R/G/B, sync → HSIN1 external sync.
+ * IF matrix bypassed (signal is already RGB).
+ */
+int32_t tv5725_input_config_rgbs(void)
+{
+    tv5725_input_config_adc_common();
+
+    /* Disable SOG */
+    tv5725_reg_write(TV5725_ADC_SOGEN, 0);
+
+    /* Sync Processor: external sync from HSIN1/VSIN1, auto polarity */
     tv5725_reg_write(TV5725_SP_SOG_SRC_SEL, 0);
     tv5725_reg_write(TV5725_SP_EXT_SYNC_SEL, 0);
-    tv5725_reg_write(TV5725_SP_SOG_P_ATO, 1);
     tv5725_reg_write(TV5725_SP_HS_POL_ATO, 1);
     tv5725_reg_write(TV5725_SP_VS_POL_ATO, 1);
 
-    /* ---- Input Formatter ----
-       24-bit RGB mode, bypass matrix, bypass data registers */
+    /* Input Formatter: 24-bit, bypass matrix (already RGB), bypass data reg */
     tv5725_reg_write(TV5725_IF_SEL24BIT, 1);
     tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
     tv5725_reg_write(TV5725_IF_IN_DREG_BYPS, 1);
 
+    /* ASW01-04: ASW01=H, ASW02=L, ASW03=L, ASW04=L for RGBS */
+    tv5725_asw_set(TV5725_ASW01, 1);
+    tv5725_asw_set(TV5725_ASW02, 0);
+    tv5725_asw_set(TV5725_ASW03, 0);
+    tv5725_asw_set(TV5725_ASW04, 0);
+
+    g_tv5725_input_mode = TV5725_INPUT_RGBS;
     return LL_OK;
 }
 
 /*
- * Initialize the output path: PLL, VDS timing, DAC, sync outputs.
- * Configures 640x480 VGA output at ~27MHz pixel clock from a 27MHz crystal.
+ * Configure input path for YUV (YPbPr component video).
+ * Pr/Y/Pb → ADC R/G/B, sync extracted via SOG on Y channel.
+ * IF matrix enabled for YUV→RGB conversion.
  */
-int32_t tv5725_output_path_init(void)
+int32_t tv5725_input_config_yuv(void)
 {
-    /* ---- PLL648: VCLK = 27MHz (from 27MHz crystal) ----
-       S0_40: source=OSC, div2=off, ICLK from PLL, mem=108MHz */
-    tv5725_reg_write(TV5725_PLL_CKIS, 0);
-    tv5725_reg_write(TV5725_PLL_DIVBY2Z, 0);
-    tv5725_reg_write(TV5725_PLL_IS, 0);
-    tv5725_reg_write(TV5725_PLL_ADS, 0);
-    tv5725_reg_write(TV5725_PLL_MS, 0x00);
+    tv5725_input_config_adc_common();
 
-    /* S0_41: 4XV=0, 2XV=0, VS4=00, VS2=01, VS=01 → VCLK=27, V2CLK=27, V4CLK=27 */
-    tv5725_reg_write(TV5725_PLL_4XV, 0);
-    tv5725_reg_write(TV5725_PLL_2XV, 0);
-    tv5725_reg_write(TV5725_PLL_VS4, 0);
-    tv5725_reg_write(TV5725_PLL_VS2, 1);
-    tv5725_reg_write(TV5725_PLL_VS, 1);
+    /* Enable SOG on Y channel (G ADC input) */
+    tv5725_reg_write(TV5725_ADC_SOGEN, 1);
 
-    /* S0_43: Lock enable */
-    tv5725_reg_write(TV5725_PLL_LEN, 1);
-    tv5725_reg_write(TV5725_PLL_VCORST, 0);
+    /* Sync Processor: SOG source, auto polarity */
+    tv5725_reg_write(TV5725_SP_SOG_SRC_SEL, 1);
+    tv5725_reg_write(TV5725_SP_SOG_P_ATO, 1);
+    tv5725_reg_write(TV5725_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_SP_VS_POL_ATO, 1);
 
-    /* ---- PAD control ----
-       S0_48: enable sync1 input, disable digital video I/O */
-    tv5725_write_seg_byte(0x00, 0x48, 0xEA);
+    /* Input Formatter: 24-bit, enable matrix (YUV→RGB), bypass data reg */
+    tv5725_reg_write(TV5725_IF_SEL24BIT, 1);
+    tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 0);
+    tv5725_reg_write(TV5725_IF_IN_DREG_BYPS, 1);
 
-    /* S0_49: enable HSOUT/VSOUT/HBOUT/VBOUT, enable PCLKIN, disable tri-state */
-    tv5725_reg_write(TV5725_PAD_CKIN_ENZ, 0);
-    tv5725_reg_write(TV5725_PAD_CKOUT_ENZ, 1);
-    tv5725_reg_write(TV5725_PAD_SYNC_OUT_ENZ, 0);
-    tv5725_reg_write(TV5725_PAD_BLK_OUT_ENZ, 0);
-    tv5725_reg_write(TV5725_PAD_TRI_ENZ, 1);
+    /* ASW01-04: ASW01=L, ASW02=L, ASW03=L, ASW04=L for YUV */
+    tv5725_asw_set(TV5725_ASW01, 0);
+    tv5725_asw_set(TV5725_ASW02, 0);
+    tv5725_asw_set(TV5725_ASW03, 0);
+    tv5725_asw_set(TV5725_ASW04, 0);
 
-    /* ---- DAC enable ----
-       Power up DAC, enable R/G/B output to follow data */
-    tv5725_reg_write(TV5725_DAC_RGBS_PWDNZ, 1);
-    tv5725_reg_write(TV5725_DAC_RGBS_R0ENZ, 1);
-    tv5725_reg_write(TV5725_DAC_RGBS_G0ENZ, 1);
-    tv5725_reg_write(TV5725_DAC_RGBS_B0ENZ, 1);
-
-    /* Enable sync DAC output */
-    tv5725_reg_write(TV5725_DAC_RGBS_S0ENZ, 1);
-
-    /* DAC_MUX (S0_4B): bypass input DFF */
-    tv5725_write_seg_byte(0x00, 0x4B, 0x01);
-
-    /* ---- CLK/SYNC control (S0_4F) ----
-       Sync output from VDS, enable H/V sync output */
-    tv5725_reg_write(TV5725_OUT_SYNC_SEL, 0x00);
-    tv5725_reg_write(TV5725_OUT_SYNC_CNTRL, 1);
-
-    /* ---- VDS control (S3_00) ----
-       Free run, bypass H/V scaling */
-    tv5725_reg_write(TV5725_VDS_SYNC_EN, 0);
-    tv5725_reg_write(TV5725_VDS_HSCALE_BYPS, 1);
-    tv5725_reg_write(TV5725_VDS_VSCALE_BYPS, 1);
-
-    /* ---- VDS timing: 640x480 @ 27MHz (H-total=800, V-total=525) ----
-       Frame rate = 27e6 / (800*525) ≈ 64.3Hz, tolerable for most VGA monitors */
-
-    /* Horizontal: total=800, active=640, blank=160, sync pulse=96 */
-    tv5725_reg_write(TV5725_VDS_HSYNC_RST, 799);       /* H-total - 1 */
-    tv5725_reg_write(TV5725_VDS_HB_ST, 640);            /* H-blank start (active end) */
-    tv5725_reg_write(TV5725_VDS_HB_SP, 800);            /* H-blank stop (total) */
-    tv5725_reg_write(TV5725_VDS_HS_ST, 656);            /* H-sync start */
-    tv5725_reg_write(TV5725_VDS_HS_SP, 752);            /* H-sync stop */
-    tv5725_reg_write(TV5725_VDS_DIS_HB_ST, 640);        /* Display H-blank start */
-    tv5725_reg_write(TV5725_VDS_DIS_HB_SP, 800);        /* Display H-blank stop */
-
-    /* Vertical: total=525, active=480, blank=45, sync pulse=2 */
-    tv5725_reg_write(TV5725_VDS_VSYNC_RST, 524);        /* V-total - 1 */
-    tv5725_reg_write(TV5725_VDS_VB_ST, 480);            /* V-blank start (active end) */
-    tv5725_reg_write(TV5725_VDS_VB_SP, 525);            /* V-blank stop (total) */
-    tv5725_reg_write(TV5725_VDS_VS_ST, 490);            /* V-sync start */
-    tv5725_reg_write(TV5725_VDS_VS_SP, 492);            /* V-sync stop */
-    tv5725_reg_write(TV5725_VDS_DIS_VB_ST, 480);        /* Display V-blank start */
-    tv5725_reg_write(TV5725_VDS_DIS_VB_SP, 525);        /* Display V-blank stop */
-
-    /* ---- Deinterlacer bypass ----
-       Bypass deinterlacer since we use progressive output */
-    tv5725_reg_write(TV5725_DIAG_BOB_PLDY_RAM_BYPS, 1);
-
-    /* ---- VDS data path bypass ----
-       Bypass internal conversions for minimum-latency passthrough */
-    tv5725_reg_write(TV5725_VDS_CONVT_BYPS, 1);
-    tv5725_reg_write(TV5725_VDS_IN_DREG_BYPS, 1);
-
+    g_tv5725_input_mode = TV5725_INPUT_YUV;
     return LL_OK;
 }
+
+/*
+ * Auto-detect input source by reading status registers.
+ * Tries RGBS first (external sync), then YUV (SOG).
+ */
+void tv5725_input_auto_detect(void)
+{
+    uint8_t s0_05;
+
+    /* Read STATUS_IF general status */
+    tv5725_read_byte(0x00, 0x05, &s0_05);
+
+    if (s0_05 == 0x00 || s0_05 == 0xFF)
+    {
+        /* No response, fall back to RGBS */
+        tv5725_input_config_rgbs();
+        return;
+    }
+
+    /* NO_SYNC bit (bit1): 0 = sync present, 1 = no sync */
+    if (!(s0_05 & 0x02))
+    {
+        /* External sync detected → RGBS mode */
+        tv5725_input_config_rgbs();
+        return;
+    }
+
+    /* No external sync: try SOG mode for YUV */
+    tv5725_input_config_yuv();
+
+    /* TODO: verify SOG lock via PLLAD status or input detection bits */
+    g_tv5725_input_mode = TV5725_INPUT_AUTO;
+}
+
+/*
+ * Set input mode explicitly or use auto-detect.
+ */
+int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
+{
+    switch (mode)
+    {
+    case TV5725_INPUT_YUV:
+        return tv5725_input_config_yuv();
+    case TV5725_INPUT_RGBS:
+        return tv5725_input_config_rgbs();
+    case TV5725_INPUT_AUTO:
+    default:
+        tv5725_input_auto_detect();
+        return LL_OK;
+    }
+}
+
+/* ====================================================================
+   Analog switch GPIO control (ASW01-ASW04: PB12-PB15)
+   ==================================================================== */
+
+void tv5725_asw_init(void)
+{
+    stc_gpio_init_t stcGpioInit;
+
+    (void)GPIO_StructInit(&stcGpioInit);
+    stcGpioInit.u16PinDir = PIN_DIR_OUT;
+
+    (void)GPIO_Init(TV5725_ASW_PORT, TV5725_ASW01, &stcGpioInit);
+    (void)GPIO_Init(TV5725_ASW_PORT, TV5725_ASW02, &stcGpioInit);
+    (void)GPIO_Init(TV5725_ASW_PORT, TV5725_ASW03, &stcGpioInit);
+    (void)GPIO_Init(TV5725_ASW_PORT, TV5725_ASW04, &stcGpioInit);
+}
+
+/*
+ * Set a single PB12-PB15 pin high or low.
+ */
+void tv5725_asw_set(uint16_t pin, uint8_t high)
+{
+    if (high)
+        GPIO_SetPins(TV5725_ASW_PORT, pin);
+    else
+        GPIO_ResetPins(TV5725_ASW_PORT, pin);
+}
+

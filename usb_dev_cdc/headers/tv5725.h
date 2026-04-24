@@ -173,6 +173,7 @@ typedef struct {
 #define TV5725_PLL_IS                   TV5725_REG(0x00, 0x40, 2, 1)
 #define TV5725_PLL_ADS                  TV5725_REG(0x00, 0x40, 3, 1)
 #define TV5725_PLL_MS                   TV5725_REG(0x00, 0x40, 4, 3)
+/* PLL648 at s0_41 is used as full-byte clock divider select by GBSCpro */
 #define TV5725_PLL648_CONTROL_01        TV5725_REG(0x00, 0x41, 0, 8)
 #define TV5725_PLL_VS                   TV5725_REG(0x00, 0x41, 0, 2)
 #define TV5725_PLL_VS2                  TV5725_REG(0x00, 0x41, 2, 2)
@@ -293,9 +294,13 @@ typedef struct {
 #define TV5725_DIAG_BOB_PLDY_RAM_BYPS   TV5725_REG(0x02, 0x00, 7, 1)
 #define TV5725_MADPT_Y_VSCALE_BYPS      TV5725_REG(0x02, 0x02, 6, 1)
 #define TV5725_MADPT_UV_VSCALE_BYPS     TV5725_REG(0x02, 0x02, 7, 1)
+#define TV5725_MADPT_Y_MI_DET_BYPS      TV5725_REG(0x02, 0x0A, 7, 1)
 #define TV5725_MADPT_Y_MI_OFFSET        TV5725_REG(0x02, 0x0B, 0, 7)
 #define TV5725_MADPT_Y_DELAY            TV5725_REG(0x02, 0x17, 0, 4)
 #define TV5725_MADPT_UV_DELAY           TV5725_REG(0x02, 0x17, 4, 4)
+#define TV5725_MAPDT_VT_SEL_PRGV        TV5725_REG(0x02, 0x16, 7, 1)
+#define TV5725_MADPT_VTAP2_BYPS         TV5725_REG(0x02, 0x19, 2, 1)
+#define TV5725_MADPT_VTAP2_COEFF        TV5725_REG(0x02, 0x19, 4, 4)
 #define TV5725_MADPT_VSCALE_DEC_FACTOR  TV5725_REG(0x02, 0x31, 0, 2)
 
 /* ================================================================
@@ -349,6 +354,21 @@ typedef struct {
 #define TV5725_VDS_2ND_INT_BYPS         TV5725_REG(0x03, 0x40, 1, 1)
 #define TV5725_VDS_IN_DREG_BYPS         TV5725_REG(0x03, 0x40, 2, 1)
 
+/* VDS step response */
+#define TV5725_VDS_STEP_DLY_CNTRL       TV5725_REG(0x03, 0x2A, 4, 2)
+#define TV5725_VDS_STEP_GAIN            TV5725_REG(0x03, 0x2B, 0, 4)
+#define TV5725_VDS_STEP_CLIP            TV5725_REG(0x03, 0x2B, 4, 3)
+
+/* VDS peaking filter */
+#define TV5725_VDS_PK_VL_HL_SEL         TV5725_REG(0x03, 0x43, 0, 1)
+#define TV5725_VDS_PK_VL_HH_SEL         TV5725_REG(0x03, 0x43, 1, 1)
+#define TV5725_VDS_PK_LB_CORE           TV5725_REG(0x03, 0x44, 0, 3)
+#define TV5725_VDS_PK_LB_CMP            TV5725_REG(0x03, 0x44, 3, 5)
+#define TV5725_VDS_PK_LB_GAIN           TV5725_REG(0x03, 0x45, 0, 6)
+#define TV5725_VDS_PK_LH_CORE           TV5725_REG(0x03, 0x46, 0, 3)
+#define TV5725_VDS_PK_LH_CMP            TV5725_REG(0x03, 0x46, 3, 5)
+#define TV5725_VDS_PK_LH_GAIN           TV5725_REG(0x03, 0x47, 0, 6)
+
 /* Noise reduction */
 #define TV5725_VDS_GLB_NOISE            TV5725_REG(0x03, 0x51, 7, 11)
 #define TV5725_VDS_NR_Y_BYPS            TV5725_REG(0x03, 0x52, 4, 1)
@@ -371,15 +391,18 @@ typedef struct {
 #define TV5725_CAPTURE_ENABLE           TV5725_REG(0x04, 0x21, 0, 1)
 #define TV5725_CAP_FF_HALF_REQ          TV5725_REG(0x04, 0x21, 1, 1)
 #define TV5725_CAP_SAFE_GUARD_EN        TV5725_REG(0x04, 0x21, 5, 1)
+#define TV5725_CAP_STATUS_SEL           TV5725_REG(0x04, 0x22, 1, 1)
 
 #define TV5725_PB_CUT_REFRESH           TV5725_REG(0x04, 0x2B, 0, 1)
 #define TV5725_PB_REQ_SEL               TV5725_REG(0x04, 0x2B, 1, 2)
 #define TV5725_PB_BYPASS                TV5725_REG(0x04, 0x2B, 3, 1)
-#define TV5725_PB_DB_BUFFER_EN          TV5725_REG(0x04, 0x2B, 5, 1)
 #define TV5725_PB_DB_FIELD_EN           TV5725_REG(0x04, 0x2B, 4, 1)
+#define TV5725_PB_DB_BUFFER_EN          TV5725_REG(0x04, 0x2B, 5, 1)
 #define TV5725_PB_ENABLE                TV5725_REG(0x04, 0x2B, 7, 1)
 #define TV5725_PB_MAST_FLAG_REG         TV5725_REG(0x04, 0x2C, 0, 8)
 #define TV5725_PB_GENERAL_FLAG_REG      TV5725_REG(0x04, 0x2D, 0, 8)
+#define TV5725_PB_CAP_OFFSET            TV5725_REG(0x04, 0x37, 0, 10)
+#define TV5725_PB_FETCH_NUM             TV5725_REG(0x04, 0x39, 0, 10)
 
 #define TV5725_WFF_ENABLE               TV5725_REG(0x04, 0x42, 0, 1)
 #define TV5725_WFF_FF_STA_INV           TV5725_REG(0x04, 0x42, 2, 1)
@@ -390,6 +413,9 @@ typedef struct {
 #define TV5725_RFF_REQ_SEL              TV5725_REG(0x04, 0x4D, 5, 2)
 #define TV5725_RFF_ADR_ADD_2            TV5725_REG(0x04, 0x4D, 4, 1)
 #define TV5725_RFF_LREQ_CUT             TV5725_REG(0x04, 0x50, 7, 1)
+#define TV5725_RFF_YUV_DEINTERLACE      TV5725_REG(0x04, 0x50, 6, 1)
+#define TV5725_RFF_WFF_OFFSET           TV5725_REG(0x04, 0x57, 0, 10)
+#define TV5725_RFF_FETCH_NUM            TV5725_REG(0x04, 0x59, 0, 10)
 
 /* ================================================================
    Segment 0x05: ADC / Sync Processor (SP) / PLLAD / Decoder
@@ -420,6 +446,8 @@ typedef struct {
 #define TV5725_ADC_AUTO_OFST_PRD        TV5725_REG(0x05, 0x0E, 1, 1)
 #define TV5725_ADC_AUTO_OFST_DELAY      TV5725_REG(0x05, 0x0E, 2, 2)
 #define TV5725_ADC_AUTO_OFST_STEP       TV5725_REG(0x05, 0x0E, 4, 2)
+#define TV5725_ADC_AUTO_OFST_TEST       TV5725_REG(0x05, 0x0E, 7, 1)
+#define TV5725_ADC_AUTO_OFST_RANGE_REG  TV5725_REG(0x05, 0x0F, 0, 8)
 
 /* PLLAD */
 #define TV5725_PLLAD_VCORST             TV5725_REG(0x05, 0x11, 0, 1)
@@ -463,16 +491,61 @@ typedef struct {
 #define TV5725_SP_SOG_MODE              TV5725_REG(0x05, 0x56, 0, 1)
 #define TV5725_SP_SYNC_BYPS             TV5725_REG(0x05, 0x56, 4, 1)
 #define TV5725_SP_CLAMP_MANUAL          TV5725_REG(0x05, 0x56, 2, 1)
+#define TV5725_SP_CLP_SRC_SEL           TV5725_REG(0x05, 0x56, 3, 1)
+#define TV5725_SP_NO_CLAMP_REG          TV5725_REG(0x05, 0x57, 0, 1)
+#define TV5725_SP_COAST_INV_REG         TV5725_REG(0x05, 0x57, 1, 1)
+#define TV5725_SP_NO_COAST_REG          TV5725_REG(0x05, 0x57, 2, 1)
+#define TV5725_SP_HS_LOOP_SEL           TV5725_REG(0x05, 0x57, 6, 1)
+#define TV5725_SP_H_PROTECT             TV5725_REG(0x05, 0x3E, 4, 1)
+#define TV5725_SP_H_PULSE_IGNOR         TV5725_REG(0x05, 0x37, 0, 8)
+#define TV5725_SP_PRE_COAST             TV5725_REG(0x05, 0x38, 0, 8)
+#define TV5725_SP_POST_COAST            TV5725_REG(0x05, 0x39, 0, 8)
 
 /* ================================================================
    Function prototypes
    ================================================================ */
 
 int32_t tv5725_init(void);
-int32_t tv5725_input_path_init(void);
-int32_t tv5725_output_path_init(void);
 void tv5725_chip_reset(void);
 uint8_t tv5725_get_chip_id(void);
+
+/* Preset-based output path */
+void tv5725_load_preset(const uint8_t *preset);
+void tv5725_sdram_init(void);
+void tv5725_capture_start(void);
+void tv5725_capture_stop(void);
+void tv5725_apply_rgb_patches(void);
+void tv5725_apply_yuv_patches(void);
+int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv);
+
+/* ================================================================
+   Input mode selection
+   ================================================================ */
+
+/* Input signal type */
+typedef enum {
+    TV5725_INPUT_AUTO = 0,
+    TV5725_INPUT_YUV,
+    TV5725_INPUT_RGBS,
+    TV5725_INPUT_COUNT
+} tv5725_input_mode_t;
+
+/* Analog switch control: PB12-PB15, composite sync routing */
+#define TV5725_ASW_PORT             (GPIO_PORT_B)
+#define TV5725_ASW_MASK             (GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15)
+#define TV5725_ASW01                (GPIO_PIN_12)
+#define TV5725_ASW02                (GPIO_PIN_13)
+#define TV5725_ASW03                (GPIO_PIN_14)
+#define TV5725_ASW04                (GPIO_PIN_15)
+
+/* Input mode configuration */
+int32_t tv5725_input_set_mode(tv5725_input_mode_t mode);
+void tv5725_input_auto_detect(void);
+void tv5725_asw_init(void);
+void tv5725_asw_set(uint16_t pin, uint8_t high);
+
+int32_t tv5725_input_config_rgbs(void);
+int32_t tv5725_input_config_yuv(void);
 
 void tv5725_set_segment(uint8_t segment);
 int32_t tv5725_read_byte(uint8_t segment, uint8_t offset, uint8_t *value);

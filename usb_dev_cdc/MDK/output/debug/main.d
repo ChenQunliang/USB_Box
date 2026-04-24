@@ -47,3 +47,8 @@
 .\output\debug\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
 .\output\debug\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\output\debug\main.o: ..\headers\tv5725.h
+.\output\debug\main.o: ..\headers\preset_deinterlacer.h
+.\output\debug\main.o: ..\headers\preset_md_section.h
+.\output\debug\main.o: ..\headers\preset_480p.h
+.\output\debug\main.o: ..\headers\preset_720p.h
+.\output\debug\main.o: ..\headers\preset_1080p.h

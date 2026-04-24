@@ -1,6 +1,11 @@
 #include "main.h"
 #include "stdlib.h"
 #include "tv5725.h"
+#include "preset_deinterlacer.h"
+#include "preset_md_section.h"
+#include "preset_480p.h"
+#include "preset_720p.h"
+#include "preset_1080p.h"
 
 extern uint16_t g_u16_sys_timer;
 extern uint16_t g_u16_key_timer;
@@ -52,8 +57,9 @@ int32_t main(void)
     V_I2C_Init();
     if (tv5725_init() == LL_OK)
     {
-        tv5725_input_path_init();
-        tv5725_output_path_init();
+        tv5725_asw_init();
+        tv5725_input_set_mode(TV5725_INPUT_AUTO);
+        tv5725_output_path_init(preset_480p, 0); /* 480p preset, RGB input */
     }
 
     Menu_Init(&menu);
