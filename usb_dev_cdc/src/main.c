@@ -50,7 +50,11 @@ int32_t main(void)
 
     LL_PERIPH_WE(LL_PERIPH_GPIO);
     V_I2C_Init();
-    tv5725_init();
+    if (tv5725_init() == LL_OK)
+    {
+        tv5725_input_path_init();
+        tv5725_output_path_init();
+    }
 
     Menu_Init(&menu);
 

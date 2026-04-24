@@ -174,6 +174,11 @@ typedef struct {
 #define TV5725_PLL_ADS                  TV5725_REG(0x00, 0x40, 3, 1)
 #define TV5725_PLL_MS                   TV5725_REG(0x00, 0x40, 4, 3)
 #define TV5725_PLL648_CONTROL_01        TV5725_REG(0x00, 0x41, 0, 8)
+#define TV5725_PLL_VS                   TV5725_REG(0x00, 0x41, 0, 2)
+#define TV5725_PLL_VS2                  TV5725_REG(0x00, 0x41, 2, 2)
+#define TV5725_PLL_VS4                  TV5725_REG(0x00, 0x41, 4, 2)
+#define TV5725_PLL_2XV                  TV5725_REG(0x00, 0x41, 6, 1)
+#define TV5725_PLL_4XV                  TV5725_REG(0x00, 0x41, 7, 1)
 #define TV5725_PLL648_CONTROL_03        TV5725_REG(0x00, 0x43, 0, 8)
 #define TV5725_PLL_R                    TV5725_REG(0x00, 0x43, 0, 2)
 #define TV5725_PLL_S                    TV5725_REG(0x00, 0x43, 2, 2)
@@ -390,6 +395,7 @@ typedef struct {
    Segment 0x05: ADC / Sync Processor (SP) / PLLAD / Decoder
    ================================================================ */
 #define TV5725_ADC_CLK_PA               TV5725_REG(0x05, 0x00, 0, 2)
+#define TV5725_ADC_CLK_PLLAD            TV5725_REG(0x05, 0x00, 2, 1)
 #define TV5725_ADC_CLK_ICLK2X           TV5725_REG(0x05, 0x00, 3, 1)
 #define TV5725_ADC_CLK_ICLK1X           TV5725_REG(0x05, 0x00, 4, 1)
 #define TV5725_ADC_SOGEN                TV5725_REG(0x05, 0x02, 0, 1)
@@ -463,6 +469,8 @@ typedef struct {
    ================================================================ */
 
 int32_t tv5725_init(void);
+int32_t tv5725_input_path_init(void);
+int32_t tv5725_output_path_init(void);
 void tv5725_chip_reset(void);
 uint8_t tv5725_get_chip_id(void);
 
