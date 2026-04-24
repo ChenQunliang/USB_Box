@@ -182,11 +182,11 @@ int32_t Master_Initialize(void)
     i32Ret = I2C_Init(V_I2C_UNIT, &stcI2cInit, &fErr);
 
     I2C_BusWaitCmd(V_I2C_UNIT, ENABLE);
-    printf("err_code:%d\n", i32Ret);
+    printf("V_Init_Code:%d\n", i32Ret);
     return i32Ret;
 }
 
-void i2c_init(void)
+void V_I2C_Init(void)
 {
     GPIO_SetFunc(V_I2C_SCL_PORT, V_I2C_SCL_PIN, V_I2C_GPIO_SCL_FUNC);
     GPIO_SetFunc(V_I2C_SDA_PORT, V_I2C_SDA_PIN, V_I2C_GPIO_SDA_FUNC);
@@ -196,12 +196,12 @@ void i2c_init(void)
     if (LL_OK != Master_Initialize())
     {
         BSP_LED_Off(LED_ALL);
-        printf("I2C_ERR \n");
+        printf("V_I2C_ERR \n");
         for (;;)
         {
             BSP_LED_Toggle(LED_RED);
             DDL_DelayMS(500);
         }
     }
-    printf("I2C_init ok\n");
+    printf("V_I2C_init ok\n");
 }

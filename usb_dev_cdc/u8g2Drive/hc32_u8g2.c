@@ -43,6 +43,7 @@ static int32_t U8G2_I2C_Master_Initialize(void)
 
     if (LL_OK == i32Ret)
     {
+      printf("U8G2_IIC_GPIO_Init \n");
       break; // 初始化成功，退出重试
     }
     DDL_DelayMS(50); // 初始化失败，等待后重试
@@ -162,7 +163,6 @@ static void HardWare_I2C2_GPIOInit(void)
   LL_PERIPH_WE(EXAMPLE_PERIPH_WE_IIC);
   GPIO_SetFunc(U8G2_I2C_SCL_PORT, U8G2_I2C_SCL_PIN, U8G2_I2C_GPIO_SCL_FUNC);
   GPIO_SetFunc(U8G2_I2C_SDA_PORT, U8G2_I2C_SDA_PIN, U8G2_I2C_GPIO_SDA_FUNC);
-  printf("IIC_GPIO_Init \n");
 }
 
 #endif

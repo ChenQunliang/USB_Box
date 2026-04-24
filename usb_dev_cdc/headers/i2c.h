@@ -30,7 +30,7 @@ int32_t I2C_Master_Transmit(uint16_t u16DevAddr, uint8_t const au8Data[], uint32
 int32_t I2C_Master_Receive(uint16_t u16DevAddr, uint8_t au8Data[], uint32_t u32Size, uint32_t u32Timeout);
 int32_t Master_Initialize(void);
 int32_t Chip_Receive(uint16_t u16DevAddr, uint8_t au8Data_tx[], uint8_t au8Data_rx[], uint32_t u32Size, uint32_t u32Timeout);
-void i2c_init(void);
+void V_I2C_Init(void);
 
 int32_t ADV_7280_Send_Buff(uint8_t const au8Data[], uint32_t u32Size, uint32_t u32Timeout);
 

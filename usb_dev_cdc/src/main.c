@@ -49,7 +49,7 @@ int32_t main(void)
     TMRA_Start(TMRA_POS_UNIT);
 
     LL_PERIPH_WE(LL_PERIPH_GPIO);
-    i2c_init();
+    V_I2C_Init();
     tv5725_init();
 
     Menu_Init(&menu);
