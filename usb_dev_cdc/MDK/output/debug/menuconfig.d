@@ -10,6 +10,7 @@
 .\output\debug\menuconfig.o: ..\MultMenu\disp\dispDirver.h
 .\output\debug\menuconfig.o: ..\MultMenu\menu\image.h
 .\output\debug\menuconfig.o: ..\MultMenu\application\application.h
+.\output\debug\menuconfig.o: ..\MultMenu\application\tv5725_callbacks.h
 .\output\debug\menuconfig.o: ..\headers\main.h
 .\output\debug\menuconfig.o: ../../drivers/hc32_ll_driver/inc/hc32_ll.h
 .\output\debug\menuconfig.o: ../../drivers/hc32_ll_driver/inc/hc32_ll_def.h
@@ -47,4 +48,4 @@
 .\output\debug\menuconfig.o: ..\headers\EncodTimA.h
 .\output\debug\menuconfig.o: ..\headers\main.h
 .\output\debug\menuconfig.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
-.\output\debug\menuconfig.o: ..\headers\i2c.h
+.\output\debug\menuconfig.o: ..\headers\v_i2c.h

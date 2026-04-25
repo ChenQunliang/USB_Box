@@ -39,7 +39,7 @@
 .\output\debug\airplane.o: ..\headers\EncodTimA.h
 .\output\debug\airplane.o: ..\headers\main.h
 .\output\debug\airplane.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
-.\output\debug\airplane.o: ..\headers\i2c.h
+.\output\debug\airplane.o: ..\headers\v_i2c.h
 .\output\debug\airplane.o: ..\MultMenu\menu\menu.h
 .\output\debug\airplane.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\airplane.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h

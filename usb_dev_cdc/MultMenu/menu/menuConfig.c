@@ -29,6 +29,7 @@ SOFTWARE.
 #include "dispDirver.h"
 #include "image.h"
 #include "application.h"
+#include "tv5725_callbacks.h"
 //#include "flash.h"
 #include "main.h"
 //#include "DinoGame.h"
@@ -234,12 +235,12 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +Input", PARENTS, logo_allArray[1], &Input_Item, &Home_Page, &Input_Page, NULL);
             AddPage("[Back]", &Input_Page, TEXT);
                 AddItem("[Back]", RETURN, NULL, &InputHead_Item,   &Input_Page, &Home_Page, NULL);
-                AddItem(" -SV"  , ONCE_FUNCTION,   NULL, &SV_Item,   &Input_Page, NULL, NULL);       
-                AddItem(" -CVBS", ONCE_FUNCTION,   NULL, &CVBS_Item, &Input_Page, NULL, NULL); 
-                AddItem(" -RGB0", ONCE_FUNCTION,   NULL, &RGB0_Item, &Input_Page, NULL, NULL); 
-                AddItem(" -RGB1", ONCE_FUNCTION,   NULL, &RGB1_Item, &Input_Page, NULL, NULL); 
-                AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, NULL); 
-                AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, NULL); 
+                AddItem(" -SV"  , ONCE_FUNCTION,   NULL, &SV_Item,   &Input_Page, NULL, cb_input_sv);
+                AddItem(" -CVBS", ONCE_FUNCTION,   NULL, &CVBS_Item, &Input_Page, NULL, cb_input_cvbs);
+                AddItem(" -RGB0", ONCE_FUNCTION,   NULL, &RGB0_Item, &Input_Page, NULL, cb_input_rgb0);
+                AddItem(" -RGB1", ONCE_FUNCTION,   NULL, &RGB1_Item, &Input_Page, NULL, cb_input_rgb1);
+                AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, cb_input_yuv);
+                AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
         AddItem(" +VideoFormat", PARENTS, logo_allArray[2], &Format_Item, &Home_Page, &Format_Page, NULL);
             AddPage("[Back]", &Format_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &FormatHead_Item    , &Format_Page  , &Home_Page, NULL);
@@ -264,10 +265,10 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +OutPut", PARENTS, logo_allArray[4], &OutPut_Item, &Home_Page, &OutPut_Page, NULL);
             AddPage("[Back]", &OutPut_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &OutPutHead_Item     , &OutPut_Page  , &Home_Page, NULL);
-                AddItem(" -720P(4*3)"    , ONCE_FUNCTION,   NULL, &Resolution720_4_Item    , &OutPut_Page, NULL, NULL  ); 
-                AddItem(" -720P(16*9)"   , ONCE_FUNCTION,   NULL, &Resolution720_16_Item   , &OutPut_Page, NULL, NULL ); 
-                AddItem(" -1080P(4*3)"   , ONCE_FUNCTION,   NULL, &Resolution1080_4_Item   , &OutPut_Page, NULL, NULL ); 
-                AddItem(" -1080P(16*9)"  , ONCE_FUNCTION,   NULL, &Resolution1080_16_Item  , &OutPut_Page, NULL, NULL); 
+                AddItem(" -720P(4*3)"    , ONCE_FUNCTION,   NULL, &Resolution720_4_Item    , &OutPut_Page, NULL, cb_res_720p_4_3);
+                AddItem(" -720P(16*9)"   , ONCE_FUNCTION,   NULL, &Resolution720_16_Item   , &OutPut_Page, NULL, cb_res_720p_16_9);
+                AddItem(" -1080P(4*3)"   , ONCE_FUNCTION,   NULL, &Resolution1080_4_Item   , &OutPut_Page, NULL, cb_res_1080p_4_3);
+                AddItem(" -1080P(16*9)"  , ONCE_FUNCTION,   NULL, &Resolution1080_16_Item  , &OutPut_Page, NULL, cb_res_1080p_16_9);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);
                 

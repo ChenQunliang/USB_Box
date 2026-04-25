@@ -55,12 +55,14 @@ int32_t main(void)
 
     LL_PERIPH_WE(LL_PERIPH_GPIO);
     V_I2C_Init();
-    if (tv5725_init() == LL_OK)
-    {
-        tv5725_asw_init();
-        tv5725_input_set_mode(TV5725_INPUT_AUTO);
-        tv5725_output_path_init(preset_480p, 0); /* 480p preset, RGB input */
-    }
+    // tv5725_reg_read(TV5725_SP_SOG_MODE);
+    tv5725_reg_write(TV5725_SP_SOG_MODE, 0x00); /* SOG mode: normal mode */
+    // if (tv5725_init() == LL_OK)
+    // {
+    //     // tv5725_asw_init();
+    //     // tv5725_input_set_mode(TV5725_INPUT_AUTO);
+    //     // tv5725_output_path_init(preset_480p, 0); /* 480p preset, RGB input */
+    // }
 
     Menu_Init(&menu);
 

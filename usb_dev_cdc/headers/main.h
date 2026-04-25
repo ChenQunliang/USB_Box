@@ -23,7 +23,7 @@
 #include "hc32_ll.h"
 #include "ev_hc32f460_lqfp100_v2.h"
 #include "EncodTimA.h"
-#include "i2c.h"
+#include "v_i2c.h"
 //#include "tim0.h"
 
 // #include "flash.h"

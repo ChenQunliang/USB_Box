@@ -1,5 +1,5 @@
-#ifndef I2C_H
-#define I2C_H
+#ifndef V_I2C_H
+#define V_I2C_H
 
 #include "main.h"
 
@@ -10,7 +10,7 @@
 #define V_I2C_ADDR_MD_7BIT (0U)
 #define V_I2C_ADDR_MD_10BIT (1U)
 /* Config I2C address mode: I2C_ADDR_MD_7BIT or I2C_ADDR_MD_10BIT */
-#define V_I2C_ADDR_MD (I2C_ADDR_MD_7BIT)
+#define V_I2C_ADDR_MD (V_I2C_ADDR_MD_7BIT)
 
 /* Define port and pin for SDA and SCL */
 #define V_I2C_SCL_PORT (GPIO_PORT_A)

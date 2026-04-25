@@ -508,14 +508,14 @@
               <FilePath>..\src\EncodTimA.c</FilePath>
             </File>
             <File>
-              <FileName>i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\i2c.c</FilePath>
-            </File>
-            <File>
               <FileName>tv5725.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\tv5725.c</FilePath>
+            </File>
+            <File>
+              <FileName>v_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\v_i2c.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -576,6 +576,11 @@
               <FileName>application.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MultMenu\application\application.c</FilePath>
+            </File>
+            <File>
+              <FileName>tv5725_callbacks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MultMenu\application\tv5725_callbacks.c</FilePath>
             </File>
             <File>
               <FileName>DinoGame.c</FileName>
@@ -1323,14 +1328,14 @@
               <FilePath>..\src\EncodTimA.c</FilePath>
             </File>
             <File>
-              <FileName>i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\i2c.c</FilePath>
-            </File>
-            <File>
               <FileName>tv5725.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\tv5725.c</FilePath>
+            </File>
+            <File>
+              <FileName>v_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\v_i2c.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1391,6 +1396,11 @@
               <FileName>application.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MultMenu\application\application.c</FilePath>
+            </File>
+            <File>
+              <FileName>tv5725_callbacks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MultMenu\application\tv5725_callbacks.c</FilePath>
             </File>
             <File>
               <FileName>DinoGame.c</FileName>

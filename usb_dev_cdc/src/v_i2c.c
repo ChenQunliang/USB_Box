@@ -1,5 +1,5 @@
 #include "main.h"
-#include "i2c.h"
+#include "v_i2c.h"
 
 int32_t I2C_Master_Transmit(uint16_t u16DevAddr, uint8_t const au8Data[], uint32_t u32Size, uint32_t u32Timeout)
 {
@@ -10,10 +10,10 @@ int32_t I2C_Master_Transmit(uint16_t u16DevAddr, uint8_t const au8Data[], uint32
     i32Ret = I2C_Start(V_I2C_UNIT, u32Timeout);
     if (LL_OK == i32Ret)
     {
-#if (I2C_ADDR_MD == I2C_ADDR_MD_10BIT)
+#if (V_I2C_ADDR_MD == V_I2C_ADDR_MD_10BIT)
         i32Ret = I2C_Trans10BitAddr(V_I2C_UNIT, u16DevAddr, I2C_DIR_TX, u32Timeout);
 #else
-        i32Ret = I2C_TransAddr(I2C_UNIT, u16DevAddr >> 1, I2C_DIR_TX, u32Timeout);
+        i32Ret = I2C_TransAddr(V_I2C_UNIT, u16DevAddr >> 1, I2C_DIR_TX, u32Timeout);
 #endif
         DDL_DelayUS(10);
         if (LL_OK == i32Ret)
@@ -84,10 +84,10 @@ int32_t I2C_Master_Receive(uint16_t u16DevAddr, uint8_t au8Data[], uint32_t u32S
             I2C_AckConfig(V_I2C_UNIT, I2C_NACK);
         }
 
-#if (I2C_ADDR_MD == I2C_ADDR_MD_10BIT)
+#if (V_I2C_ADDR_MD == V_I2C_ADDR_MD_10BIT)
         i32Ret = I2C_Trans10BitAddr(V_I2C_UNIT, u16DevAddr, I2C_DIR_RX, u32Timeout);
 #else
-        i32Ret = I2C_TransAddr(I2C_UNIT, u16DevAddr >> 1, I2C_DIR_RX, u32Timeout);
+        i32Ret = I2C_TransAddr(V_I2C_UNIT, u16DevAddr >> 1, I2C_DIR_RX, u32Timeout);
 #endif
         DDL_DelayUS(10);
         if (LL_OK == i32Ret)
