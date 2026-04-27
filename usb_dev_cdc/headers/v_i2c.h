@@ -23,8 +23,8 @@
 #define V_TIMEOUT (0x40000UL)
 
 /* Define i2c baudrate */
-#define V_I2C_BAUDRATE (200000UL) // 200k
-#define V_I2C_CLK_DIVx (I2C_CLK_DIV4)
+#define V_I2C_BAUDRATE (400000UL) // 200k
+#define V_I2C_CLK_DIVx (I2C_CLK_DIV2)
 
 int32_t I2C_Master_Transmit(uint16_t u16DevAddr, uint8_t const au8Data[], uint32_t u32Size, uint32_t u32Timeout);
 int32_t I2C_Master_Receive(uint16_t u16DevAddr, uint8_t au8Data[], uint32_t u32Size, uint32_t u32Timeout);
