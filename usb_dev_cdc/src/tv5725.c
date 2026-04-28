@@ -1,7 +1,7 @@
 #include "tv5725.h"
 #include "v_i2c.h"
 #include <string.h>
-
+#include "si5351.h"
 /* ==================================================================
    I2C address mapping (7-bit 0x17, unshift mode)
    W: 0x17 << 1 = 0x2E    R: (0x17 << 1) | 1 = 0x2F
@@ -172,15 +172,6 @@ void tv5725_chip_reset(void)
     /* Assert then release all reset bits */
     const tv5725_reg_t bits[] = {
         TV5725_RW_PIP_V_SP,
-        // TV5725_SFTRST_IF_RSTZ,
-        // TV5725_SFTRST_DEINT_RSTZ,
-        // TV5725_SFTRST_MEM_FF_RSTZ,
-        // TV5725_SFTRST_VDS_RSTZ,
-        // TV5725_SFTRST_FIFO_RSTZ,
-        // TV5725_SFTRST_DEC_RSTZ,
-        // TV5725_SFTRST_MODE_RSTZ,
-        // TV5725_SFTRST_SYNC_RSTZ,
-        // TV5725_SFTRST_HDBYPS_RSTZ,
     };
     int n = (int)(sizeof(bits) / sizeof(bits[0]));
     for (int i = 0; i < n; i++)
