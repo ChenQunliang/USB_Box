@@ -90,6 +90,7 @@ int32_t si5351_read(uint8_t reg, uint8_t *value);
 /* --- Detection & initialisation --- */
 int32_t si5351_detect(si5351_t *dev);
 int32_t si5351_init(si5351_t *dev, uint32_t xtal_freq);
+void    si5351_external_clock_init(void);
 
 /* --- Frequency control --- */
 void    si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz);

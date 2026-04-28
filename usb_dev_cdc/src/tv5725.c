@@ -201,6 +201,8 @@ int32_t tv5725_init(void)
 
     tv5725_reg_write(TV5725_RW_PAD_CKIN_ENZ, 1); /* Enable external clock input  */
 
+    si5351_external_clock_init();
+
     return LL_OK;
 }
 

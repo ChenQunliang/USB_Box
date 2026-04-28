@@ -12,7 +12,7 @@
 
 int32_t si5351_write_burst(uint8_t reg, const uint8_t *data, uint8_t len)
 {
-    uint8_t buf[17];  /* register + up to 16 data bytes */
+    uint8_t buf[17]; /* register + up to 16 data bytes */
 
     if (len > 16)
         return LL_ERR_INVD_PARAM;
@@ -26,7 +26,7 @@ int32_t si5351_write_burst(uint8_t reg, const uint8_t *data, uint8_t len)
 
 int32_t si5351_write(uint8_t reg, uint8_t value)
 {
-    uint8_t buf[2] = { reg, value };
+    uint8_t buf[2] = {reg, value};
     return I2C_Master_Transmit(SI5351_ADDR_WR, buf, 2, V_TIMEOUT);
 }
 
@@ -87,9 +87,9 @@ int32_t si5351_init(si5351_t *dev, uint32_t xtal_freq)
     for (i = 0; i < SI5351_NUM_OUTPUTS; i++)
     {
         dev->clk_power[i] = SI5351_DRIVE_2mA;
-        dev->omsynth[i]   = 0;
-        dev->o_Rdiv[i]    = 0;
-        dev->clk_on[i]    = 0;
+        dev->omsynth[i] = 0;
+        dev->o_Rdiv[i] = 0;
+        dev->clk_on[i] = 0;
     }
 
     /* Disable spread spectrum (register 149, bit 7 = 0) */
@@ -115,7 +115,7 @@ int32_t si5351_init(si5351_t *dev, uint32_t xtal_freq)
 
 void si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz)
 {
-    uint8_t  pll_stride = 0, msyn_stride = 0;
+    uint8_t pll_stride = 0, msyn_stride = 0;
     uint32_t a, b, c, f, fvco, outdivider;
 
     if (dev == NULL || clk >= SI5351_NUM_OUTPUTS || freq_hz == 0)
@@ -126,7 +126,7 @@ void si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz)
 
     /* Apply additional R divider (power-of-2) if outdivider > 900 */
     {
-        uint8_t  R = 1;
+        uint8_t R = 1;
         while (outdivider > 900)
         {
             R *= 2;
@@ -153,14 +153,14 @@ void si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz)
 
             /* PLL register bank (8 bytes at 26 + stride) */
             uint8_t pll_bank[8];
-            pll_bank[0] = (uint8_t)((MSNx_P3 >> 8) & 0xFFU);   /* reg 26 */
-            pll_bank[1] = (uint8_t)(MSNx_P3 & 0xFFU);           /* reg 27 */
-            pll_bank[2] = (uint8_t)((MSNx_P1 >> 16) & 0x03U);   /* reg 28 */
-            pll_bank[3] = (uint8_t)((MSNx_P1 >> 8) & 0xFFU);   /* reg 29 */
-            pll_bank[4] = (uint8_t)(MSNx_P1 & 0xFFU);           /* reg 30 */
+            pll_bank[0] = (uint8_t)((MSNx_P3 >> 8) & 0xFFU);  /* reg 26 */
+            pll_bank[1] = (uint8_t)(MSNx_P3 & 0xFFU);         /* reg 27 */
+            pll_bank[2] = (uint8_t)((MSNx_P1 >> 16) & 0x03U); /* reg 28 */
+            pll_bank[3] = (uint8_t)((MSNx_P1 >> 8) & 0xFFU);  /* reg 29 */
+            pll_bank[4] = (uint8_t)(MSNx_P1 & 0xFFU);         /* reg 30 */
             pll_bank[5] = (uint8_t)(((MSNx_P3 >> 12) & 0x0FU) |
                                     ((MSNx_P2 >> 16) & 0x0FU)); /* reg 31 */
-            pll_bank[6] = (uint8_t)((MSNx_P2 >> 8) & 0xFFU);   /* reg 32 */
+            pll_bank[6] = (uint8_t)((MSNx_P2 >> 8) & 0xFFU);    /* reg 32 */
             pll_bank[7] = (uint8_t)(MSNx_P2 & 0xFFU);           /* reg 33 */
 
             /* CLK0 → PLLA (stride 0), CLK1/2 → PLLB (stride 8) */
@@ -174,22 +174,38 @@ void si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz)
             uint8_t Rbits = 0;
             switch (R)
             {
-                case 1:   Rbits = 0;   break;
-                case 2:   Rbits = 16;  break;
-                case 4:   Rbits = 32;  break;
-                case 8:   Rbits = 48;  break;
-                case 16:  Rbits = 64;  break;
-                case 32:  Rbits = 80;  break;
-                case 64:  Rbits = 96;  break;
-                case 128: Rbits = 112; break;
+            case 1:
+                Rbits = 0;
+                break;
+            case 2:
+                Rbits = 16;
+                break;
+            case 4:
+                Rbits = 32;
+                break;
+            case 8:
+                Rbits = 48;
+                break;
+            case 16:
+                Rbits = 64;
+                break;
+            case 32:
+                Rbits = 80;
+                break;
+            case 64:
+                Rbits = 96;
+                break;
+            case 128:
+                Rbits = 112;
+                break;
             }
 
             /* Check if output divider changed (avoid unnecessary reset / click) */
             if (dev->omsynth[clk] != (uint16_t)outdivider ||
-                dev->o_Rdiv[clk]  != Rbits)
+                dev->o_Rdiv[clk] != Rbits)
             {
                 dev->omsynth[clk] = (uint16_t)outdivider;
-                dev->o_Rdiv[clk]  = Rbits;
+                dev->o_Rdiv[clk] = Rbits;
                 msyn_stride = clk * 8;
 
                 /* Special case: MSynth divide-by-4 (see Si5351 datasheet §4.1.3) */
@@ -198,14 +214,14 @@ void si5351_set_freq(si5351_t *dev, uint8_t clk, uint32_t freq_hz)
 
                 /* Output MS register bank (8 bytes at 42 + stride) */
                 uint8_t ms_bank[8];
-                ms_bank[0] = 0;                                        /* reg 42 */
-                ms_bank[1] = 1;                                        /* reg 43 */
+                ms_bank[0] = 0;                                           /* reg 42 */
+                ms_bank[1] = 1;                                           /* reg 43 */
                 ms_bank[2] = (uint8_t)(((MSx_P1 >> 16) & 0x03U) | Rbits); /* reg 44 */
-                ms_bank[3] = (uint8_t)((MSx_P1 >> 8) & 0xFFU);        /* reg 45 */
-                ms_bank[4] = (uint8_t)(MSx_P1 & 0xFFU);                /* reg 46 */
-                ms_bank[5] = 0;                                        /* reg 47 */
-                ms_bank[6] = 0;                                        /* reg 48 */
-                ms_bank[7] = 0;                                        /* reg 49 */
+                ms_bank[3] = (uint8_t)((MSx_P1 >> 8) & 0xFFU);            /* reg 45 */
+                ms_bank[4] = (uint8_t)(MSx_P1 & 0xFFU);                   /* reg 46 */
+                ms_bank[5] = 0;                                           /* reg 47 */
+                ms_bank[6] = 0;                                           /* reg 48 */
+                ms_bank[7] = 0;                                           /* reg 49 */
 
                 /* Write both banks close together to minimise glitch */
                 si5351_write_burst(SI5351_REG_PLLA_MSNA_26 + pll_stride,
@@ -297,4 +313,26 @@ void si5351_disable_all(si5351_t *dev)
 void si5351_reset_pll(void)
 {
     si5351_write(SI5351_REG_PLL_RESET, SI5351_PLL_RESET_BOTH);
+}
+
+/* ==================================================================
+   Probe & init external clock generator at startup
+   Called from tv5725_init() after enabling external clock input.
+   ================================================================== */
+void si5351_external_clock_init(void)
+{
+    si5351_t si5351;
+
+    if (si5351_detect(&si5351) != LL_OK)
+    {
+        printf("Si5351 not detected\n");
+        return;
+    }
+    printf("Si5351 detected\n");
+
+    si5351_init(&si5351, 25000000UL);
+    si5351_write(SI5351_REG_XTAL_LOAD, SI5351_XTAL_LOAD_DEFAULT);
+    si5351_set_power(&si5351, 0, SI5351_DRIVE_6mA);
+    si5351_set_freq(&si5351, 0, 81000000UL);
+    si5351_disable(&si5351, 0);
 }
