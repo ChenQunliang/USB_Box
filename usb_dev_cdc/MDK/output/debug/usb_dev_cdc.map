@@ -1021,6 +1021,7 @@ Section Cross References
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_input_rgbs) for cb_input_rgbs
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_input_rgsb) for cb_input_rgsb
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_input_yuv) for cb_input_yuv
+    menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_chip_id_show) for cb_chip_id_show
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_sog_normal) for cb_sog_normal
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_sog_force) for cb_sog_force
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_sog_show) for cb_sog_show
@@ -1028,7 +1029,6 @@ Section Cross References
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_res_720p_16_9) for cb_res_720p_16_9
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_res_1080p_4_3) for cb_res_1080p_4_3
     menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_res_1080p_16_9) for cb_res_1080p_16_9
-    menuconfig.o(i.Create_MenuTree) refers to tv5725_callbacks.o(i.cb_chip_id_show) for cb_chip_id_show
     menuconfig.o(i.Create_Parameter) refers to menu.o(i.Create_element) for Create_element
     menuconfig.o(i.Create_Parameter) refers to menuconfig.o(.bss) for .bss
     menuconfig.o(i.Create_Parameter) refers to menuconfig.o(.data) for .data
@@ -4555,30 +4555,30 @@ Image Symbol Table
     RGBS_Item                                0x1fff87d0   Data          52  menuconfig.o(.bss)
     RGSB_Item                                0x1fff8804   Data          52  menuconfig.o(.bss)
     YUV_Item                                 0x1fff8838   Data          52  menuconfig.o(.bss)
-    SOG_Item                                 0x1fff886c   Data          52  menuconfig.o(.bss)
-    SOGHead_Item                             0x1fff88a0   Data          52  menuconfig.o(.bss)
-    SOG_Normal_Item                          0x1fff88d4   Data          52  menuconfig.o(.bss)
-    SOG_Force_Item                           0x1fff8908   Data          52  menuconfig.o(.bss)
-    SOG_Show_Item                            0x1fff893c   Data          52  menuconfig.o(.bss)
-    Auto_Item                                0x1fff8970   Data          52  menuconfig.o(.bss)
-    Ntsc_Item                                0x1fff89a4   Data          52  menuconfig.o(.bss)
-    Ntsc443_Item                             0x1fff89d8   Data          52  menuconfig.o(.bss)
-    Pal_Item                                 0x1fff8a0c   Data          52  menuconfig.o(.bss)
-    Pal_M_Item                               0x1fff8a40   Data          52  menuconfig.o(.bss)
-    Secam_Item                               0x1fff8a74   Data          52  menuconfig.o(.bss)
-    Brightness_Item                          0x1fff8aa8   Data          52  menuconfig.o(.bss)
-    Contrast_Item                            0x1fff8adc   Data          52  menuconfig.o(.bss)
-    Saturation_Item                          0x1fff8b10   Data          52  menuconfig.o(.bss)
-    Hues_Item                                0x1fff8b44   Data          52  menuconfig.o(.bss)
-    LeftAndRight_Item                        0x1fff8b78   Data          52  menuconfig.o(.bss)
-    UpAndDown_Item                           0x1fff8bac   Data          52  menuconfig.o(.bss)
-    Resolution720_4_Item                     0x1fff8be0   Data          52  menuconfig.o(.bss)
-    Resolution720_16_Item                    0x1fff8c14   Data          52  menuconfig.o(.bss)
-    Resolution1080_4_Item                    0x1fff8c48   Data          52  menuconfig.o(.bss)
-    Resolution1080_16_Item                   0x1fff8c7c   Data          52  menuconfig.o(.bss)
-    Save_Item                                0x1fff8cb0   Data          52  menuconfig.o(.bss)
-    Load_Item                                0x1fff8ce4   Data          52  menuconfig.o(.bss)
-    ChipID_Item                              0x1fff8d18   Data          52  menuconfig.o(.bss)
+    ChipID_Item                              0x1fff886c   Data          52  menuconfig.o(.bss)
+    SOG_Item                                 0x1fff88a0   Data          52  menuconfig.o(.bss)
+    SOGHead_Item                             0x1fff88d4   Data          52  menuconfig.o(.bss)
+    SOG_Normal_Item                          0x1fff8908   Data          52  menuconfig.o(.bss)
+    SOG_Force_Item                           0x1fff893c   Data          52  menuconfig.o(.bss)
+    SOG_Show_Item                            0x1fff8970   Data          52  menuconfig.o(.bss)
+    Auto_Item                                0x1fff89a4   Data          52  menuconfig.o(.bss)
+    Ntsc_Item                                0x1fff89d8   Data          52  menuconfig.o(.bss)
+    Ntsc443_Item                             0x1fff8a0c   Data          52  menuconfig.o(.bss)
+    Pal_Item                                 0x1fff8a40   Data          52  menuconfig.o(.bss)
+    Pal_M_Item                               0x1fff8a74   Data          52  menuconfig.o(.bss)
+    Secam_Item                               0x1fff8aa8   Data          52  menuconfig.o(.bss)
+    Brightness_Item                          0x1fff8adc   Data          52  menuconfig.o(.bss)
+    Contrast_Item                            0x1fff8b10   Data          52  menuconfig.o(.bss)
+    Saturation_Item                          0x1fff8b44   Data          52  menuconfig.o(.bss)
+    Hues_Item                                0x1fff8b78   Data          52  menuconfig.o(.bss)
+    LeftAndRight_Item                        0x1fff8bac   Data          52  menuconfig.o(.bss)
+    UpAndDown_Item                           0x1fff8be0   Data          52  menuconfig.o(.bss)
+    Resolution720_4_Item                     0x1fff8c14   Data          52  menuconfig.o(.bss)
+    Resolution720_16_Item                    0x1fff8c48   Data          52  menuconfig.o(.bss)
+    Resolution1080_4_Item                    0x1fff8c7c   Data          52  menuconfig.o(.bss)
+    Resolution1080_16_Item                   0x1fff8cb0   Data          52  menuconfig.o(.bss)
+    Save_Item                                0x1fff8ce4   Data          52  menuconfig.o(.bss)
+    Load_Item                                0x1fff8d18   Data          52  menuconfig.o(.bss)
     buffer                                   0x1fff8d4c   Data         128  wave.o(.bss)
     u8g2                                     0x1fff8dcc   Data         148  dispdirver.o(.bss)
     STACK$$Base                              0x1fff9428   Number         0  startup_hc32f460.o(STACK)

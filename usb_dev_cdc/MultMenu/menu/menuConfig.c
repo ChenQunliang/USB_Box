@@ -43,6 +43,8 @@ xItem InputHead_Item, ColorHead_Item, FormatHead_Item, ScreenHead_Item, OutPutHe
 xItem Input_Item    , Color_Item    , Format_Item    , Screen_Item    , OutPut_Item    ;
 /*signal*/
 xItem RGBS_Item, RGSB_Item, YUV_Item;
+/*ChipID*/
+xItem ChipID_Item;
 /*SOG*/
 xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item;
 /*Format*/
@@ -57,10 +59,9 @@ xItem  Resolution720_4_Item,    Resolution720_16_Item,  Resolution1080_4_Item,  
 xItem Save_Item;
 /*Load*/
 xItem Load_Item;
-/*ChipID*/
-xItem ChipID_Item;
- 
- 
+
+
+
 
 
 extern int test;
@@ -242,6 +243,7 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -RGBS", ONCE_FUNCTION,   NULL, &RGBS_Item, &Input_Page, NULL, cb_input_rgbs);
                 AddItem(" -RGSB", ONCE_FUNCTION,   NULL, &RGSB_Item, &Input_Page, NULL, cb_input_rgsb);
                 AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, cb_input_yuv);
+                AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Input_Page, NULL, cb_chip_id_show);
                 AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Input_Page, &SOG_Page, NULL);
                     AddPage("[Back]", &SOG_Page, TEXT);
                         AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Input_Page, NULL);
@@ -278,7 +280,6 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -1080P(16*9)"  , ONCE_FUNCTION,   NULL, &Resolution1080_16_Item  , &OutPut_Page, NULL, cb_res_1080p_16_9);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);
-        AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Home_Page, NULL, cb_chip_id_show);
                 
 //        AddItem(" -Image", LOOP_FUNCTION, logo_allArray[6], &Image_Item, &Home_Page, NULL, Show_Logo);
 //        AddItem(" -Github", _TEXT_, logo_allArray[5], &Github_Item, &Home_Page, NULL, NULL);
