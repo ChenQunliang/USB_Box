@@ -98,36 +98,56 @@ int32_t tv5725_write_buf(uint8_t seg, uint8_t offset, const uint8_t *buf, uint8_
 
 uint32_t tv5725_reg_read(tv5725_reg_t reg)
 {
-    uint8_t byte;
-    if (reg.bit_width > 8)
+    uint8_t buf[8];
+    uint8_t n = (uint8_t)((reg.bit_offset + reg.bit_width + 7) / 8);
+
+    if (n > sizeof(buf) || reg.bit_width > 32)
         return 0;
-    if (seg_read(reg.segment, reg.offset, &byte, 1) != LL_OK)
+
+    if (seg_read(reg.segment, reg.offset, buf, n) != LL_OK)
         return 0;
-    return (uint32_t)((byte >> reg.bit_offset) & ((1U << reg.bit_width) - 1U));
+
+    uint64_t raw = 0;
+    for (uint8_t i = 0; i < n; i++)
+        raw |= (uint64_t)buf[i] << (i * 8);
+
+    return (uint32_t)((raw >> reg.bit_offset) & ((1ULL << reg.bit_width) - 1ULL));
 }
 
 void tv5725_reg_write(tv5725_reg_t reg, uint32_t value)
 {
-    if (reg.bit_width > 8)
+    uint8_t buf[8];
+    uint8_t n = (uint8_t)((reg.bit_offset + reg.bit_width + 7) / 8);
+
+    if (n > sizeof(buf))
         return;
 
-    uint8_t byte;
+    /* Full-byte-aligned: skip read-modify */
+    if (reg.bit_offset == 0 && reg.bit_width == n * 8)
+    {
+        for (uint8_t i = 0; i < n; i++)
+            buf[i] = (uint8_t)(value >> (i * 8));
+        seg_write(reg.segment, reg.offset, buf, n);
+        return;
+    }
 
-    if (reg.bit_offset == 0 && reg.bit_width == 8)
-    {
-        /* Full byte: direct write */
-        byte = (uint8_t)value;
-        seg_write(reg.segment, reg.offset, &byte, 1);
-    }
-    else
-    {
-        /* Bitfield: read-modify-write */
-        if (seg_read(reg.segment, reg.offset, &byte, 1) != LL_OK)
-            return;
-        uint8_t mask = (uint8_t)(((1U << reg.bit_width) - 1U) << reg.bit_offset);
-        byte = (byte & ~mask) | (uint8_t)((value << reg.bit_offset) & mask);
-        seg_write(reg.segment, reg.offset, &byte, 1);
-    }
+    /* Bitfield (single or multi-byte): read-modify-write */
+    if (seg_read(reg.segment, reg.offset, buf, n) != LL_OK)
+        return;
+
+    uint64_t raw = 0;
+    for (uint8_t i = 0; i < n; i++)
+        raw |= (uint64_t)buf[i] << (i * 8);
+
+    uint64_t mask = (reg.bit_width >= 64) ? ~0ULL : ((1ULL << reg.bit_width) - 1ULL);
+    mask <<= reg.bit_offset;
+
+    raw = (raw & ~mask) | (((uint64_t)value << reg.bit_offset) & mask);
+
+    for (uint8_t i = 0; i < n; i++)
+        buf[i] = (uint8_t)(raw >> (i * 8));
+
+    seg_write(reg.segment, reg.offset, buf, n);
 }
 
 /* ==================================================================
