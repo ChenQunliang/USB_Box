@@ -27,23 +27,20 @@ Project File Date:  04/25/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'usb_dev_cdc_Debug'
+compiling main.c...
+..\src\main.c(17): warning:  #177-D: function "fault_test_by_div0"  was declared but never referenced
+  static void fault_test_by_div0(void)
+..\src\main.c: 1 warning, 0 errors
 compiling tv5725_callbacks.c...
-..\MultMenu\application\tv5725_callbacks.c(70): warning:  #223-D: function "tv5725_reg_write" declared implicitly
-      tv5725_reg_write(TV5725_RW_SYNC_PROC_48, 0x00);
-..\MultMenu\application\tv5725_callbacks.c(71): warning:  #223-D: function "tv5725_reg_read" declared implicitly
-      uint32_t val = tv5725_reg_read(TV5725_RW_SYNC_PROC_48);
-..\MultMenu\application\tv5725_callbacks.c(78): warning:  #223-D: function "tv5725_reg_write" declared implicitly
-      tv5725_reg_write(TV5725_RW_PIP_V_SP, 0x123);
-..\MultMenu\application\tv5725_callbacks.c(79): warning:  #223-D: function "tv5725_reg_read" declared implicitly
-      uint32_t val = tv5725_reg_read(TV5725_RW_PIP_V_SP);
-..\MultMenu\application\tv5725_callbacks.c(85): warning:  #223-D: function "tv5725_reg_read" declared implicitly
-      uint32_t val = tv5725_reg_read(TV5725_RW_SYNC_PROC_48);
-..\MultMenu\application\tv5725_callbacks.c: 5 warnings, 0 errors
+compiling tv5725.c...
+..\src\tv5725.c(271): warning:  #550-D: variable "g_input_mode"  was set but never used
+  static tv5725_input_mode_t g_input_mode = TV5725_INPUT_AUTO;
+..\src\tv5725.c: 1 warning, 0 errors
 linking...
-Program Size: Code=35524 RO-data=7452 RW-data=196 ZI-data=8140  
+Program Size: Code=36096 RO-data=7596 RW-data=196 ZI-data=8036  
 FromELF: creating hex file...
 After Build - User command #1: fromelf  --bin -o "c:\Users\Admin\Desktop\All_projects\Un8266_GBSC\USB_Box\usb_dev_cdc\MDK\output\debug\usb_dev_cdc.bin" "c:\Users\Admin\Desktop\All_projects\Un8266_GBSC\USB_Box\usb_dev_cdc\MDK\output\debug\usb_dev_cdc.axf"
-".\output\debug\usb_dev_cdc.axf" - 0 Error(s), 5 Warning(s).
+".\output\debug\usb_dev_cdc.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -57,7 +54,7 @@ Package Vendor: HDSC
   C:\Users\Admin\AppData\Local\Arm\Packs\HDSC\HC32F46x\1.0.2\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

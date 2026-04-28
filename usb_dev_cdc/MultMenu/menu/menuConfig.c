@@ -42,7 +42,7 @@ xItem HomeHead_Item;
 xItem InputHead_Item, ColorHead_Item, FormatHead_Item, ScreenHead_Item, OutPutHead_Item;
 xItem Input_Item    , Color_Item    , Format_Item    , Screen_Item    , OutPut_Item    ;
 /*signal*/
-xItem SV_Item, CVBS_Item, RGB0_Item, RGB1_Item, YUV_Item, VGA_Item;
+xItem RGBS_Item, RGSB_Item, YUV_Item;
 /*SOG*/
 xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item;
 /*Format*/
@@ -57,6 +57,8 @@ xItem  Resolution720_4_Item,    Resolution720_16_Item,  Resolution1080_4_Item,  
 xItem Save_Item;
 /*Load*/
 xItem Load_Item;
+/*ChipID*/
+xItem ChipID_Item;
  
  
 
@@ -237,12 +239,9 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +Input", PARENTS, logo_allArray[1], &Input_Item, &Home_Page, &Input_Page, NULL);
             AddPage("[Back]", &Input_Page, TEXT);
                 AddItem("[Back]", RETURN, NULL, &InputHead_Item,   &Input_Page, &Home_Page, NULL);
-                AddItem(" -SV"  , ONCE_FUNCTION,   NULL, &SV_Item,   &Input_Page, NULL, cb_input_sv);
-                AddItem(" -CVBS", ONCE_FUNCTION,   NULL, &CVBS_Item, &Input_Page, NULL, cb_input_cvbs);
-                AddItem(" -RGB0", ONCE_FUNCTION,   NULL, &RGB0_Item, &Input_Page, NULL, cb_input_rgb0);
-                AddItem(" -RGB1", ONCE_FUNCTION,   NULL, &RGB1_Item, &Input_Page, NULL, cb_input_rgb1);
+                AddItem(" -RGBS", ONCE_FUNCTION,   NULL, &RGBS_Item, &Input_Page, NULL, cb_input_rgbs);
+                AddItem(" -RGSB", ONCE_FUNCTION,   NULL, &RGSB_Item, &Input_Page, NULL, cb_input_rgsb);
                 AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, cb_input_yuv);
-                AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
                 AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Input_Page, &SOG_Page, NULL);
                     AddPage("[Back]", &SOG_Page, TEXT);
                         AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Input_Page, NULL);
@@ -279,6 +278,7 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -1080P(16*9)"  , ONCE_FUNCTION,   NULL, &Resolution1080_16_Item  , &OutPut_Page, NULL, cb_res_1080p_16_9);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);
+        AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Home_Page, NULL, cb_chip_id_show);
                 
 //        AddItem(" -Image", LOOP_FUNCTION, logo_allArray[6], &Image_Item, &Home_Page, NULL, Show_Logo);
 //        AddItem(" -Github", _TEXT_, logo_allArray[5], &Github_Item, &Home_Page, NULL, NULL);

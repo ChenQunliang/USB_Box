@@ -8,56 +8,24 @@ extern const uint8_t preset_1080p[];
 /* ====================================================================
    Input source callbacks
    Each maps a menu item to a physical input via ASW + input mode.
-   ASW pins (PB12-PB15) route the analog mux to select the active
-   input connector. The mux output feeds the TV5725 ADC.
    ==================================================================== */
 
-void cb_input_sv(xpMenu Menu)
+void cb_input_rgbs(xpMenu Menu)
 {
     (void)Menu;
-    /* S-Video → YUV mode via ASW */
-    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
-    /* TODO: set ASW pins for S-Video connector routing */
+    tv5725_input_set_mode(TV5725_INPUT_RGBS);
 }
 
-void cb_input_cvbs(xpMenu Menu)
+void cb_input_rgsb(xpMenu Menu)
 {
     (void)Menu;
-    /* Composite → YUV mode via ASW */
-    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
-    /* TODO: set ASW pins for CVBS connector routing */
-}
-
-void cb_input_rgb0(xpMenu Menu)
-{
-    (void)Menu;
-    /* RGB input 0 → RGBS mode */
-    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
-    /* Current ASW defaults route RGB0 (ASW01=H, others=L) */
-}
-
-void cb_input_rgb1(xpMenu Menu)
-{
-    (void)Menu;
-    /* RGB input 1 → RGBS mode */
-    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
-    /* TODO: set ASW pins for RGB1 connector routing */
+    tv5725_input_set_mode(TV5725_INPUT_RGSB);
 }
 
 void cb_input_yuv(xpMenu Menu)
 {
     (void)Menu;
-    /* YPbPr component → YUV mode */
-    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
-    /* Current ASW defaults route YUV (all ASW pins low) */
-}
-
-void cb_input_vga(xpMenu Menu)
-{
-    (void)Menu;
-    /* VGA → RGBS mode (RGBHV, external H/V sync) */
-    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
-    /* TODO: set ASW pins for VGA connector routing */
+    tv5725_input_set_mode(TV5725_INPUT_YUV);
 }
 
 /* ====================================================================
@@ -84,6 +52,17 @@ void cb_sog_show(xpMenu Menu)
     (void)Menu;
     uint32_t val = tv5725_reg_read(TV5725_RW_SYNC_PROC_48);
     printf("SOG Mode = 0x%02X\n", val);
+}
+
+/* ====================================================================
+   Chip ID callbacks
+   ==================================================================== */
+
+void cb_chip_id_show(xpMenu Menu)
+{
+    (void)Menu;
+    uint32_t id = tv5725_get_chip_id();
+    printf("TV5725 Chip ID: 0x%06lX\n", id);
 }
 
 /* ====================================================================

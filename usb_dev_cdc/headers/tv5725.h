@@ -14,6 +14,15 @@
 /* Number of segments (0-5) */
 #define TV5725_SEG_COUNT (6U)
 
+/* Sync analog-switch GPIO: PB12-PB15, each pin independently controls one
+   analog switch for routing the composite-sync signal of one input source. */
+#define TV5725_SYNC_ASW_PORT (GPIO_PORT_B)
+#define TV5725_SYNC_ASW_MASK (GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15)
+#define TV5725_SYNC_ASW1 (GPIO_PIN_12)
+#define TV5725_SYNC_ASW2 (GPIO_PIN_13)
+#define TV5725_SYNC_ASW3 (GPIO_PIN_14)
+#define TV5725_SYNC_ASW4 (GPIO_PIN_15)
+
 /* Register descriptor */
 typedef struct
 {
@@ -22,6 +31,15 @@ typedef struct
    uint8_t bit_offset;
    uint8_t bit_width;
 } tv5725_reg_t;
+
+typedef enum
+{
+   TV5725_INPUT_AUTO = 0,
+   TV5725_INPUT_YUV,
+   TV5725_INPUT_RGBS,
+   TV5725_INPUT_RGSB,
+   TV5725_INPUT_COUNT
+} tv5725_input_mode_t;
 
 /* Build a register descriptor inline */
 #define TV5725_REG(seg, off, bit, w) ((tv5725_reg_t){(seg), (off), (bit), (w)})
@@ -42,745 +60,753 @@ typedef struct
                     RESET / PAD / OSD
    ================================================================ */
 // clang-format off
-#define TV5725_RO_STATUS_INPUT_MODE_00              TV5725_REG(0x00, 0x00, 0, 8)
-#define TV5725_RO_STATUS_IF_VT_OK                   TV5725_REG(0x00, 0x00, 0, 1)
-#define TV5725_RO_STATUS_IF_HT_OK                   TV5725_REG(0x00, 0x00, 1, 1)
-#define TV5725_RO_STATUS_IF_HVT_OK                  TV5725_REG(0x00, 0x00, 2, 1)
-#define TV5725_RO_STATUS_IF_INP_NTSC_INT            TV5725_REG(0x00, 0x00, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_NTSC_PRG            TV5725_REG(0x00, 0x00, 4, 1)
-#define TV5725_RO_STATUS_IF_INP_PAL_INT             TV5725_REG(0x00, 0x00, 5, 1)
-#define TV5725_RO_STATUS_IF_INP_PAL_PRG             TV5725_REG(0x00, 0x00, 6, 1)
-#define TV5725_RO_STATUS_IF_INP_SD                  TV5725_REG(0x00, 0x00, 7, 1)
-#define TV5725_RO_STATUS_INPUT_MODE_01              TV5725_REG(0x00, 0x01, 0, 8)
-#define TV5725_RO_STATUS_IF_INP_VGA60               TV5725_REG(0x00, 0x01, 0, 1)
-#define TV5725_RO_STATUS_IF_INP_VGA75               TV5725_REG(0x00, 0x01, 1, 1)
-#define TV5725_RO_STATUS_IF_INP_VGA86               TV5725_REG(0x00, 0x01, 2, 1)
-#define TV5725_RO_STATUS_IF_INP_VGA                 TV5725_REG(0x00, 0x01, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_SVGA60              TV5725_REG(0x00, 0x01, 4, 1)
-#define TV5725_RO_STATUS_IF_INP_SVGA75              TV5725_REG(0x00, 0x01, 5, 1)
-#define TV5725_RO_STATUS_IF_INP_SVGA85              TV5725_REG(0x00, 0x01, 6, 1)
-#define TV5725_RO_STATUS_IF_INP_SVGA                TV5725_REG(0x00, 0x01, 7, 1)
-#define TV5725_RO_STATUS_INPUT_MODE_02              TV5725_REG(0x00, 0x02, 0, 8)
-#define TV5725_RO_STATUS_IF_INP_XGA60               TV5725_REG(0x00, 0x02, 0, 1)
-#define TV5725_RO_STATUS_IF_INP_XGA70               TV5725_REG(0x00, 0x02, 1, 1)
-#define TV5725_RO_STATUS_IF_INP_XGA75               TV5725_REG(0x00, 0x02, 2, 1)
-#define TV5725_RO_STATUS_IF_INP_XGA85               TV5725_REG(0x00, 0x02, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_XGA                 TV5725_REG(0x00, 0x02, 4, 1)
-#define TV5725_RO_STATUS_IF_INP_SXGA60              TV5725_REG(0x00, 0x02, 5, 1)
-#define TV5725_RO_STATUS_IF_INP_SXGA75              TV5725_REG(0x00, 0x02, 6, 1)
-#define TV5725_RO_STATUS_IF_INP_SXGA85              TV5725_REG(0x00, 0x02, 7, 1)
-#define TV5725_RO_STATUS_INPUT_MODE_03              TV5725_REG(0x00, 0x03, 0, 8)
-#define TV5725_RO_STATUS_IF_INP_SXGA                TV5725_REG(0x00, 0x03, 0, 1)
-#define TV5725_RO_STATUS_IF_INP_PC                  TV5725_REG(0x00, 0x03, 1, 1)
-#define TV5725_RO_STATUS_IF_INP_720P50              TV5725_REG(0x00, 0x03, 2, 1)
-#define TV5725_RO_STATUS_IF_INP_720P60              TV5725_REG(0x00, 0x03, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_720                 TV5725_REG(0x00, 0x03, 4, 1)
-#define TV5725_RO_STATUS_IF_INP_2200_1125I          TV5725_REG(0x00, 0x03, 5, 1)
-#define TV5725_RO_STATUS_IF_INP_2376_1250I          TV5725_REG(0x00, 0x03, 6, 1)
-#define TV5725_RO_STATUS_IF_INP_2640_1125I          TV5725_REG(0x00, 0x03, 7, 1)
-#define TV5725_RO_STATUS_INPUT_MODE_04              TV5725_REG(0x00, 0x04, 0, 8)
-#define TV5725_RO_STATUS_IF_INP_1080I               TV5725_REG(0x00, 0x04, 0, 1)
-#define TV5725_RO_STATUS_IF_INP_2200_1125P          TV5725_REG(0x00, 0x04, 1, 1)
-#define TV5725_RO_STATUS_IF_INP_2376_1250P          TV5725_REG(0x00, 0x04, 2, 1)
-#define TV5725_RO_STATUS_IF_INP_2640_1125P          TV5725_REG(0x00, 0x04, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_1808P               TV5725_REG(0x00, 0x04, 4, 1)
-#define TV5725_RO_STATUS_IF_INP_HD                  TV5725_REG(0x00, 0x04, 5, 1)
-#define TV5725_RO_STATUS_IF_INP_INT                 TV5725_REG(0x00, 0x04, 6, 1)
-#define TV5725_RO_INTERLACE_PROGRESSIVE_RECOGNIZE   TV5725_REG(0x00, 0x04, 6, 2)
-#define TV5725_RO_STATUS_IF_INP_PRG                 TV5725_REG(0x00, 0x04, 7, 1)
-#define TV5725_RO_STATUS_INPUT_MODE_05              TV5725_REG(0x00, 0x05, 0, 8)
-#define TV5725_RO_STATUS_IF_INP_USER                TV5725_REG(0x00, 0x05, 0, 1)
-#define TV5725_RO_STATUS_IF_NO_SYNC                 TV5725_REG(0x00, 0x05, 1, 1)
-#define TV5725_RO_STATUS_IF_HT_BAD                  TV5725_REG(0x00, 0x05, 2, 1)
-#define TV5725_RO_STATUS_IF_VT_BAD                  TV5725_REG(0x00, 0x05, 3, 1)
-#define TV5725_RO_STATUS_IF_INP_SW                  TV5725_REG(0x00, 0x05, 4, 1)
-#define TV5725_RO_STATUS_INPUT_SIZE_00              TV5725_REG(0x00, 0x06, 0, 8)
-#define TV5725_RO_HPERIOD_IF                        TV5725_REG(0x00, 0x06, 0, 9)
-#define TV5725_RO_STATUS_INPUT_SIZE_01              TV5725_REG(0x00, 0x07, 0, 8)
-#define TV5725_RO_H_TOTAL_HIGH                      TV5725_REG(0x00, 0x07, 0, 1)
-#define TV5725_RO_V_TOTAL_LOW                       TV5725_REG(0x00, 0x07, 1, 7)
-#define TV5725_RO_VPERIOD_IF                        TV5725_REG(0x00, 0x07, 1, 11)
-#define TV5725_RO_STATUS_INPUT_SIZE_02              TV5725_REG(0x00, 0x08, 0, 8)
-#define TV5725_RO_V_TOTAL_HIGH                      TV5725_REG(0x00, 0x08, 0, 4)
-#define TV5725_RO_STATUS_MISC_PLL648_LOCK           TV5725_REG(0x00, 0x09, 6, 1)
-#define TV5725_RO_STATUS_MISC_PLLAD_LOCK            TV5725_REG(0x00, 0x09, 7, 1)
-#define TV5725_RO_STATUS_MISC_01                    TV5725_REG(0x00, 0x0A, 0, 8)
-#define TV5725_RO_STATUS_MISC_PIP_EN_V              TV5725_REG(0x00, 0x0A, 0, 1)
-#define TV5725_RO_STATUS_MISC_PIP_EN_H              TV5725_REG(0x00, 0x0A, 1, 1)
-#define TV5725_RO_STATUS_MISC_VBLK                  TV5725_REG(0x00, 0x0A, 4, 1)
-#define TV5725_RO_STATUS_MISC_HBLK                  TV5725_REG(0x00, 0x0A, 5, 1)
-#define TV5725_RO_STATUS_MISC_VSYNC                 TV5725_REG(0x00, 0x0A, 6, 1)
-#define TV5725_RO_STATUS_MISC_HSYNC                 TV5725_REG(0x00, 0x0A, 7, 1)
-#define TV5725_RO_CHIP_ID_00                        TV5725_REG(0x00, 0x0B, 0, 8)
-#define TV5725_RO_CHIP_ID_01                        TV5725_REG(0x00, 0x0C, 0, 8)
-#define TV5725_RO_CHIP_ID_02                        TV5725_REG(0x00, 0x0D, 0, 8)
-#define TV5725_RO_STATUS_GPIO_GPIO                  TV5725_REG(0x00, 0x0E, 0, 1)
-#define TV5725_RO_STATUS_GPIO_HALF                  TV5725_REG(0x00, 0x0E, 1, 1)
-#define TV5725_RO_STATUS_GPIO_SCLSA                 TV5725_REG(0x00, 0x0E, 2, 1)
-#define TV5725_RO_STATUS_GPIO_MBA                   TV5725_REG(0x00, 0x0E, 3, 1)
-#define TV5725_RO_STATUS_GPIO_MCS1                  TV5725_REG(0x00, 0x0E, 4, 1)
-#define TV5725_RO_STATUS_GPIO_HBOUT                 TV5725_REG(0x00, 0x0E, 5, 1)
-#define TV5725_RO_STATUS_GPIO_VBOUT                 TV5725_REG(0x00, 0x0E, 6, 1)
-#define TV5725_RO_STATUS_GPIO_CLKOUT                TV5725_REG(0x00, 0x0E, 7, 1)
-#define TV5725_RO_STATUS_INTERRUPT_00               TV5725_REG(0x00, 0x0F, 0, 8)
-#define TV5725_RO_STATUS_INT_SOG_BAD                TV5725_REG(0x00, 0x0F, 0, 1)
-#define TV5725_RO_STATUS_INT_SOG_SW                 TV5725_REG(0x00, 0x0F, 1, 1)
-#define TV5725_RO_STATUS_INT_SOG_OK                 TV5725_REG(0x00, 0x0F, 2, 1)
-#define TV5725_RO_STATUS_INT_INP_SW                 TV5725_REG(0x00, 0x0F, 3, 1)
-#define TV5725_RO_STATUS_INT_INP_NO_SYNC            TV5725_REG(0x00, 0x0F, 4, 1)
-#define TV5725_RO_STATUS_INT_INP_HSYNC              TV5725_REG(0x00, 0x0F, 5, 1)
-#define TV5725_RO_STATUS_INT_INP_VSYNC              TV5725_REG(0x00, 0x0F, 6, 1)
-#define TV5725_RO_STATUS_INT_INP_CSYNC              TV5725_REG(0x00, 0x0F, 7, 1)
-#define TV5725_RO_STATUS_VDS_FR_NUM                 TV5725_REG(0x00, 0x10, 0, 4)
-#define TV5725_RO_STATUS_VDS_OUT_VSYNC              TV5725_REG(0x00, 0x10, 4, 1)
-#define TV5725_RO_STATUS_VDS_OUT_HSYNC              TV5725_REG(0x00, 0x10, 5, 1)
-#define TV5725_RO_STATUS_VDS_FIELD                  TV5725_REG(0x00, 0x11, 0, 1)
-#define TV5725_RO_STATUS_VDS_OUT_BLANK              TV5725_REG(0x00, 0x11, 1, 1)
-#define TV5725_RO_STATUS_VDS_VERT_COUNT             TV5725_REG(0x00, 0x11, 4, 11)
-#define TV5725_RO_STATUS_MEM_FF_WFF_FIFO_FULL       TV5725_REG(0x00, 0x13, 0, 1)
-#define TV5725_RO_STATUS_MEM_FF_WFF_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 1, 1)
-#define TV5725_RO_STATUS_MEM_FF_RFF_FIFO_FULL       TV5725_REG(0x00, 0x13, 2, 1)
-#define TV5725_RO_STATUS_MEM_FF_RFF_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 3, 1)
-#define TV5725_RO_STATUS_MEM_FF_CAP_FIFO_FULL       TV5725_REG(0x00, 0x13, 4, 1)
-#define TV5725_RO_STATUS_MEM_FF_CAP_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 5, 1)
-#define TV5725_RO_STATUS_MEM_FF_PLY_FIFO_FULL       TV5725_REG(0x00, 0x13, 6, 1)
-#define TV5725_RO_STATUS_MEM_FF_PLY_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 7, 1)
-#define TV5725_RO_STATUS_MEM_FF_EXT_FIN             TV5725_REG(0x00, 0x14, 0, 1)
-#define TV5725_RO_STATUS_DEINT_PULLDN               TV5725_REG(0x00, 0x15, 7, 1)
-#define TV5725_RO_STATUS_SYNC_PROC_00               TV5725_REG(0x00, 0x16, 0, 8)
-#define TV5725_RO_STATUS_SYNC_PROC_HSPOL            TV5725_REG(0x00, 0x16, 0, 1)
-#define TV5725_RO_STATUS_SYNC_PROC_HSACT            TV5725_REG(0x00, 0x16, 1, 1)
-#define TV5725_RO_STATUS_SYNC_PROC_VSPOL            TV5725_REG(0x00, 0x16, 2, 1)
-#define TV5725_RO_STATUS_SYNC_PROC_VSACT            TV5725_REG(0x00, 0x16, 3, 1)
-#define TV5725_RO_STATUS_SYNC_PROC_HTOTAL           TV5725_REG(0x00, 0x17, 0, 12)
-#define TV5725_RO_STATUS_SYNC_PROC_HLOW_LEN         TV5725_REG(0x00, 0x19, 0, 12)
-#define TV5725_RO_STATUS_SYNC_PROC_VTOTAL           TV5725_REG(0x00, 0x1B, 0, 11)
-#define TV5725_RO_STATUS_TEST_BUS_00                TV5725_REG(0x00, 0x1F, 0, 8)
-#define TV5725_RO_STATUS_TEST_FF                    TV5725_REG(0x00, 0x20, 0, 16)
-#define TV5725_RO_STATUS_CRC_PB_00                  TV5725_REG(0x00, 0x23, 0, 8)
-#define TV5725_RO_STATUS_TEST_BUS_01                TV5725_REG(0x00, 0x2E, 0, 8)
-#define TV5725_RO_TEST_BUS                          TV5725_REG(0x00, 0x2E, 0, 16)
-#define TV5725_RO_STATUS_TEST_BUS_02                TV5725_REG(0x00, 0x2F, 0, 8)
-#define TV5725_RW_PLL_CKIS                          TV5725_REG(0x00, 0x40, 0, 1)
-#define TV5725_RW_PLL_DIVBY2Z                       TV5725_REG(0x00, 0x40, 1, 1)
-#define TV5725_RW_PLL_IS                            TV5725_REG(0x00, 0x40, 2, 1)
-#define TV5725_RW_PLL_ADS                           TV5725_REG(0x00, 0x40, 3, 1)
-#define TV5725_RW_PLL_MS                            TV5725_REG(0x00, 0x40, 4, 3)
-#define TV5725_RW_CONTROL_PLL648_01                 TV5725_REG(0x00, 0x41, 0, 8)
-#define TV5725_RW_CONTROL_PLL648_03                 TV5725_REG(0x00, 0x43, 0, 8)
-#define TV5725_RW_PLL_R                             TV5725_REG(0x00, 0x43, 0, 2)
-#define TV5725_RW_PLL_S                             TV5725_REG(0x00, 0x43, 2, 2)
-#define TV5725_RW_PLL_LEN                           TV5725_REG(0x00, 0x43, 4, 1)
-#define TV5725_RW_PLL_VCORST                        TV5725_REG(0x00, 0x43, 5, 1)
-#define TV5725_RW_DAC_RGBS_PWDNZ                    TV5725_REG(0x00, 0x44, 0, 1)
-#define TV5725_RW_DAC_RGBS_R0ENZ                    TV5725_REG(0x00, 0x44, 2, 1)
-#define TV5725_RW_DAC_RGBS_G0ENZ                    TV5725_REG(0x00, 0x44, 5, 1)
-#define TV5725_RW_DAC_RGBS_B0ENZ                    TV5725_REG(0x00, 0x45, 0, 1)
-#define TV5725_RW_DAC_RGBS_SPD                      TV5725_REG(0x00, 0x45, 2, 1)
-#define TV5725_RW_DAC_RGBS_S0ENZ                    TV5725_REG(0x00, 0x45, 3, 1)
-#define TV5725_RW_DAC_RGBS_S1EN                     TV5725_REG(0x00, 0x45, 4, 1)
-#define TV5725_RW_CONTROL_RESET_00                  TV5725_REG(0x00, 0x46, 0, 8)
-#define TV5725_RW_SFTRST_IF_RSTZ                    TV5725_REG(0x00, 0x46, 0, 1)
-#define TV5725_RW_SFTRST_DEINT_RSTZ                 TV5725_REG(0x00, 0x46, 1, 1)
-#define TV5725_RW_SFTRST_MEM_FF_RSTZ                TV5725_REG(0x00, 0x46, 2, 1)
-#define TV5725_RW_SFTRST_FIFO_RSTZ                  TV5725_REG(0x00, 0x46, 4, 1)
-#define TV5725_RW_SFTRST_VDS_RSTZ                   TV5725_REG(0x00, 0x46, 6, 1)
-#define TV5725_RW_CONTROL_RESET_01                  TV5725_REG(0x00, 0x47, 0, 8)
-#define TV5725_RW_SFTRST_DEC_RSTZ                   TV5725_REG(0x00, 0x47, 0, 1)
-#define TV5725_RW_SFTRST_MODE_RSTZ                  TV5725_REG(0x00, 0x47, 1, 1)
-#define TV5725_RW_SFTRST_SYNC_RSTZ                  TV5725_REG(0x00, 0x47, 2, 1)
-#define TV5725_RW_SFTRST_HDBYPS_RSTZ                TV5725_REG(0x00, 0x47, 3, 1)
-#define TV5725_RW_SFTRST_INT_RSTZ                   TV5725_REG(0x00, 0x47, 4, 1)
-#define TV5725_RW_CONTROL_PAD_00                    TV5725_REG(0x00, 0x48, 0, 8)
-#define TV5725_RW_PAD_BOUT_EN                       TV5725_REG(0x00, 0x48, 0, 1)
-#define TV5725_RW_PAD_SYNC1_IN_ENZ                  TV5725_REG(0x00, 0x48, 6, 1)
-#define TV5725_RW_PAD_SYNC2_IN_ENZ                  TV5725_REG(0x00, 0x48, 7, 1)
-#define TV5725_RW_CONTROL_PAD_01                    TV5725_REG(0x00, 0x49, 0, 8)
-#define TV5725_RW_PAD_CKIN_ENZ                      TV5725_REG(0x00, 0x49, 0, 1)
-#define TV5725_RW_PAD_CKOUT_ENZ                     TV5725_REG(0x00, 0x49, 1, 1)
-#define TV5725_RW_PAD_SYNC_OUT_ENZ                  TV5725_REG(0x00, 0x49, 2, 1)
-#define TV5725_RW_PAD_BLK_OUT_ENZ                   TV5725_REG(0x00, 0x49, 3, 1)
-#define TV5725_RW_PAD_TRI_ENZ                       TV5725_REG(0x00, 0x49, 4, 1)
-#define TV5725_RW_PAD_OSC_CNTRL                     TV5725_REG(0x00, 0x4A, 0, 3)
-#define TV5725_RW_DAC_RGBS_BYPS2DAC                 TV5725_REG(0x00, 0x4B, 1, 1)
-#define TV5725_RW_DAC_RGBS_ADC2DAC                  TV5725_REG(0x00, 0x4B, 2, 1)
-#define TV5725_RW_TEST_BUS_SEL                      TV5725_REG(0x00, 0x4D, 0, 5)
-#define TV5725_RW_TEST_BUS_EN                       TV5725_REG(0x00, 0x4D, 5, 1)
-#define TV5725_RW_OUT_SYNC_CNTRL                    TV5725_REG(0x00, 0x4F, 5, 1)
-#define TV5725_RW_OUT_SYNC_SEL                      TV5725_REG(0x00, 0x4F, 6, 2)
-#define TV5725_RW_CONTROL_GPIO_00                   TV5725_REG(0x00, 0x52, 0, 8)
-#define TV5725_RW_CONTROL_GPIO_01                   TV5725_REG(0x00, 0x53, 0, 8)
-#define TV5725_RW_CONTROL_INTERRUPT_00              TV5725_REG(0x00, 0x58, 0, 8)
-#define TV5725_RW_CONTROL_INT_RST_SOGBAD            TV5725_REG(0x00, 0x58, 0, 1)
-#define TV5725_RW_CONTROL_INT_RST_SOGSWITCH         TV5725_REG(0x00, 0x58, 1, 1)
-#define TV5725_RW_CONTROL_INT_RST_NOHSYNC           TV5725_REG(0x00, 0x58, 4, 1)
-#define TV5725_RW_CONTROL_INTERRUPT_01              TV5725_REG(0x00, 0x59, 0, 8)
-#define TV5725_RW_OSD_SW_RESET                      TV5725_REG(0x00, 0x90, 0, 1)
-#define TV5725_RW_OSD_HORIZONTAL_ZOOM               TV5725_REG(0x00, 0x90, 1, 3)
-#define TV5725_RW_OSD_VERTICAL_ZOOM                 TV5725_REG(0x00, 0x90, 4, 2)
-#define TV5725_RW_OSD_DISP_EN                       TV5725_REG(0x00, 0x90, 6, 1)
-#define TV5725_RW_OSD_MENU_EN                       TV5725_REG(0x00, 0x90, 7, 1)
-#define TV5725_RW_OSD_MENU_ICON_SEL                 TV5725_REG(0x00, 0x91, 0, 4)
-#define TV5725_RW_OSD_MENU_MOD_SEL                  TV5725_REG(0x00, 0x91, 4, 4)
-#define TV5725_RW_OSD_MENU_BAR_FONT_FORCOR          TV5725_REG(0x00, 0x92, 0, 3)
-#define TV5725_RW_OSD_MENU_BAR_FONT_BGCOR           TV5725_REG(0x00, 0x92, 3, 3)
-#define TV5725_RW_OSD_MENU_BAR_BORD_COR             TV5725_REG(0x00, 0x92, 6, 3)
-#define TV5725_RW_OSD_MENU_SEL_FORCOR               TV5725_REG(0x00, 0x93, 1, 3)
-#define TV5725_RW_OSD_MENU_SEL_BGCOR                TV5725_REG(0x00, 0x93, 4, 3)
-#define TV5725_RW_OSD_COMMAND_FINISH                TV5725_REG(0x00, 0x93, 7, 1)
-#define TV5725_RW_OSD_MENU_DISP_STYLE               TV5725_REG(0x00, 0x94, 0, 1)
-#define TV5725_RW_OSD_YCBCR_RGB_FORMAT              TV5725_REG(0x00, 0x94, 2, 1)
-#define TV5725_RW_OSD_INT_NG_LAT                    TV5725_REG(0x00, 0x94, 3, 1)
-#define TV5725_RW_OSD_TEST_SEL                      TV5725_REG(0x00, 0x94, 4, 4)
-#define TV5725_RW_OSD_REG_05                        TV5725_REG(0x00, 0x95, 0, 8)
-#define TV5725_RW_OSD_REG_06                        TV5725_REG(0x00, 0x96, 0, 8)
-#define TV5725_RW_OSD_REG_07                        TV5725_REG(0x00, 0x97, 0, 8)
-#define TV5725_RW_OSD_REG_08                        TV5725_REG(0x00, 0x98, 0, 8)
+#define TV5725_RO_STATUS_INPUT_MODE_00              TV5725_REG(0x00, 0x00, 0, 8)  /* 输入格式器状态: 模式 00 */
+#define TV5725_RO_STATUS_IF_VT_OK                   TV5725_REG(0x00, 0x00, 0, 1)  /* 输入格式器状态: 垂直 正常 */
+#define TV5725_RO_STATUS_IF_HT_OK                   TV5725_REG(0x00, 0x00, 1, 1)  /* 输入格式器状态: 水平 正常 */
+#define TV5725_RO_STATUS_IF_HVT_OK                  TV5725_REG(0x00, 0x00, 2, 1)  /* 输入格式器状态: 水平垂直 正常 */
+#define TV5725_RO_STATUS_IF_INP_NTSC_INT            TV5725_REG(0x00, 0x00, 3, 1)  /* 输入格式器状态: 输入 NTSC INT */
+#define TV5725_RO_STATUS_IF_INP_NTSC_PRG            TV5725_REG(0x00, 0x00, 4, 1)  /* 输入格式器状态: 输入 NTSC PRG */
+#define TV5725_RO_STATUS_IF_INP_PAL_INT             TV5725_REG(0x00, 0x00, 5, 1)  /* 输入格式器状态: 输入 PAL INT */
+#define TV5725_RO_STATUS_IF_INP_PAL_PRG             TV5725_REG(0x00, 0x00, 6, 1)  /* 输入格式器状态: 输入 PAL PRG */
+#define TV5725_RO_STATUS_IF_INP_SD                  TV5725_REG(0x00, 0x00, 7, 1)  /* 输入格式器状态: 输入 标清 */
+#define TV5725_RO_STATUS_INPUT_MODE_01              TV5725_REG(0x00, 0x01, 0, 8)  /* 输入格式器状态: 模式 01 */
+#define TV5725_RO_STATUS_IF_INP_VGA60               TV5725_REG(0x00, 0x01, 0, 1)  /* 输入格式器状态: 输入 VGA60 */
+#define TV5725_RO_STATUS_IF_INP_VGA75               TV5725_REG(0x00, 0x01, 1, 1)  /* 输入格式器状态: 输入 VGA75 */
+#define TV5725_RO_STATUS_IF_INP_VGA86               TV5725_REG(0x00, 0x01, 2, 1)  /* 输入格式器状态: 输入 VGA86 */
+#define TV5725_RO_STATUS_IF_INP_VGA                 TV5725_REG(0x00, 0x01, 3, 1)  /* 输入格式器状态: 输入 VGA */
+#define TV5725_RO_STATUS_IF_INP_SVGA60              TV5725_REG(0x00, 0x01, 4, 1)  /* 输入格式器状态: 输入 SVGA60 */
+#define TV5725_RO_STATUS_IF_INP_SVGA75              TV5725_REG(0x00, 0x01, 5, 1)  /* 输入格式器状态: 输入 SVGA75 */
+#define TV5725_RO_STATUS_IF_INP_SVGA85              TV5725_REG(0x00, 0x01, 6, 1)  /* 输入格式器状态: 输入 SVGA85 */
+#define TV5725_RO_STATUS_IF_INP_SVGA                TV5725_REG(0x00, 0x01, 7, 1)  /* 输入格式器状态: 输入 SVGA */
+#define TV5725_RO_STATUS_INPUT_MODE_02              TV5725_REG(0x00, 0x02, 0, 8)  /* 输入格式器状态: 模式 02 */
+#define TV5725_RO_STATUS_IF_INP_XGA60               TV5725_REG(0x00, 0x02, 0, 1)  /* 输入格式器状态: 输入 XGA60 */
+#define TV5725_RO_STATUS_IF_INP_XGA70               TV5725_REG(0x00, 0x02, 1, 1)  /* 输入格式器状态: 输入 XGA70 */
+#define TV5725_RO_STATUS_IF_INP_XGA75               TV5725_REG(0x00, 0x02, 2, 1)  /* 输入格式器状态: 输入 XGA75 */
+#define TV5725_RO_STATUS_IF_INP_XGA85               TV5725_REG(0x00, 0x02, 3, 1)  /* 输入格式器状态: 输入 XGA85 */
+#define TV5725_RO_STATUS_IF_INP_XGA                 TV5725_REG(0x00, 0x02, 4, 1)  /* 输入格式器状态: 输入 XGA */
+#define TV5725_RO_STATUS_IF_INP_SXGA60              TV5725_REG(0x00, 0x02, 5, 1)  /* 输入格式器状态: 输入 SXGA60 */
+#define TV5725_RO_STATUS_IF_INP_SXGA75              TV5725_REG(0x00, 0x02, 6, 1)  /* 输入格式器状态: 输入 SXGA75 */
+#define TV5725_RO_STATUS_IF_INP_SXGA85              TV5725_REG(0x00, 0x02, 7, 1)  /* 输入格式器状态: 输入 SXGA85 */
+#define TV5725_RO_STATUS_INPUT_MODE_03              TV5725_REG(0x00, 0x03, 0, 8)  /* 输入格式器状态: 模式 03 */
+#define TV5725_RO_STATUS_IF_INP_SXGA                TV5725_REG(0x00, 0x03, 0, 1)  /* 输入格式器状态: 输入 SXGA */
+#define TV5725_RO_STATUS_IF_INP_PC                  TV5725_REG(0x00, 0x03, 1, 1)  /* 输入格式器状态: 输入 PC */
+#define TV5725_RO_STATUS_IF_INP_720P50              TV5725_REG(0x00, 0x03, 2, 1)  /* 输入格式器状态: 输入 720P50 */
+#define TV5725_RO_STATUS_IF_INP_720P60              TV5725_REG(0x00, 0x03, 3, 1)  /* 输入格式器状态: 输入 720P60 */
+#define TV5725_RO_STATUS_IF_INP_720                 TV5725_REG(0x00, 0x03, 4, 1)  /* 输入格式器状态: 输入 720 */
+#define TV5725_RO_STATUS_IF_INP_2200_1125I          TV5725_REG(0x00, 0x03, 5, 1)  /* 输入格式器状态: 输入 2200 1125I */
+#define TV5725_RO_STATUS_IF_INP_2376_1250I          TV5725_REG(0x00, 0x03, 6, 1)  /* 输入格式器状态: 输入 2376 1250I */
+#define TV5725_RO_STATUS_IF_INP_2640_1125I          TV5725_REG(0x00, 0x03, 7, 1)  /* 输入格式器状态: 输入 2640 1125I */
+#define TV5725_RO_STATUS_INPUT_MODE_04              TV5725_REG(0x00, 0x04, 0, 8)  /* 输入格式器状态: 模式 04 */
+#define TV5725_RO_STATUS_IF_INP_1080I               TV5725_REG(0x00, 0x04, 0, 1)  /* 输入格式器状态: 输入 1080I */
+#define TV5725_RO_STATUS_IF_INP_2200_1125P          TV5725_REG(0x00, 0x04, 1, 1)  /* 输入格式器状态: 输入 2200 1125P */
+#define TV5725_RO_STATUS_IF_INP_2376_1250P          TV5725_REG(0x00, 0x04, 2, 1)  /* 输入格式器状态: 输入 2376 1250P */
+#define TV5725_RO_STATUS_IF_INP_2640_1125P          TV5725_REG(0x00, 0x04, 3, 1)  /* 输入格式器状态: 输入 2640 1125P */
+#define TV5725_RO_STATUS_IF_INP_1808P               TV5725_REG(0x00, 0x04, 4, 1)  /* 输入格式器状态: 输入 1808P */
+#define TV5725_RO_STATUS_IF_INP_HD                  TV5725_REG(0x00, 0x04, 5, 1)  /* 输入格式器状态: 输入 高清 */
+#define TV5725_RO_STATUS_IF_INP_INT                 TV5725_REG(0x00, 0x04, 6, 1)  /* 输入格式器状态: 输入 INT */
+#define TV5725_RO_INTERLACE_PROGRESSIVE_RECOGNIZE   TV5725_REG(0x00, 0x04, 6, 2)  /* INTERLACE: PROGRESSIVE RECOGNIZE */
+#define TV5725_RO_STATUS_IF_INP_PRG                 TV5725_REG(0x00, 0x04, 7, 1)  /* 输入格式器状态: 输入 PRG */
+#define TV5725_RO_STATUS_INPUT_MODE_05              TV5725_REG(0x00, 0x05, 0, 8)  /* 输入格式器状态: 模式 05 */
+#define TV5725_RO_STATUS_IF_INP_USER                TV5725_REG(0x00, 0x05, 0, 1)  /* 输入格式器状态: 输入 USER */
+#define TV5725_RO_STATUS_IF_NO_SYNC                 TV5725_REG(0x00, 0x05, 1, 1)  /* 输入格式器状态: NO SYNC */
+#define TV5725_RO_STATUS_IF_HT_BAD                  TV5725_REG(0x00, 0x05, 2, 1)  /* 输入格式器状态: 水平 异常 */
+#define TV5725_RO_STATUS_IF_VT_BAD                  TV5725_REG(0x00, 0x05, 3, 1)  /* 输入格式器状态: 垂直 异常 */
+#define TV5725_RO_STATUS_IF_INP_SW                  TV5725_REG(0x00, 0x05, 4, 1)  /* 输入格式器状态: 输入 SW */
+#define TV5725_RO_STATUS_INPUT_SIZE_00              TV5725_REG(0x00, 0x06, 0, 8)  /* 输入格式器状态: 尺寸 00 */
+#define TV5725_RO_HPERIOD_IF                        TV5725_REG(0x00, 0x06, 0, 9)  /* HPERIOD: 输入格式器 */
+#define TV5725_RO_STATUS_INPUT_SIZE_01              TV5725_REG(0x00, 0x07, 0, 8)  /* 输入格式器状态: 尺寸 01 */
+#define TV5725_RO_H_TOTAL_HIGH                      TV5725_REG(0x00, 0x07, 0, 1)  /* H: 总计 高 */
+#define TV5725_RO_V_TOTAL_LOW                       TV5725_REG(0x00, 0x07, 1, 7)  /* V: 总计 低 */
+#define TV5725_RO_VPERIOD_IF                        TV5725_REG(0x00, 0x07, 1, 11)  /* VPERIOD: 输入格式器 */
+#define TV5725_RO_STATUS_INPUT_SIZE_02              TV5725_REG(0x00, 0x08, 0, 8)  /* 输入格式器状态: 尺寸 02 */
+#define TV5725_RO_V_TOTAL_HIGH                      TV5725_REG(0x00, 0x08, 0, 4)  /* V: 总计 高 */
+#define TV5725_RO_STATUS_MISC_PLL648_LOCK           TV5725_REG(0x00, 0x09, 6, 1)  /* MISC状态: PLL648 锁定 */
+#define TV5725_RO_STATUS_MISC_PLLAD_LOCK            TV5725_REG(0x00, 0x09, 7, 1)  /* MISC状态: PLLAD 锁定 */
+#define TV5725_RO_STATUS_MISC_01                    TV5725_REG(0x00, 0x0A, 0, 8)  /* MISC状态: 01 */
+#define TV5725_RO_STATUS_MISC_PIP_EN_V              TV5725_REG(0x00, 0x0A, 0, 1)  /* MISC状态: PIP 使能 V */
+#define TV5725_RO_STATUS_MISC_PIP_EN_H              TV5725_REG(0x00, 0x0A, 1, 1)  /* MISC状态: PIP 使能 H */
+#define TV5725_RO_STATUS_MISC_VBLK                  TV5725_REG(0x00, 0x0A, 4, 1)  /* MISC状态: VBLK */
+#define TV5725_RO_STATUS_MISC_HBLK                  TV5725_REG(0x00, 0x0A, 5, 1)  /* MISC状态: HBLK */
+#define TV5725_RO_STATUS_MISC_VSYNC                 TV5725_REG(0x00, 0x0A, 6, 1)  /* MISC状态: 场同步 */
+#define TV5725_RO_STATUS_MISC_HSYNC                 TV5725_REG(0x00, 0x0A, 7, 1)  /* MISC状态: 行同步 */
+#define TV5725_RO_CHIP_ID_00                        TV5725_REG(0x00, 0x0B, 0, 8)  /* 芯片: ID 00 */
+#define TV5725_RO_CHIP_ID_01                        TV5725_REG(0x00, 0x0C, 0, 8)  /* 芯片: ID 01 */
+#define TV5725_RO_CHIP_ID_02                        TV5725_REG(0x00, 0x0D, 0, 8)  /* 芯片: ID 02 */
+#define TV5725_RO_STATUS_GPIO_GPIO                  TV5725_REG(0x00, 0x0E, 0, 1)  /* GPIO状态: GPIO */
+#define TV5725_RO_STATUS_GPIO_HALF                  TV5725_REG(0x00, 0x0E, 1, 1)  /* GPIO状态: 半 */
+#define TV5725_RO_STATUS_GPIO_SCLSA                 TV5725_REG(0x00, 0x0E, 2, 1)  /* GPIO状态: SCLSA */
+#define TV5725_RO_STATUS_GPIO_MBA                   TV5725_REG(0x00, 0x0E, 3, 1)  /* GPIO状态: MBA */
+#define TV5725_RO_STATUS_GPIO_MCS1                  TV5725_REG(0x00, 0x0E, 4, 1)  /* GPIO状态: MCS1 */
+#define TV5725_RO_STATUS_GPIO_HBOUT                 TV5725_REG(0x00, 0x0E, 5, 1)  /* GPIO状态: HBOUT */
+#define TV5725_RO_STATUS_GPIO_VBOUT                 TV5725_REG(0x00, 0x0E, 6, 1)  /* GPIO状态: VBOUT */
+#define TV5725_RO_STATUS_GPIO_CLKOUT                TV5725_REG(0x00, 0x0E, 7, 1)  /* GPIO状态: CLKOUT */
+#define TV5725_RO_STATUS_INTERRUPT_00               TV5725_REG(0x00, 0x0F, 0, 8)  /* 中断状态: 00 */
+#define TV5725_RO_STATUS_INT_SOG_BAD                TV5725_REG(0x00, 0x0F, 0, 1)  /* 中断状态: 绿同步 异常 */
+#define TV5725_RO_STATUS_INT_SOG_SW                 TV5725_REG(0x00, 0x0F, 1, 1)  /* 中断状态: 绿同步 SW */
+#define TV5725_RO_STATUS_INT_SOG_OK                 TV5725_REG(0x00, 0x0F, 2, 1)  /* 中断状态: 绿同步 正常 */
+#define TV5725_RO_STATUS_INT_INP_SW                 TV5725_REG(0x00, 0x0F, 3, 1)  /* 中断状态: 输入 SW */
+#define TV5725_RO_STATUS_INT_INP_NO_SYNC            TV5725_REG(0x00, 0x0F, 4, 1)  /* 中断状态: 输入 NO SYNC */
+#define TV5725_RO_STATUS_INT_INP_HSYNC              TV5725_REG(0x00, 0x0F, 5, 1)  /* 中断状态: 输入 行同步 */
+#define TV5725_RO_STATUS_INT_INP_VSYNC              TV5725_REG(0x00, 0x0F, 6, 1)  /* 中断状态: 输入 场同步 */
+#define TV5725_RO_STATUS_INT_INP_CSYNC              TV5725_REG(0x00, 0x0F, 7, 1)  /* 中断状态: 输入 复合同步 */
+#define TV5725_RO_STATUS_VDS_FR_NUM                 TV5725_REG(0x00, 0x10, 0, 4)  /* VDS状态: FR 数量 */
+#define TV5725_RO_STATUS_VDS_OUT_VSYNC              TV5725_REG(0x00, 0x10, 4, 1)  /* VDS状态: 输出 场同步 */
+#define TV5725_RO_STATUS_VDS_OUT_HSYNC              TV5725_REG(0x00, 0x10, 5, 1)  /* VDS状态: 输出 行同步 */
+#define TV5725_RO_STATUS_VDS_FIELD                  TV5725_REG(0x00, 0x11, 0, 1)  /* VDS状态: 场 */
+#define TV5725_RO_STATUS_VDS_OUT_BLANK              TV5725_REG(0x00, 0x11, 1, 1)  /* VDS状态: 输出 BLANK */
+#define TV5725_RO_STATUS_VDS_VERT_COUNT             TV5725_REG(0x00, 0x11, 4, 11)  /* VDS状态: VERT COUNT */
+#define TV5725_RO_STATUS_MEM_FF_WFF_FIFO_FULL       TV5725_REG(0x00, 0x13, 0, 1)  /* 存储器状态: FIFO WFF FIFO 满 */
+#define TV5725_RO_STATUS_MEM_FF_WFF_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 1, 1)  /* 存储器状态: FIFO WFF FIFO 空 */
+#define TV5725_RO_STATUS_MEM_FF_RFF_FIFO_FULL       TV5725_REG(0x00, 0x13, 2, 1)  /* 存储器状态: FIFO RFF FIFO 满 */
+#define TV5725_RO_STATUS_MEM_FF_RFF_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 3, 1)  /* 存储器状态: FIFO RFF FIFO 空 */
+#define TV5725_RO_STATUS_MEM_FF_CAP_FIFO_FULL       TV5725_REG(0x00, 0x13, 4, 1)  /* 存储器状态: FIFO CAP FIFO 满 */
+#define TV5725_RO_STATUS_MEM_FF_CAP_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 5, 1)  /* 存储器状态: FIFO CAP FIFO 空 */
+#define TV5725_RO_STATUS_MEM_FF_PLY_FIFO_FULL       TV5725_REG(0x00, 0x13, 6, 1)  /* 存储器状态: FIFO PLY FIFO 满 */
+#define TV5725_RO_STATUS_MEM_FF_PLY_FIFO_EMPTY      TV5725_REG(0x00, 0x13, 7, 1)  /* 存储器状态: FIFO PLY FIFO 空 */
+#define TV5725_RO_STATUS_MEM_FF_EXT_FIN             TV5725_REG(0x00, 0x14, 0, 1)  /* 存储器状态: FIFO EXT FIN */
+#define TV5725_RO_STATUS_DEINT_PULLDN               TV5725_REG(0x00, 0x15, 7, 1)  /* DEINT状态: PULLDN */
+#define TV5725_RO_STATUS_SYNC_PROC_00               TV5725_REG(0x00, 0x16, 0, 8)  /* 同步状态: PROC 00 */
+#define TV5725_RO_STATUS_SYNC_PROC_HSPOL            TV5725_REG(0x00, 0x16, 0, 1)  /* 同步状态: PROC HSPOL */
+#define TV5725_RO_STATUS_SYNC_PROC_HSACT            TV5725_REG(0x00, 0x16, 1, 1)  /* 同步状态: PROC HSACT */
+#define TV5725_RO_STATUS_SYNC_PROC_VSPOL            TV5725_REG(0x00, 0x16, 2, 1)  /* 同步状态: PROC VSPOL */
+#define TV5725_RO_STATUS_SYNC_PROC_VSACT            TV5725_REG(0x00, 0x16, 3, 1)  /* 同步状态: PROC VSACT */
+#define TV5725_RO_STATUS_SYNC_PROC_HTOTAL           TV5725_REG(0x00, 0x17, 0, 12)  /* 同步状态: PROC HTOTAL */
+#define TV5725_RO_STATUS_SYNC_PROC_HLOW_LEN         TV5725_REG(0x00, 0x19, 0, 12)  /* 同步状态: PROC HLOW 长度 */
+#define TV5725_RO_STATUS_SYNC_PROC_VTOTAL           TV5725_REG(0x00, 0x1B, 0, 11)  /* 同步状态: PROC VTOTAL */
+#define TV5725_RO_STATUS_TEST_BUS_00                TV5725_REG(0x00, 0x1F, 0, 8)  /* 测试状态: 总线 00 */
+#define TV5725_RO_STATUS_TEST_FF                    TV5725_REG(0x00, 0x20, 0, 16)  /* 测试状态: FIFO */
+#define TV5725_RO_STATUS_CRC_PB_00                  TV5725_REG(0x00, 0x23, 0, 8)  /* CRC状态: PB 00 */
+#define TV5725_RO_STATUS_TEST_BUS_01                TV5725_REG(0x00, 0x2E, 0, 8)  /* 测试状态: 总线 01 */
+#define TV5725_RO_TEST_BUS                          TV5725_REG(0x00, 0x2E, 0, 16)  /* 测试: 总线 */
+#define TV5725_RO_STATUS_TEST_BUS_02                TV5725_REG(0x00, 0x2F, 0, 8)  /* 测试状态: 总线 02 */
+#define TV5725_RW_PLL_CKIS                          TV5725_REG(0x00, 0x40, 0, 1)  /* PLL: CKIS */
+#define TV5725_RW_PLL_DIVBY2Z                       TV5725_REG(0x00, 0x40, 1, 1)  /* PLL: DIVBY2Z */
+#define TV5725_RW_PLL_IS                            TV5725_REG(0x00, 0x40, 2, 1)  /* PLL: IS */
+#define TV5725_RW_PLL_ADS                           TV5725_REG(0x00, 0x40, 3, 1)  /* PLL: ADS */
+#define TV5725_RW_PLL_MS                            TV5725_REG(0x00, 0x40, 4, 3)  /* PLL: MS */
+#define TV5725_RW_CONTROL_PLL648_01                 TV5725_REG(0x00, 0x41, 0, 8)  /* PLL648控制: 01 */
+#define TV5725_RW_CONTROL_PLL648_03                 TV5725_REG(0x00, 0x43, 0, 8)  /* PLL648控制: 03 */
+#define TV5725_RW_PLL_R                             TV5725_REG(0x00, 0x43, 0, 2)  /* PLL: R */
+#define TV5725_RW_PLL_S                             TV5725_REG(0x00, 0x43, 2, 2)  /* PLL: S */
+#define TV5725_RW_PLL_LEN                           TV5725_REG(0x00, 0x43, 4, 1)  /* PLL: 长度 */
+#define TV5725_RW_PLL_VCORST                        TV5725_REG(0x00, 0x43, 5, 1)  /* PLL: VCO复位 */
+#define TV5725_RW_DAC_RGBS_PWDNZ                    TV5725_REG(0x00, 0x44, 0, 1)  /* DAC: RGBS 掉电(低有效) */
+#define TV5725_RW_DAC_RGBS_R0ENZ                    TV5725_REG(0x00, 0x44, 2, 1)  /* DAC: RGBS R0ENZ */
+#define TV5725_RW_DAC_RGBS_G0ENZ                    TV5725_REG(0x00, 0x44, 5, 1)  /* DAC: RGBS G0ENZ */
+#define TV5725_RW_DAC_RGBS_B0ENZ                    TV5725_REG(0x00, 0x45, 0, 1)  /* DAC: RGBS B0ENZ */
+#define TV5725_RW_DAC_RGBS_SPD                      TV5725_REG(0x00, 0x45, 2, 1)  /* DAC: RGBS SPD */
+#define TV5725_RW_DAC_RGBS_S0ENZ                    TV5725_REG(0x00, 0x45, 3, 1)  /* DAC: RGBS S0ENZ */
+#define TV5725_RW_DAC_RGBS_S1EN                     TV5725_REG(0x00, 0x45, 4, 1)  /* DAC: RGBS S1EN */
+#define TV5725_RW_CONTROL_RESET_00                  TV5725_REG(0x00, 0x46, 0, 8)  /* 复位控制: 00 */
+#define TV5725_RW_SFTRST_IF_RSTZ                    TV5725_REG(0x00, 0x46, 0, 1)  /* 软复位: 输入格式器 复位(低有效) */
+#define TV5725_RW_SFTRST_DEINT_RSTZ                 TV5725_REG(0x00, 0x46, 1, 1)  /* 软复位: DEINT 复位(低有效) */
+#define TV5725_RW_SFTRST_MEM_FF_RSTZ                TV5725_REG(0x00, 0x46, 2, 1)  /* 软复位: 存储器 FIFO 复位(低有效) */
+#define TV5725_RW_SFTRST_FIFO_RSTZ                  TV5725_REG(0x00, 0x46, 4, 1)  /* 软复位: FIFO 复位(低有效) */
+#define TV5725_RW_SFTRST_VDS_RSTZ                   TV5725_REG(0x00, 0x46, 6, 1)  /* 软复位: VDS 复位(低有效) */
+#define TV5725_RW_CONTROL_RESET_01                  TV5725_REG(0x00, 0x47, 0, 8)  /* 复位控制: 01 */
+#define TV5725_RW_SFTRST_DEC_RSTZ                   TV5725_REG(0x00, 0x47, 0, 1)  /* 软复位: 解码器 复位(低有效) */
+#define TV5725_RW_SFTRST_MODE_RSTZ                  TV5725_REG(0x00, 0x47, 1, 1)  /* 软复位: 模式 复位(低有效) */
+#define TV5725_RW_SFTRST_SYNC_RSTZ                  TV5725_REG(0x00, 0x47, 2, 1)  /* 软复位: 同步 复位(低有效) */
+#define TV5725_RW_SFTRST_HDBYPS_RSTZ                TV5725_REG(0x00, 0x47, 3, 1)  /* 软复位: HDBYPS 复位(低有效) */
+#define TV5725_RW_SFTRST_INT_RSTZ                   TV5725_REG(0x00, 0x47, 4, 1)  /* 软复位: 中断 复位(低有效) */
+#define TV5725_RW_CONTROL_PAD_00                    TV5725_REG(0x00, 0x48, 0, 8)  /* 引脚控制: 00 */
+#define TV5725_RW_PAD_BOUT_EN                       TV5725_REG(0x00, 0x48, 0, 1)  /* 引脚: B输出 使能 */
+#define TV5725_RW_PAD_SYNC1_IN_ENZ                  TV5725_REG(0x00, 0x48, 6, 1)  /* 引脚: SYNC1 输入 使能(低有效) */
+#define TV5725_RW_PAD_SYNC2_IN_ENZ                  TV5725_REG(0x00, 0x48, 7, 1)  /* 引脚: SYNC2 输入 使能(低有效) */
+#define TV5725_RW_CONTROL_PAD_01                    TV5725_REG(0x00, 0x49, 0, 8)  /* 引脚控制: 01 */
+#define TV5725_RW_PAD_CKIN_ENZ                      TV5725_REG(0x00, 0x49, 0, 1)  /* 引脚: 时钟输入 使能(低有效) */
+#define TV5725_RW_PAD_CKOUT_ENZ                     TV5725_REG(0x00, 0x49, 1, 1)  /* 引脚: 时钟输出 使能(低有效) */
+#define TV5725_RW_PAD_SYNC_OUT_ENZ                  TV5725_REG(0x00, 0x49, 2, 1)  /* 引脚: 同步 输出 使能(低有效) */
+#define TV5725_RW_PAD_BLK_OUT_ENZ                   TV5725_REG(0x00, 0x49, 3, 1)  /* 引脚: 消隐 输出 使能(低有效) */
+#define TV5725_RW_PAD_TRI_ENZ                       TV5725_REG(0x00, 0x49, 4, 1)  /* 引脚: 三态 使能(低有效) */
+#define TV5725_RW_PAD_OSC_CNTRL                     TV5725_REG(0x00, 0x4A, 0, 3)  /* 引脚: 振荡器 控制 */
+#define TV5725_RW_DAC_RGBS_BYPS2DAC                 TV5725_REG(0x00, 0x4B, 1, 1)  /* DAC: RGBS BYPS2DAC */
+#define TV5725_RW_DAC_RGBS_ADC2DAC                  TV5725_REG(0x00, 0x4B, 2, 1)  /* DAC: RGBS ADC2DAC */
+#define TV5725_RW_TEST_BUS_SEL                      TV5725_REG(0x00, 0x4D, 0, 5)  /* 测试: 总线 选择 */
+#define TV5725_RW_TEST_BUS_EN                       TV5725_REG(0x00, 0x4D, 5, 1)  /* 测试: 总线 使能 */
+#define TV5725_RW_OUT_SYNC_CNTRL                    TV5725_REG(0x00, 0x4F, 5, 1)  /* OUT: 同步 控制 */
+#define TV5725_RW_OUT_SYNC_SEL                      TV5725_REG(0x00, 0x4F, 6, 2)  /* OUT: 同步 选择 */
+#define TV5725_RW_CONTROL_GPIO_00                   TV5725_REG(0x00, 0x52, 0, 8)  /* GPIO控制: 00 */
+#define TV5725_RW_CONTROL_GPIO_01                   TV5725_REG(0x00, 0x53, 0, 8)  /* GPIO控制: 01 */
+#define TV5725_RW_CONTROL_INTERRUPT_00              TV5725_REG(0x00, 0x58, 0, 8)  /* 中断控制: 00 */
+#define TV5725_RW_CONTROL_INT_RST_SOGBAD            TV5725_REG(0x00, 0x58, 0, 1)  /* 中断控制: 复位 SOGBAD */
+#define TV5725_RW_CONTROL_INT_RST_SOGSWITCH         TV5725_REG(0x00, 0x58, 1, 1)  /* 中断控制: 复位 SOGSWITCH */
+#define TV5725_RW_CONTROL_INT_RST_NOHSYNC           TV5725_REG(0x00, 0x58, 4, 1)  /* 中断控制: 复位 NOHSYNC */
+#define TV5725_RW_CONTROL_INTERRUPT_01              TV5725_REG(0x00, 0x59, 0, 8)  /* 中断控制: 01 */
+#define TV5725_RW_OSD_SW_RESET                      TV5725_REG(0x00, 0x90, 0, 1)  /* OSD: SW 复位 */
+#define TV5725_RW_OSD_HORIZONTAL_ZOOM               TV5725_REG(0x00, 0x90, 1, 3)  /* OSD: HORIZONTAL 缩放 */
+#define TV5725_RW_OSD_VERTICAL_ZOOM                 TV5725_REG(0x00, 0x90, 4, 2)  /* OSD: VERTICAL 缩放 */
+#define TV5725_RW_OSD_DISP_EN                       TV5725_REG(0x00, 0x90, 6, 1)  /* OSD: 显示 使能 */
+#define TV5725_RW_OSD_MENU_EN                       TV5725_REG(0x00, 0x90, 7, 1)  /* OSD: MENU 使能 */
+#define TV5725_RW_OSD_MENU_ICON_SEL                 TV5725_REG(0x00, 0x91, 0, 4)  /* OSD: MENU 图标 选择 */
+#define TV5725_RW_OSD_MENU_MOD_SEL                  TV5725_REG(0x00, 0x91, 4, 4)  /* OSD: MENU MOD 选择 */
+#define TV5725_RW_OSD_MENU_BAR_FONT_FORCOR          TV5725_REG(0x00, 0x92, 0, 3)  /* OSD: MENU BAR 字体 前景色 */
+#define TV5725_RW_OSD_MENU_BAR_FONT_BGCOR           TV5725_REG(0x00, 0x92, 3, 3)  /* OSD: MENU BAR 字体 背景色 */
+#define TV5725_RW_OSD_MENU_BAR_BORD_COR             TV5725_REG(0x00, 0x92, 6, 3)  /* OSD: MENU BAR 边框 COR */
+#define TV5725_RW_OSD_MENU_SEL_FORCOR               TV5725_REG(0x00, 0x93, 1, 3)  /* OSD: MENU 选择 前景色 */
+#define TV5725_RW_OSD_MENU_SEL_BGCOR                TV5725_REG(0x00, 0x93, 4, 3)  /* OSD: MENU 选择 背景色 */
+#define TV5725_RW_OSD_COMMAND_FINISH                TV5725_REG(0x00, 0x93, 7, 1)  /* OSD: 命令 完成 */
+#define TV5725_RW_OSD_MENU_DISP_STYLE               TV5725_REG(0x00, 0x94, 0, 1)  /* OSD: MENU 显示 样式 */
+#define TV5725_RW_OSD_YCBCR_RGB_FORMAT              TV5725_REG(0x00, 0x94, 2, 1)  /* OSD: YCBCR RGB FORMAT */
+#define TV5725_RW_OSD_INT_NG_LAT                    TV5725_REG(0x00, 0x94, 3, 1)  /* OSD: 中断 NG 锁存 */
+#define TV5725_RW_OSD_TEST_SEL                      TV5725_REG(0x00, 0x94, 4, 4)  /* OSD: 测试 选择 */
+#define TV5725_RW_OSD_REG_05                        TV5725_REG(0x00, 0x95, 0, 8)  /* OSD: 寄存器 05 */
+#define TV5725_RW_OSD_REG_06                        TV5725_REG(0x00, 0x96, 0, 8)  /* OSD: 寄存器 06 */
+#define TV5725_RW_OSD_REG_07                        TV5725_REG(0x00, 0x97, 0, 8)  /* OSD: 寄存器 07 */
+#define TV5725_RW_OSD_REG_08                        TV5725_REG(0x00, 0x98, 0, 8)  /* OSD: 寄存器 08 */
 
 /* ================================================================
    Segment 0x01: INPUT_FORMATTER / HD_BYPS / MODE_DET
    ================================================================ */
 
-#define TV5725_RW_IF_IN_DREG_BYPS                   TV5725_REG(0x01, 0x00, 0, 1)
-#define TV5725_RW_IF_MATRIX_BYPS                    TV5725_REG(0x01, 0x00, 1, 1)
-#define TV5725_RW_IF_UV_REVERT                      TV5725_REG(0x01, 0x00, 2, 1)
-#define TV5725_RW_IF_SEL_656                        TV5725_REG(0x01, 0x00, 3, 1)
-#define TV5725_RW_IF_SEL16BIT                       TV5725_REG(0x01, 0x00, 4, 1)
-#define TV5725_RW_IF_VS_SEL                         TV5725_REG(0x01, 0x00, 5, 1)
-#define TV5725_RW_IF_PRGRSV_CNTRL                   TV5725_REG(0x01, 0x00, 6, 1)
-#define TV5725_RW_IF_HS_FLIP                        TV5725_REG(0x01, 0x00, 7, 1)
-#define TV5725_RW_IF_VS_FLIP                        TV5725_REG(0x01, 0x01, 0, 1)
-#define TV5725_RW_IF_SEL24BIT                       TV5725_REG(0x01, 0x01, 7, 1)
-#define TV5725_RW_INPUT_FORMATTER_02                TV5725_REG(0x01, 0x02, 0, 8)
-#define TV5725_RW_IF_SEL_WEN                        TV5725_REG(0x01, 0x02, 0, 1)
-#define TV5725_RW_IF_HS_SEL_LPF                     TV5725_REG(0x01, 0x02, 1, 1)
-#define TV5725_RW_IF_HS_INT_LPF_BYPS                TV5725_REG(0x01, 0x02, 2, 1)
-#define TV5725_RW_IF_HS_PSHIFT_BYPS                 TV5725_REG(0x01, 0x02, 3, 1)
-#define TV5725_RW_IF_HS_TAP11_BYPS                  TV5725_REG(0x01, 0x02, 4, 1)
-#define TV5725_RW_IF_HS_Y_PDELAY                    TV5725_REG(0x01, 0x02, 5, 2)
-#define TV5725_RW_IF_HS_DEC_FACTOR                  TV5725_REG(0x01, 0x0B, 4, 2)
-#define TV5725_RW_IF_SEL_HSCALE                     TV5725_REG(0x01, 0x0B, 6, 1)
-#define TV5725_RW_IF_LD_SEL_PROV                    TV5725_REG(0x01, 0x0B, 7, 1)
-#define TV5725_RW_IF_LD_RAM_BYPS                    TV5725_REG(0x01, 0x0C, 0, 1)
-#define TV5725_RW_IF_LD_ST                          TV5725_REG(0x01, 0x0C, 1, 4)
-#define TV5725_RW_IF_INI_ST                         TV5725_REG(0x01, 0x0C, 5, 11)
-#define TV5725_RW_IF_HSYNC_RST                      TV5725_REG(0x01, 0x0E, 0, 11)
-#define TV5725_RW_IF_HB_ST                          TV5725_REG(0x01, 0x10, 0, 11)
-#define TV5725_RW_IF_HB_SP                          TV5725_REG(0x01, 0x12, 0, 11)
-#define TV5725_RW_IF_HB_SP1                         TV5725_REG(0x01, 0x16, 0, 11)
-#define TV5725_RW_IF_HB_ST2                         TV5725_REG(0x01, 0x18, 0, 11)
-#define TV5725_RW_IF_HB_SP2                         TV5725_REG(0x01, 0x1A, 0, 11)
-#define TV5725_RW_IF_VB_ST                          TV5725_REG(0x01, 0x1C, 0, 11)
-#define TV5725_RW_IF_VB_SP                          TV5725_REG(0x01, 0x1E, 0, 11)
-#define TV5725_RW_IF_LINE_ST                        TV5725_REG(0x01, 0x20, 0, 12)
-#define TV5725_RW_IF_LINE_SP                        TV5725_REG(0x01, 0x22, 0, 12)
-#define TV5725_RW_IF_HBIN_ST                        TV5725_REG(0x01, 0x24, 0, 12)
-#define TV5725_RW_IF_HBIN_SP                        TV5725_REG(0x01, 0x26, 0, 12)
-#define TV5725_RW_IF_LD_WRST_SEL                    TV5725_REG(0x01, 0x28, 1, 1)
-#define TV5725_RW_IF_SEL_ADC_SYNC                   TV5725_REG(0x01, 0x28, 2, 1)
-#define TV5725_RW_IF_TEST_EN                        TV5725_REG(0x01, 0x28, 3, 1)
-#define TV5725_RW_IF_TEST_SEL                       TV5725_REG(0x01, 0x28, 4, 4)
-#define TV5725_RW_IF_AUTO_OFST_EN                   TV5725_REG(0x01, 0x29, 0, 1)
-#define TV5725_RW_IF_AUTO_OFST_PRD                  TV5725_REG(0x01, 0x29, 1, 1)
-#define TV5725_RW_IF_AUTO_OFST_U_RANGE              TV5725_REG(0x01, 0x2A, 0, 4)
-#define TV5725_RW_IF_AUTO_OFST_V_RANGE              TV5725_REG(0x01, 0x2A, 4, 4)
-#define TV5725_RW_GBS_PRESET_ID                     TV5725_REG(0x01, 0x2B, 0, 7)
-#define TV5725_RW_GBS_PRESET_CUSTOM                 TV5725_REG(0x01, 0x2B, 7, 1)
-#define TV5725_RW_GBS_OPTION_SCANLINES_ENABLED      TV5725_REG(0x01, 0x2C, 0, 1)
-#define TV5725_RW_GBS_OPTION_SCALING_RGBHV          TV5725_REG(0x01, 0x2C, 1, 1)
-#define TV5725_RW_GBS_OPTION_PALFORCED60_ENABLED    TV5725_REG(0x01, 0x2C, 2, 1)
-#define TV5725_RW_GBS_RUNTIME_UNUSED_BIT            TV5725_REG(0x01, 0x2C, 3, 1)
-#define TV5725_RW_GBS_RUNTIME_FTL_ADJUSTED          TV5725_REG(0x01, 0x2C, 4, 1)
-#define TV5725_RW_GBS_PRESET_DISPLAY_CLOCK          TV5725_REG(0x01, 0x2D, 0, 8)
-#define TV5725_RW_HD_MATRIX_BYPS                    TV5725_REG(0x01, 0x30, 1, 1)
-#define TV5725_RW_HD_DYN_BYPS                       TV5725_REG(0x01, 0x30, 2, 1)
-#define TV5725_RW_HD_SEL_BLK_IN                     TV5725_REG(0x01, 0x30, 3, 1)
-#define TV5725_RW_HD_BYPS_02                        TV5725_REG(0x01, 0x32, 0, 8)
-#define TV5725_RW_HD_BYPS_04                        TV5725_REG(0x01, 0x34, 0, 8)
-#define TV5725_RW_HD_BYPS_06                        TV5725_REG(0x01, 0x36, 0, 8)
-#define TV5725_RW_HD_HSYNC_RST                      TV5725_REG(0x01, 0x37, 0, 11)
-#define TV5725_RW_HD_INI_ST                         TV5725_REG(0x01, 0x39, 0, 11)
-#define TV5725_RW_HD_HB_ST                          TV5725_REG(0x01, 0x3B, 0, 12)
-#define TV5725_RW_HD_HB_SP                          TV5725_REG(0x01, 0x3D, 0, 12)
-#define TV5725_RW_HD_HS_ST                          TV5725_REG(0x01, 0x3F, 0, 12)
-#define TV5725_RW_HD_HS_SP                          TV5725_REG(0x01, 0x41, 0, 12)
-#define TV5725_RW_HD_VB_ST                          TV5725_REG(0x01, 0x43, 0, 12)
-#define TV5725_RW_HD_VB_SP                          TV5725_REG(0x01, 0x45, 0, 12)
-#define TV5725_RW_HD_VS_ST                          TV5725_REG(0x01, 0x47, 0, 12)
-#define TV5725_RW_HD_VS_SP                          TV5725_REG(0x01, 0x49, 0, 12)
-#define TV5725_RW_HD_BYPS_23                        TV5725_REG(0x01, 0x53, 0, 8)
-#define TV5725_RW_HD_BYPS_24                        TV5725_REG(0x01, 0x54, 0, 8)
-#define TV5725_RW_HD_BYPS_25                        TV5725_REG(0x01, 0x55, 0, 8)
-#define TV5725_RW_MD_HPERIOD_LOCK_VALUE             TV5725_REG(0x01, 0x60, 0, 5)
-#define TV5725_RW_MD_HPERIOD_UNLOCK_VALUE           TV5725_REG(0x01, 0x60, 5, 3)
-#define TV5725_RW_MD_VPERIOD_LOCK_VALUE             TV5725_REG(0x01, 0x61, 0, 5)
-#define TV5725_RW_MD_VPERIOD_UNLOCK_VALUE           TV5725_REG(0x01, 0x61, 5, 3)
-#define TV5725_RW_MD_HS_FLIP                        TV5725_REG(0x01, 0x63, 6, 1)
-#define TV5725_RW_MD_VS_FLIP                        TV5725_REG(0x01, 0x63, 7, 1)
-#define TV5725_RW_MD_VGA_CNTRL                      TV5725_REG(0x01, 0x65, 0, 7)
-#define TV5725_RW_MD_SEL_VGA60                      TV5725_REG(0x01, 0x65, 7, 1)
-#define TV5725_RW_MODE_DET_06                       TV5725_REG(0x01, 0x66, 0, 8)
-#define TV5725_RW_MODE_DET_07                       TV5725_REG(0x01, 0x67, 0, 8)
-#define TV5725_RW_MODE_DET_0A                       TV5725_REG(0x01, 0x6A, 0, 8)
-#define TV5725_RW_MODE_DET_0B                       TV5725_REG(0x01, 0x6B, 0, 8)
-#define TV5725_RW_MODE_DET_0C                       TV5725_REG(0x01, 0x6C, 0, 8)
-#define TV5725_RW_MODE_DET_0E                       TV5725_REG(0x01, 0x6E, 0, 8)
-#define TV5725_RW_MD_XGA_70HZ_CNTRL                 TV5725_REG(0x01, 0x6F, 0, 7)
-#define TV5725_RW_MD_XGA_75HZ_CNTRL                 TV5725_REG(0x01, 0x70, 0, 7)
-#define TV5725_RW_MD_XGA_85HZ_CNTRL                 TV5725_REG(0x01, 0x71, 0, 7)
-#define TV5725_RW_MD_SXGA_60HZ_CNTRL                TV5725_REG(0x01, 0x73, 0, 7)
-#define TV5725_RW_MD_SXGA_75HZ_CNTRL                TV5725_REG(0x01, 0x74, 0, 7)
-#define TV5725_RW_MD_SXGA_85HZ_CNTRL                TV5725_REG(0x01, 0x75, 0, 7)
-#define TV5725_RW_MD_HD1250P_CNTRL                  TV5725_REG(0x01, 0x7F, 0, 7)
+#define TV5725_RW_IF_IN_DREG_BYPS                   TV5725_REG(0x01, 0x00, 0, 1)  /* 输入格式器: 输入 数据寄存器 旁路 */
+#define TV5725_RW_IF_MATRIX_BYPS                    TV5725_REG(0x01, 0x00, 1, 1)  /* 输入格式器: 矩阵 旁路 */
+#define TV5725_RW_IF_UV_REVERT                      TV5725_REG(0x01, 0x00, 2, 1)  /* 输入格式器: UV 反转 */
+#define TV5725_RW_IF_SEL_656                        TV5725_REG(0x01, 0x00, 3, 1)  /* 输入格式器: 选择 656 */
+#define TV5725_RW_IF_SEL16BIT                       TV5725_REG(0x01, 0x00, 4, 1)  /* 输入格式器: SEL16BIT */
+#define TV5725_RW_IF_VS_SEL                         TV5725_REG(0x01, 0x00, 5, 1)  /* 输入格式器: 场同步 选择 */
+#define TV5725_RW_IF_PRGRSV_CNTRL                   TV5725_REG(0x01, 0x00, 6, 1)  /* 输入格式器: PRGRSV 控制 */
+#define TV5725_RW_IF_HS_FLIP                        TV5725_REG(0x01, 0x00, 7, 1)  /* 输入格式器: 行同步 翻转 */
+#define TV5725_RW_IF_VS_FLIP                        TV5725_REG(0x01, 0x01, 0, 1)  /* 输入格式器: 场同步 翻转 */
+#define TV5725_RW_IF_SEL24BIT                       TV5725_REG(0x01, 0x01, 7, 1)  /* 输入格式器: SEL24BIT */
+#define TV5725_RW_INPUT_FORMATTER_02                TV5725_REG(0x01, 0x02, 0, 8)  /* 输入格式器: 格式器 02 */
+#define TV5725_RW_IF_SEL_WEN                        TV5725_REG(0x01, 0x02, 0, 1)  /* 输入格式器: 选择 WEN */
+#define TV5725_RW_IF_HS_SEL_LPF                     TV5725_REG(0x01, 0x02, 1, 1)  /* 输入格式器: 行同步 选择 低通滤波 */
+#define TV5725_RW_IF_HS_INT_LPF_BYPS                TV5725_REG(0x01, 0x02, 2, 1)  /* 输入格式器: 行同步 中断 低通滤波 旁路 */
+#define TV5725_RW_IF_HS_PSHIFT_BYPS                 TV5725_REG(0x01, 0x02, 3, 1)  /* 输入格式器: 行同步 PSHIFT 旁路 */
+#define TV5725_RW_IF_HS_TAP11_BYPS                  TV5725_REG(0x01, 0x02, 4, 1)  /* 输入格式器: 行同步 TAP11 旁路 */
+#define TV5725_RW_IF_HS_Y_PDELAY                    TV5725_REG(0x01, 0x02, 5, 2)  /* 输入格式器: 行同步 Y PDELAY */
+#define TV5725_RW_IF_HS_DEC_FACTOR                  TV5725_REG(0x01, 0x0B, 4, 2)  /* 输入格式器: 行同步 解码器 因子 */
+#define TV5725_RW_IF_SEL_HSCALE                     TV5725_REG(0x01, 0x0B, 6, 1)  /* 输入格式器: 选择 水平缩放 */
+#define TV5725_RW_IF_LD_SEL_PROV                    TV5725_REG(0x01, 0x0B, 7, 1)  /* 输入格式器: 加载 选择 progressive */
+#define TV5725_RW_IF_LD_RAM_BYPS                    TV5725_REG(0x01, 0x0C, 0, 1)  /* 输入格式器: 加载 RAM 旁路 */
+#define TV5725_RW_IF_LD_ST                          TV5725_REG(0x01, 0x0C, 1, 4)  /* 输入格式器: 加载 起始 */
+#define TV5725_RW_IF_INI_ST                         TV5725_REG(0x01, 0x0C, 5, 11)  /* 输入格式器: 初始 起始 */
+#define TV5725_RW_IF_HSYNC_RST                      TV5725_REG(0x01, 0x0E, 0, 11)  /* 输入格式器: 行同步 复位 */
+#define TV5725_RW_IF_HB_ST                          TV5725_REG(0x01, 0x10, 0, 11)  /* 输入格式器: 行消隐 起始 */
+#define TV5725_RW_IF_HB_SP                          TV5725_REG(0x01, 0x12, 0, 11)  /* 输入格式器: 行消隐 结束 */
+#define TV5725_RW_IF_HB_SP1                         TV5725_REG(0x01, 0x16, 0, 11)  /* 输入格式器: 行消隐 SP1 */
+#define TV5725_RW_IF_HB_ST2                         TV5725_REG(0x01, 0x18, 0, 11)  /* 输入格式器: 行消隐 ST2 */
+#define TV5725_RW_IF_HB_SP2                         TV5725_REG(0x01, 0x1A, 0, 11)  /* 输入格式器: 行消隐 SP2 */
+#define TV5725_RW_IF_VB_ST                          TV5725_REG(0x01, 0x1C, 0, 11)  /* 输入格式器: 场消隐 起始 */
+#define TV5725_RW_IF_VB_SP                          TV5725_REG(0x01, 0x1E, 0, 11)  /* 输入格式器: 场消隐 结束 */
+#define TV5725_RW_IF_LINE_ST                        TV5725_REG(0x01, 0x20, 0, 12)  /* 输入格式器: 行 起始 */
+#define TV5725_RW_IF_LINE_SP                        TV5725_REG(0x01, 0x22, 0, 12)  /* 输入格式器: 行 结束 */
+#define TV5725_RW_IF_HBIN_ST                        TV5725_REG(0x01, 0x24, 0, 12)  /* 输入格式器: HBIN 起始 */
+#define TV5725_RW_IF_HBIN_SP                        TV5725_REG(0x01, 0x26, 0, 12)  /* 输入格式器: HBIN 结束 */
+#define TV5725_RW_IF_LD_WRST_SEL                    TV5725_REG(0x01, 0x28, 1, 1)  /* 输入格式器: 加载 WRST 选择 */
+#define TV5725_RW_IF_SEL_ADC_SYNC                   TV5725_REG(0x01, 0x28, 2, 1)  /* 输入格式器: 选择 ADC 同步 */
+#define TV5725_RW_IF_TEST_EN                        TV5725_REG(0x01, 0x28, 3, 1)  /* 输入格式器: 测试 使能 */
+#define TV5725_RW_IF_TEST_SEL                       TV5725_REG(0x01, 0x28, 4, 4)  /* 输入格式器: 测试 选择 */
+#define TV5725_RW_IF_AUTO_OFST_EN                   TV5725_REG(0x01, 0x29, 0, 1)  /* 输入格式器: 自动 偏移 使能 */
+#define TV5725_RW_IF_AUTO_OFST_PRD                  TV5725_REG(0x01, 0x29, 1, 1)  /* 输入格式器: 自动 偏移 PRD */
+#define TV5725_RW_IF_AUTO_OFST_U_RANGE              TV5725_REG(0x01, 0x2A, 0, 4)  /* 输入格式器: 自动 偏移 U 范围 */
+#define TV5725_RW_IF_AUTO_OFST_V_RANGE              TV5725_REG(0x01, 0x2A, 4, 4)  /* 输入格式器: 自动 偏移 V 范围 */
+#define TV5725_RW_GBS_PRESET_ID                     TV5725_REG(0x01, 0x2B, 0, 7)  /* GBS: PRESET ID */
+#define TV5725_RW_GBS_PRESET_CUSTOM                 TV5725_REG(0x01, 0x2B, 7, 1)  /* GBS: PRESET CUSTOM */
+#define TV5725_RW_GBS_OPTION_SCANLINES_ENABLED      TV5725_REG(0x01, 0x2C, 0, 1)  /* GBS: OPTION SCANLINES ENABLED */
+#define TV5725_RW_GBS_OPTION_SCALING_RGBHV          TV5725_REG(0x01, 0x2C, 1, 1)  /* GBS: OPTION SCALING RGBHV */
+#define TV5725_RW_GBS_OPTION_PALFORCED60_ENABLED    TV5725_REG(0x01, 0x2C, 2, 1)  /* GBS: OPTION PALFORCED60 ENABLED */
+#define TV5725_RW_GBS_RUNTIME_UNUSED_BIT            TV5725_REG(0x01, 0x2C, 3, 1)  /* GBS: RUNTIME 未使用 BIT */
+#define TV5725_RW_GBS_RUNTIME_FTL_ADJUSTED          TV5725_REG(0x01, 0x2C, 4, 1)  /* GBS: RUNTIME FTL ADJUSTED */
+#define TV5725_RW_GBS_PRESET_DISPLAY_CLOCK          TV5725_REG(0x01, 0x2D, 0, 8)  /* GBS: PRESET DISPLAY CLOCK */
+#define TV5725_RW_HD_MATRIX_BYPS                    TV5725_REG(0x01, 0x30, 1, 1)  /* 高清旁路: 矩阵 旁路 */
+#define TV5725_RW_HD_DYN_BYPS                       TV5725_REG(0x01, 0x30, 2, 1)  /* 高清旁路: DYN 旁路 */
+#define TV5725_RW_HD_SEL_BLK_IN                     TV5725_REG(0x01, 0x30, 3, 1)  /* 高清旁路: 选择 消隐 输入 */
+#define TV5725_RW_HD_BYPS_02                        TV5725_REG(0x01, 0x32, 0, 8)  /* 高清旁路: 旁路 02 */
+#define TV5725_RW_HD_BYPS_04                        TV5725_REG(0x01, 0x34, 0, 8)  /* 高清旁路: 旁路 04 */
+#define TV5725_RW_HD_BYPS_06                        TV5725_REG(0x01, 0x36, 0, 8)  /* 高清旁路: 旁路 06 */
+#define TV5725_RW_HD_HSYNC_RST                      TV5725_REG(0x01, 0x37, 0, 11)  /* 高清旁路: 行同步 复位 */
+#define TV5725_RW_HD_INI_ST                         TV5725_REG(0x01, 0x39, 0, 11)  /* 高清旁路: 初始 起始 */
+#define TV5725_RW_HD_HB_ST                          TV5725_REG(0x01, 0x3B, 0, 12)  /* 高清旁路: 行消隐 起始 */
+#define TV5725_RW_HD_HB_SP                          TV5725_REG(0x01, 0x3D, 0, 12)  /* 高清旁路: 行消隐 结束 */
+#define TV5725_RW_HD_HS_ST                          TV5725_REG(0x01, 0x3F, 0, 12)  /* 高清旁路: 行同步 起始 */
+#define TV5725_RW_HD_HS_SP                          TV5725_REG(0x01, 0x41, 0, 12)  /* 高清旁路: 行同步 结束 */
+#define TV5725_RW_HD_VB_ST                          TV5725_REG(0x01, 0x43, 0, 12)  /* 高清旁路: 场消隐 起始 */
+#define TV5725_RW_HD_VB_SP                          TV5725_REG(0x01, 0x45, 0, 12)  /* 高清旁路: 场消隐 结束 */
+#define TV5725_RW_HD_VS_ST                          TV5725_REG(0x01, 0x47, 0, 12)  /* 高清旁路: 场同步 起始 */
+#define TV5725_RW_HD_VS_SP                          TV5725_REG(0x01, 0x49, 0, 12)  /* 高清旁路: 场同步 结束 */
+#define TV5725_RW_HD_BYPS_23                        TV5725_REG(0x01, 0x53, 0, 8)  /* 高清旁路: 旁路 23 */
+#define TV5725_RW_HD_BYPS_24                        TV5725_REG(0x01, 0x54, 0, 8)  /* 高清旁路: 旁路 24 */
+#define TV5725_RW_HD_BYPS_25                        TV5725_REG(0x01, 0x55, 0, 8)  /* 高清旁路: 旁路 25 */
+#define TV5725_RW_MD_HPERIOD_LOCK_VALUE             TV5725_REG(0x01, 0x60, 0, 5)  /* 模式检测: HPERIOD 锁定 值 */
+#define TV5725_RW_MD_HPERIOD_UNLOCK_VALUE           TV5725_REG(0x01, 0x60, 5, 3)  /* 模式检测: HPERIOD UNLOCK 值 */
+#define TV5725_RW_MD_VPERIOD_LOCK_VALUE             TV5725_REG(0x01, 0x61, 0, 5)  /* 模式检测: VPERIOD 锁定 值 */
+#define TV5725_RW_MD_VPERIOD_UNLOCK_VALUE           TV5725_REG(0x01, 0x61, 5, 3)  /* 模式检测: VPERIOD UNLOCK 值 */
+#define TV5725_RW_MD_HS_FLIP                        TV5725_REG(0x01, 0x63, 6, 1)  /* 模式检测: 行同步 翻转 */
+#define TV5725_RW_MD_VS_FLIP                        TV5725_REG(0x01, 0x63, 7, 1)  /* 模式检测: 场同步 翻转 */
+#define TV5725_RW_MD_VGA_CNTRL                      TV5725_REG(0x01, 0x65, 0, 7)  /* 模式检测: VGA 控制 */
+#define TV5725_RW_MD_SEL_VGA60                      TV5725_REG(0x01, 0x65, 7, 1)  /* 模式检测: 选择 VGA60 */
+#define TV5725_RW_MODE_DET_06                       TV5725_REG(0x01, 0x66, 0, 8)  /* MODE: 检测 06 */
+#define TV5725_RW_MODE_DET_07                       TV5725_REG(0x01, 0x67, 0, 8)  /* MODE: 检测 07 */
+#define TV5725_RW_MODE_DET_0A                       TV5725_REG(0x01, 0x6A, 0, 8)  /* MODE: 检测 0A */
+#define TV5725_RW_MODE_DET_0B                       TV5725_REG(0x01, 0x6B, 0, 8)  /* MODE: 检测 0B */
+#define TV5725_RW_MODE_DET_0C                       TV5725_REG(0x01, 0x6C, 0, 8)  /* MODE: 检测 0C */
+#define TV5725_RW_MODE_DET_0E                       TV5725_REG(0x01, 0x6E, 0, 8)  /* MODE: 检测 0E */
+#define TV5725_RW_MD_XGA_70HZ_CNTRL                 TV5725_REG(0x01, 0x6F, 0, 7)  /* 模式检测: XGA 70HZ 控制 */
+#define TV5725_RW_MD_XGA_75HZ_CNTRL                 TV5725_REG(0x01, 0x70, 0, 7)  /* 模式检测: XGA 75HZ 控制 */
+#define TV5725_RW_MD_XGA_85HZ_CNTRL                 TV5725_REG(0x01, 0x71, 0, 7)  /* 模式检测: XGA 85HZ 控制 */
+#define TV5725_RW_MD_SXGA_60HZ_CNTRL                TV5725_REG(0x01, 0x73, 0, 7)  /* 模式检测: SXGA 60HZ 控制 */
+#define TV5725_RW_MD_SXGA_75HZ_CNTRL                TV5725_REG(0x01, 0x74, 0, 7)  /* 模式检测: SXGA 75HZ 控制 */
+#define TV5725_RW_MD_SXGA_85HZ_CNTRL                TV5725_REG(0x01, 0x75, 0, 7)  /* 模式检测: SXGA 85HZ 控制 */
+#define TV5725_RW_MD_HD1250P_CNTRL                  TV5725_REG(0x01, 0x7F, 0, 7)  /* 模式检测: HD1250P 控制 */
 
 /* ================================================================
    Segment 0x02: DEINTERLACER
    ================================================================ */
 
-#define TV5725_RW_DEINTERLACER_00                   TV5725_REG(0x02, 0x00, 0, 8)
-#define TV5725_RW_DIAG_BOB_PLDY_RAM_BYPS            TV5725_REG(0x02, 0x00, 7, 1)
-#define TV5725_RW_MADPT_Y_VSCALE_BYPS               TV5725_REG(0x02, 0x02, 6, 1)
-#define TV5725_RW_MADPT_UV_VSCALE_BYPS              TV5725_REG(0x02, 0x02, 7, 1)
-#define TV5725_RW_MADPT_STILL_NOISE_EST_EN          TV5725_REG(0x02, 0x0A, 5, 1)
-#define TV5725_RW_MADPT_Y_MI_DET_BYPS               TV5725_REG(0x02, 0x0A, 7, 1)
-#define TV5725_RW_MADPT_Y_MI_OFFSET                 TV5725_REG(0x02, 0x0B, 0, 7)
-#define TV5725_RW_MADPT_MI_1BIT_BYPS                TV5725_REG(0x02, 0x0C, 4, 1)
-#define TV5725_RW_MADPT_MI_1BIT_FRAME2_EN           TV5725_REG(0x02, 0x0C, 5, 1)
-#define TV5725_RW_MADPT_MO_ADP_UV_EN                TV5725_REG(0x02, 0x16, 5, 1)
-#define TV5725_RW_MADPT_VT_FILTER_CNTRL             TV5725_REG(0x02, 0x16, 6, 1)
-#define TV5725_RW_MAPDT_VT_SEL_PRGV                 TV5725_REG(0x02, 0x16, 7, 1)
-#define TV5725_RW_DEINTERLACER_17                   TV5725_REG(0x02, 0x17, 0, 8)
-#define TV5725_RW_MADPT_Y_DELAY                     TV5725_REG(0x02, 0x17, 0, 4)
-#define TV5725_RW_MADPT_UV_DELAY                    TV5725_REG(0x02, 0x17, 4, 4)
-#define TV5725_RW_MADPT_HTAP_BYPS                   TV5725_REG(0x02, 0x18, 3, 1)
-#define TV5725_RW_MADPT_BIT_STILL_EN                TV5725_REG(0x02, 0x19, 0, 1)
-#define TV5725_RW_MADPT_VTAP2_BYPS                  TV5725_REG(0x02, 0x19, 2, 1)
-#define TV5725_RW_MADPT_VTAP2_ROUND_SEL             TV5725_REG(0x02, 0x19, 3, 1)
-#define TV5725_RW_MADPT_VTAP2_COEFF                 TV5725_REG(0x02, 0x19, 4, 4)
-#define TV5725_RW_MADPT_EN_NOUT_FOR_STILL           TV5725_REG(0x02, 0x21, 4, 1)
-#define TV5725_RW_MADPT_EN_NOUT_FOR_LESS_STILL      TV5725_REG(0x02, 0x21, 5, 1)
-#define TV5725_RW_MADPT_PD_RAM_BYPS                 TV5725_REG(0x02, 0x24, 2, 1)
-#define TV5725_RW_MADPT_VIIR_BYPS                   TV5725_REG(0x02, 0x26, 6, 1)
-#define TV5725_RW_MADPT_VIIR_COEF                   TV5725_REG(0x02, 0x27, 0, 7)
-#define TV5725_RW_MADPT_VSCALE_DEC_FACTOR           TV5725_REG(0x02, 0x31, 0, 2)
-#define TV5725_RW_MADPT_SEL_PHASE_INI               TV5725_REG(0x02, 0x31, 2, 1)
-#define TV5725_RW_MADPT_DD0_SEL                     TV5725_REG(0x02, 0x35, 3, 1)
-#define TV5725_RW_MADPT_NRD_VIIR_PD_BYPS            TV5725_REG(0x02, 0x35, 4, 1)
-#define TV5725_RW_MADPT_UVDLY_PD_BYPS               TV5725_REG(0x02, 0x35, 5, 1)
-#define TV5725_RW_MADPT_CMP_EN                      TV5725_REG(0x02, 0x35, 6, 1)
-#define TV5725_RW_MADPT_UVDLY_PD_SP                 TV5725_REG(0x02, 0x39, 0, 4)
-#define TV5725_RW_MADPT_UVDLY_PD_ST                 TV5725_REG(0x02, 0x39, 4, 4)
-#define TV5725_RW_MADPT_EN_UV_DEINT                 TV5725_REG(0x02, 0x3A, 0, 1)
-#define TV5725_RW_MADPT_EN_STILL_FOR_NRD            TV5725_REG(0x02, 0x3A, 3, 1)
-#define TV5725_RW_MADPT_MI_1BIT_DLY                 TV5725_REG(0x02, 0x3A, 5, 2)
-#define TV5725_RW_MADPT_UV_MI_DET_BYPS              TV5725_REG(0x02, 0x3A, 7, 1)
-#define TV5725_RW_MADPT_UV_MI_OFFSET                TV5725_REG(0x02, 0x3B, 0, 7)
+#define TV5725_RW_DEINTERLACER_00                   TV5725_REG(0x02, 0x00, 0, 8)  /* 去交错寄存器 00 */
+#define TV5725_RW_DIAG_BOB_PLDY_RAM_BYPS            TV5725_REG(0x02, 0x00, 7, 1)  /* 诊断: BOB PLDY RAM 旁路 */
+#define TV5725_RW_MADPT_Y_VSCALE_BYPS               TV5725_REG(0x02, 0x02, 6, 1)  /* 运动自适应去交错: Y 垂直缩放 旁路 */
+#define TV5725_RW_MADPT_UV_VSCALE_BYPS              TV5725_REG(0x02, 0x02, 7, 1)  /* 运动自适应去交错: UV 垂直缩放 旁路 */
+#define TV5725_RW_MADPT_STILL_NOISE_EST_EN          TV5725_REG(0x02, 0x0A, 5, 1)  /* 运动自适应去交错: 静止 噪声 估计 使能 */
+#define TV5725_RW_MADPT_Y_MI_DET_BYPS               TV5725_REG(0x02, 0x0A, 7, 1)  /* 运动自适应去交错: Y MI 检测 旁路 */
+#define TV5725_RW_MADPT_Y_MI_OFFSET                 TV5725_REG(0x02, 0x0B, 0, 7)  /* 运动自适应去交错: Y MI 偏移 */
+#define TV5725_RW_MADPT_MI_1BIT_BYPS                TV5725_REG(0x02, 0x0C, 4, 1)  /* 运动自适应去交错: MI 1BIT 旁路 */
+#define TV5725_RW_MADPT_MI_1BIT_FRAME2_EN           TV5725_REG(0x02, 0x0C, 5, 1)  /* 运动自适应去交错: MI 1BIT FRAME2 使能 */
+#define TV5725_RW_MADPT_MO_ADP_UV_EN                TV5725_REG(0x02, 0x16, 5, 1)  /* 运动自适应去交错: MO ADP UV 使能 */
+#define TV5725_RW_MADPT_VT_FILTER_CNTRL             TV5725_REG(0x02, 0x16, 6, 1)  /* 运动自适应去交错: 垂直 滤波 控制 */
+#define TV5725_RW_MAPDT_VT_SEL_PRGV                 TV5725_REG(0x02, 0x16, 7, 1)  /* 运动自适应去交错: 垂直 选择 PRGV */
+#define TV5725_RW_DEINTERLACER_17                   TV5725_REG(0x02, 0x17, 0, 8)  /* 去交错寄存器 17 */
+#define TV5725_RW_MADPT_Y_DELAY                     TV5725_REG(0x02, 0x17, 0, 4)  /* 运动自适应去交错: Y 延迟 */
+#define TV5725_RW_MADPT_UV_DELAY                    TV5725_REG(0x02, 0x17, 4, 4)  /* 运动自适应去交错: UV 延迟 */
+#define TV5725_RW_MADPT_HTAP_BYPS                   TV5725_REG(0x02, 0x18, 3, 1)  /* 运动自适应去交错: HTAP 旁路 */
+#define TV5725_RW_MADPT_BIT_STILL_EN                TV5725_REG(0x02, 0x19, 0, 1)  /* 运动自适应去交错: BIT 静止 使能 */
+#define TV5725_RW_MADPT_VTAP2_BYPS                  TV5725_REG(0x02, 0x19, 2, 1)  /* 运动自适应去交错: VTAP2 旁路 */
+#define TV5725_RW_MADPT_VTAP2_ROUND_SEL             TV5725_REG(0x02, 0x19, 3, 1)  /* 运动自适应去交错: VTAP2 舍入 选择 */
+#define TV5725_RW_MADPT_VTAP2_COEFF                 TV5725_REG(0x02, 0x19, 4, 4)  /* 运动自适应去交错: VTAP2 系数 */
+#define TV5725_RW_MADPT_EN_NOUT_FOR_STILL           TV5725_REG(0x02, 0x21, 4, 1)  /* 运动自适应去交错: 使能 NOUT FOR 静止 */
+#define TV5725_RW_MADPT_EN_NOUT_FOR_LESS_STILL      TV5725_REG(0x02, 0x21, 5, 1)  /* 运动自适应去交错: 使能 NOUT FOR LESS 静止 */
+#define TV5725_RW_MADPT_PD_RAM_BYPS                 TV5725_REG(0x02, 0x24, 2, 1)  /* 运动自适应去交错: PD RAM 旁路 */
+#define TV5725_RW_MADPT_VIIR_BYPS                   TV5725_REG(0x02, 0x26, 6, 1)  /* 运动自适应去交错: VIIR 旁路 */
+#define TV5725_RW_MADPT_VIIR_COEF                   TV5725_REG(0x02, 0x27, 0, 7)  /* 运动自适应去交错: VIIR COEF */
+#define TV5725_RW_MADPT_VSCALE_DEC_FACTOR           TV5725_REG(0x02, 0x31, 0, 2)  /* 运动自适应去交错: 垂直缩放 解码器 因子 */
+#define TV5725_RW_MADPT_SEL_PHASE_INI               TV5725_REG(0x02, 0x31, 2, 1)  /* 运动自适应去交错: 选择 相位 初始 */
+#define TV5725_RW_MADPT_DD0_SEL                     TV5725_REG(0x02, 0x35, 3, 1)  /* 运动自适应去交错: DD0 选择 */
+#define TV5725_RW_MADPT_NRD_VIIR_PD_BYPS            TV5725_REG(0x02, 0x35, 4, 1)  /* 运动自适应去交错: NRD VIIR PD 旁路 */
+#define TV5725_RW_MADPT_UVDLY_PD_BYPS               TV5725_REG(0x02, 0x35, 5, 1)  /* 运动自适应去交错: UVDLY PD 旁路 */
+#define TV5725_RW_MADPT_CMP_EN                      TV5725_REG(0x02, 0x35, 6, 1)  /* 运动自适应去交错: 比较 使能 */
+#define TV5725_RW_MADPT_UVDLY_PD_SP                 TV5725_REG(0x02, 0x39, 0, 4)  /* 运动自适应去交错: UVDLY PD 结束 */
+#define TV5725_RW_MADPT_UVDLY_PD_ST                 TV5725_REG(0x02, 0x39, 4, 4)  /* 运动自适应去交错: UVDLY PD 起始 */
+#define TV5725_RW_MADPT_EN_UV_DEINT                 TV5725_REG(0x02, 0x3A, 0, 1)  /* 运动自适应去交错: 使能 UV DEINT */
+#define TV5725_RW_MADPT_EN_STILL_FOR_NRD            TV5725_REG(0x02, 0x3A, 3, 1)  /* 运动自适应去交错: 使能 静止 FOR NRD */
+#define TV5725_RW_MADPT_MI_1BIT_DLY                 TV5725_REG(0x02, 0x3A, 5, 2)  /* 运动自适应去交错: MI 1BIT 延迟 */
+#define TV5725_RW_MADPT_UV_MI_DET_BYPS              TV5725_REG(0x02, 0x3A, 7, 1)  /* 运动自适应去交错: UV MI 检测 旁路 */
+#define TV5725_RW_MADPT_UV_MI_OFFSET                TV5725_REG(0x02, 0x3B, 0, 7)  /* 运动自适应去交错: UV MI 偏移 */
 
 /* ================================================================
    Segment 0x03: VDS_PROC / PIP
    ================================================================ */
 
-#define TV5725_RW_VDS_SYNC_EN                       TV5725_REG(0x03, 0x00, 0, 1)
-#define TV5725_RW_VDS_FIELDAB_EN                    TV5725_REG(0x03, 0x00, 1, 1)
-#define TV5725_RW_VDS_DFIELD_EN                     TV5725_REG(0x03, 0x00, 2, 1)
-#define TV5725_RW_VDS_FIELD_FLIP                    TV5725_REG(0x03, 0x00, 3, 1)
-#define TV5725_RW_VDS_HSCALE_BYPS                   TV5725_REG(0x03, 0x00, 4, 1)
-#define TV5725_RW_VDS_VSCALE_BYPS                   TV5725_REG(0x03, 0x00, 5, 1)
-#define TV5725_RW_VDS_HALF_EN                       TV5725_REG(0x03, 0x00, 6, 1)
-#define TV5725_RW_VDS_SRESET                        TV5725_REG(0x03, 0x00, 7, 1)
-#define TV5725_RW_VDS_HSYNC_RST                     TV5725_REG(0x03, 0x01, 0, 12)
-#define TV5725_RW_VDS_VSYNC_RST                     TV5725_REG(0x03, 0x02, 4, 11)
-#define TV5725_RW_VDS_HB_ST                         TV5725_REG(0x03, 0x04, 0, 12)
-#define TV5725_RW_VDS_HB_SP                         TV5725_REG(0x03, 0x05, 4, 12)
-#define TV5725_RW_VDS_VB_ST                         TV5725_REG(0x03, 0x07, 0, 11)
-#define TV5725_RW_VDS_VB_SP                         TV5725_REG(0x03, 0x08, 4, 11)
-#define TV5725_RW_VDS_HS_ST                         TV5725_REG(0x03, 0x0A, 0, 12)
-#define TV5725_RW_VDS_HS_SP                         TV5725_REG(0x03, 0x0B, 4, 12)
-#define TV5725_RW_VDS_VS_ST                         TV5725_REG(0x03, 0x0D, 0, 11)
-#define TV5725_RW_VDS_VS_SP                         TV5725_REG(0x03, 0x0E, 4, 11)
-#define TV5725_RW_VDS_DIS_HB_ST                     TV5725_REG(0x03, 0x10, 0, 12)
-#define TV5725_RW_VDS_DIS_HB_SP                     TV5725_REG(0x03, 0x11, 4, 12)
-#define TV5725_RW_VDS_DIS_VB_ST                     TV5725_REG(0x03, 0x13, 0, 11)
-#define TV5725_RW_VDS_DIS_VB_SP                     TV5725_REG(0x03, 0x14, 4, 11)
-#define TV5725_RW_VDS_HSCALE                        TV5725_REG(0x03, 0x16, 0, 10)
-#define TV5725_RW_VDS_VSCALE                        TV5725_REG(0x03, 0x17, 4, 10)
-#define TV5725_RW_VDS_FRAME_RST                     TV5725_REG(0x03, 0x19, 0, 10)
-#define TV5725_RW_VDS_FLOCK_EN                      TV5725_REG(0x03, 0x1A, 4, 1)
-#define TV5725_RW_VDS_FREERUN_FID                   TV5725_REG(0x03, 0x1A, 5, 1)
-#define TV5725_RW_VDS_FID_AA_DLY                    TV5725_REG(0x03, 0x1A, 6, 1)
-#define TV5725_RW_VDS_FID_RST                       TV5725_REG(0x03, 0x1A, 7, 1)
-#define TV5725_RW_VDS_FR_SELECT                     TV5725_REG(0x03, 0x1B, 0, 32)
-#define TV5725_RW_VDS_FRAME_NO                      TV5725_REG(0x03, 0x1F, 0, 4)
-#define TV5725_RW_VDS_DIF_FR_SEL_EN                 TV5725_REG(0x03, 0x1F, 4, 1)
-#define TV5725_RW_VDS_EN_FR_NUM_RST                 TV5725_REG(0x03, 0x1F, 5, 1)
-#define TV5725_RW_VDS_VSYN_SIZE1                    TV5725_REG(0x03, 0x20, 0, 11)
-#define TV5725_RW_VDS_VSYN_SIZE2                    TV5725_REG(0x03, 0x22, 0, 11)
-#define TV5725_RW_VDS_PROC_24                       TV5725_REG(0x03, 0x24, 0, 8)
-#define TV5725_RW_VDS_UV_FLIP                       TV5725_REG(0x03, 0x24, 0, 1)
-#define TV5725_RW_VDS_U_DELAY                       TV5725_REG(0x03, 0x24, 1, 1)
-#define TV5725_RW_VDS_V_DELAY                       TV5725_REG(0x03, 0x24, 2, 1)
-#define TV5725_RW_VDS_TAP6_BYPS                     TV5725_REG(0x03, 0x24, 3, 1)
-#define TV5725_RW_VDS_Y_DELAY                       TV5725_REG(0x03, 0x24, 4, 2)
-#define TV5725_RW_VDS_WEN_DELAY                     TV5725_REG(0x03, 0x24, 6, 2)
-#define TV5725_RW_VDS_D_SP                          TV5725_REG(0x03, 0x25, 0, 10)
-#define TV5725_RW_VDS_D_RAM_BYPS                    TV5725_REG(0x03, 0x26, 6, 1)
-#define TV5725_RW_VDS_BLEV_AUTO_EN                  TV5725_REG(0x03, 0x26, 7, 1)
-#define TV5725_RW_VDS_USER_MIN                      TV5725_REG(0x03, 0x27, 0, 4)
-#define TV5725_RW_VDS_USER_MAX                      TV5725_REG(0x03, 0x27, 4, 4)
-#define TV5725_RW_VDS_PROC_28                       TV5725_REG(0x03, 0x28, 0, 8)
-#define TV5725_RW_VDS_PROC_29                       TV5725_REG(0x03, 0x29, 0, 8)
-#define TV5725_RW_VDS_BLEV_BYPS                     TV5725_REG(0x03, 0x2A, 0, 1)
-#define TV5725_RW_VDS_STEP_DLY_CNTRL                TV5725_REG(0x03, 0x2A, 4, 2)
-#define TV5725_RW_VDS_0X2A_RESERVED_2BITS           TV5725_REG(0x03, 0x2A, 6, 2)
-#define TV5725_RW_VDS_STEP_GAIN                     TV5725_REG(0x03, 0x2B, 0, 4)
-#define TV5725_RW_VDS_STEP_CLIP                     TV5725_REG(0x03, 0x2B, 4, 3)
-#define TV5725_RW_VDS_UV_STEP_BYPS                  TV5725_REG(0x03, 0x2B, 7, 1)
-#define TV5725_RW_VDS_PROC_2C                       TV5725_REG(0x03, 0x2C, 0, 8)
-#define TV5725_RW_VDS_PROC_2D                       TV5725_REG(0x03, 0x2D, 0, 8)
-#define TV5725_RW_VDS_PROC_2E                       TV5725_REG(0x03, 0x2E, 0, 8)
-#define TV5725_RW_VDS_PROC_2F                       TV5725_REG(0x03, 0x2F, 0, 8)
-#define TV5725_RW_VDS_PROC_30                       TV5725_REG(0x03, 0x30, 0, 8)
-#define TV5725_RW_VDS_SK_GAIN                       TV5725_REG(0x03, 0x31, 0, 4)
-#define TV5725_RW_VDS_SK_Y_EN                       TV5725_REG(0x03, 0x31, 4, 1)
-#define TV5725_RW_VDS_SK_BYPS                       TV5725_REG(0x03, 0x31, 5, 1)
-#define TV5725_RW_VDS_SVM_BPF_CNTRL                 TV5725_REG(0x03, 0x32, 0, 2)
-#define TV5725_RW_VDS_SVM_POL_FLIP                  TV5725_REG(0x03, 0x32, 2, 1)
-#define TV5725_RW_VDS_SVM_2ND_BYPS                  TV5725_REG(0x03, 0x32, 3, 1)
-#define TV5725_RW_VDS_SVM_VCLK_DELAY                TV5725_REG(0x03, 0x32, 4, 3)
-#define TV5725_RW_VDS_SVM_SIGMOID_BYPS              TV5725_REG(0x03, 0x32, 7, 1)
-#define TV5725_RW_VDS_PROC_33                       TV5725_REG(0x03, 0x33, 0, 8)
-#define TV5725_RW_VDS_PROC_34                       TV5725_REG(0x03, 0x34, 0, 8)
-#define TV5725_RW_VDS_PROC_35                       TV5725_REG(0x03, 0x35, 0, 8)
-#define TV5725_RW_VDS_PROC_36                       TV5725_REG(0x03, 0x36, 0, 8)
-#define TV5725_RW_VDS_PROC_37                       TV5725_REG(0x03, 0x37, 0, 8)
-#define TV5725_RW_VDS_PROC_38                       TV5725_REG(0x03, 0x38, 0, 8)
-#define TV5725_RW_VDS_PROC_39                       TV5725_REG(0x03, 0x39, 0, 8)
-#define TV5725_RW_VDS_PROC_3A                       TV5725_REG(0x03, 0x3A, 0, 8)
-#define TV5725_RW_VDS_PROC_3B                       TV5725_REG(0x03, 0x3B, 0, 8)
-#define TV5725_RW_VDS_PROC_3C                       TV5725_REG(0x03, 0x3C, 0, 8)
-#define TV5725_RW_VDS_SYNC_LEV                      TV5725_REG(0x03, 0x3D, 0, 9)
-#define TV5725_RW_VDS_CONVT_BYPS                    TV5725_REG(0x03, 0x3E, 3, 1)
-#define TV5725_RW_VDS_DYN_BYPS                      TV5725_REG(0x03, 0x3E, 4, 1)
-#define TV5725_RW_VDS_BLK_BF_EN                     TV5725_REG(0x03, 0x3E, 7, 1)
-#define TV5725_RW_VDS_PROC_3F                       TV5725_REG(0x03, 0x3F, 0, 8)
-#define TV5725_RW_VDS_1ST_INT_BYPS                  TV5725_REG(0x03, 0x40, 0, 1)
-#define TV5725_RW_VDS_2ND_INT_BYPS                  TV5725_REG(0x03, 0x40, 1, 1)
-#define TV5725_RW_VDS_IN_DREG_BYPS                  TV5725_REG(0x03, 0x40, 2, 1)
-#define TV5725_RW_VDS_SVM_V4CLK_DELAY               TV5725_REG(0x03, 0x40, 4, 2)
-#define TV5725_RW_VDS_PK_LINE_BUF_SP                TV5725_REG(0x03, 0x41, 0, 10)
-#define TV5725_RW_VDS_PK_RAM_BYPS                   TV5725_REG(0x03, 0x42, 6, 1)
-#define TV5725_RW_VDS_PK_VL_HL_SEL                  TV5725_REG(0x03, 0x43, 0, 1)
-#define TV5725_RW_VDS_PK_VL_HH_SEL                  TV5725_REG(0x03, 0x43, 1, 1)
-#define TV5725_RW_VDS_PK_VH_HL_SEL                  TV5725_REG(0x03, 0x43, 2, 1)
-#define TV5725_RW_VDS_PK_VH_HH_SEL                  TV5725_REG(0x03, 0x43, 3, 1)
-#define TV5725_RW_VDS_PK_LB_CORE                    TV5725_REG(0x03, 0x44, 0, 3)
-#define TV5725_RW_VDS_PK_LB_CMP                     TV5725_REG(0x03, 0x44, 3, 5)
-#define TV5725_RW_VDS_PK_LB_GAIN                    TV5725_REG(0x03, 0x45, 0, 6)
-#define TV5725_RW_VDS_PK_LH_CORE                    TV5725_REG(0x03, 0x46, 0, 3)
-#define TV5725_RW_VDS_PK_LH_CMP                     TV5725_REG(0x03, 0x46, 3, 5)
-#define TV5725_RW_VDS_PK_LH_GAIN                    TV5725_REG(0x03, 0x47, 0, 6)
-#define TV5725_RW_VDS_PK_HL_CORE                    TV5725_REG(0x03, 0x48, 0, 3)
-#define TV5725_RW_VDS_PK_HL_CMP                     TV5725_REG(0x03, 0x48, 3, 5)
-#define TV5725_RW_VDS_PK_HL_GAIN                    TV5725_REG(0x03, 0x49, 0, 6)
-#define TV5725_RW_VDS_PK_HB_CORE                    TV5725_REG(0x03, 0x4A, 0, 3)
-#define TV5725_RW_VDS_PK_HB_CMP                     TV5725_REG(0x03, 0x4A, 3, 5)
-#define TV5725_RW_VDS_PK_HB_GAIN                    TV5725_REG(0x03, 0x4B, 0, 6)
-#define TV5725_RW_VDS_PK_HH_CORE                    TV5725_REG(0x03, 0x4C, 0, 3)
-#define TV5725_RW_VDS_PK_HH_CMP                     TV5725_REG(0x03, 0x4C, 3, 5)
-#define TV5725_RW_VDS_PK_HH_GAIN                    TV5725_REG(0x03, 0x4D, 0, 6)
-#define TV5725_RW_VDS_PK_Y_H_BYPS                   TV5725_REG(0x03, 0x4E, 0, 1)
-#define TV5725_RW_VDS_PK_Y_V_BYPS                   TV5725_REG(0x03, 0x4E, 1, 1)
-#define TV5725_RW_VDS_C_VPK_BYPS                    TV5725_REG(0x03, 0x4E, 3, 1)
-#define TV5725_RW_VDS_C_VPK_CORE                    TV5725_REG(0x03, 0x4E, 4, 3)
-#define TV5725_RW_VDS_C_VPK_GAIN                    TV5725_REG(0x03, 0x4F, 0, 6)
-#define TV5725_RW_VDS_TEST_BUS_SEL                  TV5725_REG(0x03, 0x50, 0, 4)
-#define TV5725_RW_VDS_TEST_EN                       TV5725_REG(0x03, 0x50, 4, 1)
-#define TV5725_RW_VDS_DO_UV_DEV_BYPS                TV5725_REG(0x03, 0x50, 5, 1)
-#define TV5725_RW_VDS_DO_UVSEL_FLIP                 TV5725_REG(0x03, 0x50, 6, 1)
-#define TV5725_RW_VDS_DO_16B_EN                     TV5725_REG(0x03, 0x50, 7, 1)
-#define TV5725_RW_VDS_GLB_NOISE                     TV5725_REG(0x03, 0x51, 7, 11)
-#define TV5725_RW_VDS_NR_Y_BYPS                     TV5725_REG(0x03, 0x52, 4, 1)
-#define TV5725_RW_VDS_NR_C_BYPS                     TV5725_REG(0x03, 0x52, 5, 1)
-#define TV5725_RW_VDS_NR_DIF_LPF5_BYPS              TV5725_REG(0x03, 0x52, 6, 1)
-#define TV5725_RW_VDS_NR_MI_TH_EN                   TV5725_REG(0x03, 0x52, 7, 1)
-#define TV5725_RW_VDS_NR_MI_OFFSET                  TV5725_REG(0x03, 0x53, 0, 7)
-#define TV5725_RW_VDS_NR_MIG_USER_EN                TV5725_REG(0x03, 0x53, 7, 1)
-#define TV5725_RW_VDS_NR_MI_GAIN                    TV5725_REG(0x03, 0x54, 0, 4)
-#define TV5725_RW_VDS_NR_STILL_GAIN                 TV5725_REG(0x03, 0x54, 4, 4)
-#define TV5725_RW_VDS_NR_MI_THRES                   TV5725_REG(0x03, 0x55, 0, 4)
-#define TV5725_RW_VDS_NR_EN_H_NOISY                 TV5725_REG(0x03, 0x55, 4, 1)
-#define TV5725_RW_VDS_NR_EN_GLB_STILL               TV5725_REG(0x03, 0x55, 6, 1)
-#define TV5725_RW_VDS_NR_GLB_STILL_MENU             TV5725_REG(0x03, 0x55, 7, 1)
-#define TV5725_RW_VDS_NR_NOISY_OFFSET               TV5725_REG(0x03, 0x56, 0, 7)
-#define TV5725_RW_VDS_W_LEV_BYPS                    TV5725_REG(0x03, 0x56, 7, 1)
-#define TV5725_RW_VDS_PROC_57                       TV5725_REG(0x03, 0x57, 0, 8)
-#define TV5725_RW_VDS_PROC_58                       TV5725_REG(0x03, 0x58, 0, 8)
-#define TV5725_RW_VDS_PROC_59                       TV5725_REG(0x03, 0x59, 0, 8)
-#define TV5725_RW_VDS_PROC_5A                       TV5725_REG(0x03, 0x5A, 0, 8)
-#define TV5725_RW_VDS_NS_U_GAIN                     TV5725_REG(0x03, 0x5B, 0, 7)
-#define TV5725_RW_VDS_NS_SQUARE_RAD                 TV5725_REG(0x03, 0x5B, 7, 15)
-#define TV5725_RW_VDS_NS_Y_HIGH_TH                  TV5725_REG(0x03, 0x5D, 6, 8)
-#define TV5725_RW_VDS_NS_V_GAIN                     TV5725_REG(0x03, 0x5E, 6, 7)
-#define TV5725_RW_VDS_NS_Y_LOW_TH                   TV5725_REG(0x03, 0x5F, 5, 5)
-#define TV5725_RW_VDS_NS_BYPS                       TV5725_REG(0x03, 0x60, 2, 1)
-#define TV5725_RW_VDS_NS_Y_ACTIVE_EN                TV5725_REG(0x03, 0x60, 3, 1)
-#define TV5725_RW_VDS_C1_TAG_LOW_SLOPE              TV5725_REG(0x03, 0x60, 4, 10)
-#define TV5725_RW_VDS_C1_TAG_HIGH_SLOPE             TV5725_REG(0x03, 0x61, 6, 10)
-#define TV5725_RW_VDS_C1_GAIN                       TV5725_REG(0x03, 0x63, 0, 4)
-#define TV5725_RW_VDS_C1_U_LOW                      TV5725_REG(0x03, 0x63, 4, 8)
-#define TV5725_RW_VDS_C1_U_HIGH                     TV5725_REG(0x03, 0x64, 4, 8)
-#define TV5725_RW_VDS_C1_BYPS                       TV5725_REG(0x03, 0x65, 4, 1)
-#define TV5725_RW_VDS_C1_Y_THRESH                   TV5725_REG(0x03, 0x65, 5, 8)
-#define TV5725_RW_VDS_C2_TAG_LOW_SLOPE              TV5725_REG(0x03, 0x66, 5, 10)
-#define TV5725_RW_VDS_C2_TAG_HIGH_SLOPE             TV5725_REG(0x03, 0x67, 7, 10)
-#define TV5725_RW_VDS_C2_GAIN                       TV5725_REG(0x03, 0x69, 1, 4)
-#define TV5725_RW_VDS_C2_U_LOW                      TV5725_REG(0x03, 0x69, 5, 8)
-#define TV5725_RW_VDS_C2_U_HIGH                     TV5725_REG(0x03, 0x6A, 5, 8)
-#define TV5725_RW_VDS_C2_BYPS                       TV5725_REG(0x03, 0x6B, 5, 1)
-#define TV5725_RW_VDS_C2_Y_THRESH                   TV5725_REG(0x03, 0x6B, 6, 8)
-#define TV5725_RW_VDS_EXT_HB_ST                     TV5725_REG(0x03, 0x6D, 0, 12)
-#define TV5725_RW_VDS_EXT_HB_SP                     TV5725_REG(0x03, 0x6E, 4, 12)
-#define TV5725_RW_VDS_EXT_VB_ST                     TV5725_REG(0x03, 0x70, 0, 11)
-#define TV5725_RW_VDS_EXT_VB_SP                     TV5725_REG(0x03, 0x71, 4, 11)
-#define TV5725_RW_VDS_SYNC_IN_SEL                   TV5725_REG(0x03, 0x72, 7, 1)
-#define TV5725_RW_VDS_BLUE_RANGE                    TV5725_REG(0x03, 0x73, 0, 3)
-#define TV5725_RW_VDS_BLUE_BYPS                     TV5725_REG(0x03, 0x73, 3, 1)
-#define TV5725_RW_VDS_BLUE_UGAIN                    TV5725_REG(0x03, 0x73, 4, 4)
-#define TV5725_RW_VDS_BLUE_VGAIN                    TV5725_REG(0x03, 0x74, 0, 4)
-#define TV5725_RW_VDS_BLUE_Y_LEV                    TV5725_REG(0x03, 0x74, 4, 4)
-#define TV5725_RW_PIP_UV_FLIP                       TV5725_REG(0x03, 0x80, 0, 1)
-#define TV5725_RW_PIP_U_DELAY                       TV5725_REG(0x03, 0x80, 1, 1)
-#define TV5725_RW_PIP_V_DELAY                       TV5725_REG(0x03, 0x80, 2, 1)
-#define TV5725_RW_PIP_TAP3_BYPS                     TV5725_REG(0x03, 0x80, 3, 1)
-#define TV5725_RW_PIP_Y_DELAY                       TV5725_REG(0x03, 0x80, 4, 2)
-#define TV5725_RW_PIP_SUB_16B_SEL                   TV5725_REG(0x03, 0x80, 6, 1)
-#define TV5725_RW_PIP_DYN_BYPS                      TV5725_REG(0x03, 0x80, 7, 1)
-#define TV5725_RW_PIP_CONVT_BYPS                    TV5725_REG(0x03, 0x81, 0, 1)
-#define TV5725_RW_PIP_DREG_BYPS                     TV5725_REG(0x03, 0x81, 3, 1)
-#define TV5725_RW_PIP_EN                            TV5725_REG(0x03, 0x81, 7, 1)
-#define TV5725_RW_PIP_02                            TV5725_REG(0x03, 0x82, 0, 8)
-#define TV5725_RW_PIP_03                            TV5725_REG(0x03, 0x83, 0, 8)
-#define TV5725_RW_PIP_04                            TV5725_REG(0x03, 0x84, 0, 8)
-#define TV5725_RW_PIP_05                            TV5725_REG(0x03, 0x85, 0, 8)
-#define TV5725_RW_PIP_06                            TV5725_REG(0x03, 0x86, 0, 8)
-#define TV5725_RW_PIP_07                            TV5725_REG(0x03, 0x87, 0, 8)
-#define TV5725_RW_PIP_H_ST                          TV5725_REG(0x03, 0x88, 0, 12)
-#define TV5725_RW_PIP_H_SP                          TV5725_REG(0x03, 0x8A, 0, 12)
-#define TV5725_RW_PIP_V_ST                          TV5725_REG(0x03, 0x8C, 0, 11)
-#define TV5725_RW_PIP_V_SP                          TV5725_REG(0x03, 0x8E, 0, 11)
+#define TV5725_RW_VDS_SYNC_EN                       TV5725_REG(0x03, 0x00, 0, 1)  /* VDS: 同步 使能 */
+#define TV5725_RW_VDS_FIELDAB_EN                    TV5725_REG(0x03, 0x00, 1, 1)  /* VDS: FIELDAB 使能 */
+#define TV5725_RW_VDS_DFIELD_EN                     TV5725_REG(0x03, 0x00, 2, 1)  /* VDS: DFIELD 使能 */
+#define TV5725_RW_VDS_FIELD_FLIP                    TV5725_REG(0x03, 0x00, 3, 1)  /* VDS: 场 翻转 */
+#define TV5725_RW_VDS_HSCALE_BYPS                   TV5725_REG(0x03, 0x00, 4, 1)  /* VDS: 水平缩放 旁路 */
+#define TV5725_RW_VDS_VSCALE_BYPS                   TV5725_REG(0x03, 0x00, 5, 1)  /* VDS: 垂直缩放 旁路 */
+#define TV5725_RW_VDS_HALF_EN                       TV5725_REG(0x03, 0x00, 6, 1)  /* VDS: 半 使能 */
+#define TV5725_RW_VDS_SRESET                        TV5725_REG(0x03, 0x00, 7, 1)  /* VDS: SRESET */
+#define TV5725_RW_VDS_HSYNC_RST                     TV5725_REG(0x03, 0x01, 0, 12)  /* VDS: 行同步 复位 */
+#define TV5725_RW_VDS_VSYNC_RST                     TV5725_REG(0x03, 0x02, 4, 11)  /* VDS: 场同步 复位 */
+#define TV5725_RW_VDS_HB_ST                         TV5725_REG(0x03, 0x04, 0, 12)  /* VDS: 行消隐 起始 */
+#define TV5725_RW_VDS_HB_SP                         TV5725_REG(0x03, 0x05, 4, 12)  /* VDS: 行消隐 结束 */
+#define TV5725_RW_VDS_VB_ST                         TV5725_REG(0x03, 0x07, 0, 11)  /* VDS: 场消隐 起始 */
+#define TV5725_RW_VDS_VB_SP                         TV5725_REG(0x03, 0x08, 4, 11)  /* VDS: 场消隐 结束 */
+#define TV5725_RW_VDS_HS_ST                         TV5725_REG(0x03, 0x0A, 0, 12)  /* VDS: 行同步 起始 */
+#define TV5725_RW_VDS_HS_SP                         TV5725_REG(0x03, 0x0B, 4, 12)  /* VDS: 行同步 结束 */
+#define TV5725_RW_VDS_VS_ST                         TV5725_REG(0x03, 0x0D, 0, 11)  /* VDS: 场同步 起始 */
+#define TV5725_RW_VDS_VS_SP                         TV5725_REG(0x03, 0x0E, 4, 11)  /* VDS: 场同步 结束 */
+#define TV5725_RW_VDS_DIS_HB_ST                     TV5725_REG(0x03, 0x10, 0, 12)  /* VDS: 显示 行消隐 起始 */
+#define TV5725_RW_VDS_DIS_HB_SP                     TV5725_REG(0x03, 0x11, 4, 12)  /* VDS: 显示 行消隐 结束 */
+#define TV5725_RW_VDS_DIS_VB_ST                     TV5725_REG(0x03, 0x13, 0, 11)  /* VDS: 显示 场消隐 起始 */
+#define TV5725_RW_VDS_DIS_VB_SP                     TV5725_REG(0x03, 0x14, 4, 11)  /* VDS: 显示 场消隐 结束 */
+#define TV5725_RW_VDS_HSCALE                        TV5725_REG(0x03, 0x16, 0, 10)  /* VDS: 水平缩放 */
+#define TV5725_RW_VDS_VSCALE                        TV5725_REG(0x03, 0x17, 4, 10)  /* VDS: 垂直缩放 */
+#define TV5725_RW_VDS_FRAME_RST                     TV5725_REG(0x03, 0x19, 0, 10)  /* VDS: 帧 复位 */
+#define TV5725_RW_VDS_FLOCK_EN                      TV5725_REG(0x03, 0x1A, 4, 1)  /* VDS: FLOCK 使能 */
+#define TV5725_RW_VDS_FREERUN_FID                   TV5725_REG(0x03, 0x1A, 5, 1)  /* VDS: FREERUN FID */
+#define TV5725_RW_VDS_FID_AA_DLY                    TV5725_REG(0x03, 0x1A, 6, 1)  /* VDS: FID AA 延迟 */
+#define TV5725_RW_VDS_FID_RST                       TV5725_REG(0x03, 0x1A, 7, 1)  /* VDS: FID 复位 */
+#define TV5725_RW_VDS_FR_SELECT                     TV5725_REG(0x03, 0x1B, 0, 32)  /* VDS: FR SELECT */
+#define TV5725_RW_VDS_FRAME_NO                      TV5725_REG(0x03, 0x1F, 0, 4)  /* VDS: 帧 NO */
+#define TV5725_RW_VDS_DIF_FR_SEL_EN                 TV5725_REG(0x03, 0x1F, 4, 1)  /* VDS: DIF FR 选择 使能 */
+#define TV5725_RW_VDS_EN_FR_NUM_RST                 TV5725_REG(0x03, 0x1F, 5, 1)  /* VDS: 使能 FR 数量 复位 */
+#define TV5725_RW_VDS_VSYN_SIZE1                    TV5725_REG(0x03, 0x20, 0, 11)  /* VDS: VSYN SIZE1 */
+#define TV5725_RW_VDS_VSYN_SIZE2                    TV5725_REG(0x03, 0x22, 0, 11)  /* VDS: VSYN SIZE2 */
+#define TV5725_RW_VDS_PROC_24                       TV5725_REG(0x03, 0x24, 0, 8)  /* VDS: PROC 24 */
+#define TV5725_RW_VDS_UV_FLIP                       TV5725_REG(0x03, 0x24, 0, 1)  /* VDS: UV 翻转 */
+#define TV5725_RW_VDS_U_DELAY                       TV5725_REG(0x03, 0x24, 1, 1)  /* VDS: U 延迟 */
+#define TV5725_RW_VDS_V_DELAY                       TV5725_REG(0x03, 0x24, 2, 1)  /* VDS: V 延迟 */
+#define TV5725_RW_VDS_TAP6_BYPS                     TV5725_REG(0x03, 0x24, 3, 1)  /* VDS: TAP6 旁路 */
+#define TV5725_RW_VDS_Y_DELAY                       TV5725_REG(0x03, 0x24, 4, 2)  /* VDS: Y 延迟 */
+#define TV5725_RW_VDS_WEN_DELAY                     TV5725_REG(0x03, 0x24, 6, 2)  /* VDS: WEN 延迟 */
+#define TV5725_RW_VDS_D_SP                          TV5725_REG(0x03, 0x25, 0, 10)  /* VDS: D 结束 */
+#define TV5725_RW_VDS_D_RAM_BYPS                    TV5725_REG(0x03, 0x26, 6, 1)  /* VDS: D RAM 旁路 */
+#define TV5725_RW_VDS_BLEV_AUTO_EN                  TV5725_REG(0x03, 0x26, 7, 1)  /* VDS: BLEV 自动 使能 */
+#define TV5725_RW_VDS_USER_MIN                      TV5725_REG(0x03, 0x27, 0, 4)  /* VDS: USER 最小 */
+#define TV5725_RW_VDS_USER_MAX                      TV5725_REG(0x03, 0x27, 4, 4)  /* VDS: USER 最大 */
+#define TV5725_RW_VDS_PROC_28                       TV5725_REG(0x03, 0x28, 0, 8)  /* VDS: PROC 28 */
+#define TV5725_RW_VDS_PROC_29                       TV5725_REG(0x03, 0x29, 0, 8)  /* VDS: PROC 29 */
+#define TV5725_RW_VDS_BLEV_BYPS                     TV5725_REG(0x03, 0x2A, 0, 1)  /* VDS: BLEV 旁路 */
+#define TV5725_RW_VDS_STEP_DLY_CNTRL                TV5725_REG(0x03, 0x2A, 4, 2)  /* VDS: STEP 延迟 控制 */
+#define TV5725_RW_VDS_0X2A_RESERVED_2BITS           TV5725_REG(0x03, 0x2A, 6, 2)  /* VDS: 0X2A RESERVED 2BITS */
+#define TV5725_RW_VDS_STEP_GAIN                     TV5725_REG(0x03, 0x2B, 0, 4)  /* VDS: STEP 增益 */
+#define TV5725_RW_VDS_STEP_CLIP                     TV5725_REG(0x03, 0x2B, 4, 3)  /* VDS: STEP CLIP */
+#define TV5725_RW_VDS_UV_STEP_BYPS                  TV5725_REG(0x03, 0x2B, 7, 1)  /* VDS: UV STEP 旁路 */
+#define TV5725_RW_VDS_PROC_2C                       TV5725_REG(0x03, 0x2C, 0, 8)  /* VDS: PROC 2C */
+#define TV5725_RW_VDS_PROC_2D                       TV5725_REG(0x03, 0x2D, 0, 8)  /* VDS: PROC 2D */
+#define TV5725_RW_VDS_PROC_2E                       TV5725_REG(0x03, 0x2E, 0, 8)  /* VDS: PROC 2E */
+#define TV5725_RW_VDS_PROC_2F                       TV5725_REG(0x03, 0x2F, 0, 8)  /* VDS: PROC 2F */
+#define TV5725_RW_VDS_PROC_30                       TV5725_REG(0x03, 0x30, 0, 8)  /* VDS: PROC 30 */
+#define TV5725_RW_VDS_SK_GAIN                       TV5725_REG(0x03, 0x31, 0, 4)  /* VDS: SK 增益 */
+#define TV5725_RW_VDS_SK_Y_EN                       TV5725_REG(0x03, 0x31, 4, 1)  /* VDS: SK Y 使能 */
+#define TV5725_RW_VDS_SK_BYPS                       TV5725_REG(0x03, 0x31, 5, 1)  /* VDS: SK 旁路 */
+#define TV5725_RW_VDS_SVM_BPF_CNTRL                 TV5725_REG(0x03, 0x32, 0, 2)  /* VDS: SVM BPF 控制 */
+#define TV5725_RW_VDS_SVM_POL_FLIP                  TV5725_REG(0x03, 0x32, 2, 1)  /* VDS: SVM 极性 翻转 */
+#define TV5725_RW_VDS_SVM_2ND_BYPS                  TV5725_REG(0x03, 0x32, 3, 1)  /* VDS: SVM 2ND 旁路 */
+#define TV5725_RW_VDS_SVM_VCLK_DELAY                TV5725_REG(0x03, 0x32, 4, 3)  /* VDS: SVM VCLK 延迟 */
+#define TV5725_RW_VDS_SVM_SIGMOID_BYPS              TV5725_REG(0x03, 0x32, 7, 1)  /* VDS: SVM SIGMOID 旁路 */
+#define TV5725_RW_VDS_PROC_33                       TV5725_REG(0x03, 0x33, 0, 8)  /* VDS: PROC 33 */
+#define TV5725_RW_VDS_PROC_34                       TV5725_REG(0x03, 0x34, 0, 8)  /* VDS: PROC 34 */
+#define TV5725_RW_VDS_PROC_35                       TV5725_REG(0x03, 0x35, 0, 8)  /* VDS: PROC 35 */
+#define TV5725_RW_VDS_PROC_36                       TV5725_REG(0x03, 0x36, 0, 8)  /* VDS: PROC 36 */
+#define TV5725_RW_VDS_PROC_37                       TV5725_REG(0x03, 0x37, 0, 8)  /* VDS: PROC 37 */
+#define TV5725_RW_VDS_PROC_38                       TV5725_REG(0x03, 0x38, 0, 8)  /* VDS: PROC 38 */
+#define TV5725_RW_VDS_PROC_39                       TV5725_REG(0x03, 0x39, 0, 8)  /* VDS: PROC 39 */
+#define TV5725_RW_VDS_PROC_3A                       TV5725_REG(0x03, 0x3A, 0, 8)  /* VDS: PROC 3A */
+#define TV5725_RW_VDS_PROC_3B                       TV5725_REG(0x03, 0x3B, 0, 8)  /* VDS: PROC 3B */
+#define TV5725_RW_VDS_PROC_3C                       TV5725_REG(0x03, 0x3C, 0, 8)  /* VDS: PROC 3C */
+#define TV5725_RW_VDS_SYNC_LEV                      TV5725_REG(0x03, 0x3D, 0, 9)  /* VDS: 同步 LEV */
+#define TV5725_RW_VDS_CONVT_BYPS                    TV5725_REG(0x03, 0x3E, 3, 1)  /* VDS: CONVT 旁路 */
+#define TV5725_RW_VDS_DYN_BYPS                      TV5725_REG(0x03, 0x3E, 4, 1)  /* VDS: DYN 旁路 */
+#define TV5725_RW_VDS_BLK_BF_EN                     TV5725_REG(0x03, 0x3E, 7, 1)  /* VDS: 消隐 BF 使能 */
+#define TV5725_RW_VDS_PROC_3F                       TV5725_REG(0x03, 0x3F, 0, 8)  /* VDS: PROC 3F */
+#define TV5725_RW_VDS_1ST_INT_BYPS                  TV5725_REG(0x03, 0x40, 0, 1)  /* VDS: 1ST 中断 旁路 */
+#define TV5725_RW_VDS_2ND_INT_BYPS                  TV5725_REG(0x03, 0x40, 1, 1)  /* VDS: 2ND 中断 旁路 */
+#define TV5725_RW_VDS_IN_DREG_BYPS                  TV5725_REG(0x03, 0x40, 2, 1)  /* VDS: 输入 数据寄存器 旁路 */
+#define TV5725_RW_VDS_SVM_V4CLK_DELAY               TV5725_REG(0x03, 0x40, 4, 2)  /* VDS: SVM V4CLK 延迟 */
+#define TV5725_RW_VDS_PK_LINE_BUF_SP                TV5725_REG(0x03, 0x41, 0, 10)  /* VDS: PK 行 BUF 结束 */
+#define TV5725_RW_VDS_PK_RAM_BYPS                   TV5725_REG(0x03, 0x42, 6, 1)  /* VDS: PK RAM 旁路 */
+#define TV5725_RW_VDS_PK_VL_HL_SEL                  TV5725_REG(0x03, 0x43, 0, 1)  /* VDS: PK VL HL 选择 */
+#define TV5725_RW_VDS_PK_VL_HH_SEL                  TV5725_REG(0x03, 0x43, 1, 1)  /* VDS: PK VL HH 选择 */
+#define TV5725_RW_VDS_PK_VH_HL_SEL                  TV5725_REG(0x03, 0x43, 2, 1)  /* VDS: PK VH HL 选择 */
+#define TV5725_RW_VDS_PK_VH_HH_SEL                  TV5725_REG(0x03, 0x43, 3, 1)  /* VDS: PK VH HH 选择 */
+#define TV5725_RW_VDS_PK_LB_CORE                    TV5725_REG(0x03, 0x44, 0, 3)  /* VDS: PK LB 核 */
+#define TV5725_RW_VDS_PK_LB_CMP                     TV5725_REG(0x03, 0x44, 3, 5)  /* VDS: PK LB 比较 */
+#define TV5725_RW_VDS_PK_LB_GAIN                    TV5725_REG(0x03, 0x45, 0, 6)  /* VDS: PK LB 增益 */
+#define TV5725_RW_VDS_PK_LH_CORE                    TV5725_REG(0x03, 0x46, 0, 3)  /* VDS: PK LH 核 */
+#define TV5725_RW_VDS_PK_LH_CMP                     TV5725_REG(0x03, 0x46, 3, 5)  /* VDS: PK LH 比较 */
+#define TV5725_RW_VDS_PK_LH_GAIN                    TV5725_REG(0x03, 0x47, 0, 6)  /* VDS: PK LH 增益 */
+#define TV5725_RW_VDS_PK_HL_CORE                    TV5725_REG(0x03, 0x48, 0, 3)  /* VDS: PK HL 核 */
+#define TV5725_RW_VDS_PK_HL_CMP                     TV5725_REG(0x03, 0x48, 3, 5)  /* VDS: PK HL 比较 */
+#define TV5725_RW_VDS_PK_HL_GAIN                    TV5725_REG(0x03, 0x49, 0, 6)  /* VDS: PK HL 增益 */
+#define TV5725_RW_VDS_PK_HB_CORE                    TV5725_REG(0x03, 0x4A, 0, 3)  /* VDS: PK 行消隐 核 */
+#define TV5725_RW_VDS_PK_HB_CMP                     TV5725_REG(0x03, 0x4A, 3, 5)  /* VDS: PK 行消隐 比较 */
+#define TV5725_RW_VDS_PK_HB_GAIN                    TV5725_REG(0x03, 0x4B, 0, 6)  /* VDS: PK 行消隐 增益 */
+#define TV5725_RW_VDS_PK_HH_CORE                    TV5725_REG(0x03, 0x4C, 0, 3)  /* VDS: PK HH 核 */
+#define TV5725_RW_VDS_PK_HH_CMP                     TV5725_REG(0x03, 0x4C, 3, 5)  /* VDS: PK HH 比较 */
+#define TV5725_RW_VDS_PK_HH_GAIN                    TV5725_REG(0x03, 0x4D, 0, 6)  /* VDS: PK HH 增益 */
+#define TV5725_RW_VDS_PK_Y_H_BYPS                   TV5725_REG(0x03, 0x4E, 0, 1)  /* VDS: PK Y H 旁路 */
+#define TV5725_RW_VDS_PK_Y_V_BYPS                   TV5725_REG(0x03, 0x4E, 1, 1)  /* VDS: PK Y V 旁路 */
+#define TV5725_RW_VDS_C_VPK_BYPS                    TV5725_REG(0x03, 0x4E, 3, 1)  /* VDS: C VPK 旁路 */
+#define TV5725_RW_VDS_C_VPK_CORE                    TV5725_REG(0x03, 0x4E, 4, 3)  /* VDS: C VPK 核 */
+#define TV5725_RW_VDS_C_VPK_GAIN                    TV5725_REG(0x03, 0x4F, 0, 6)  /* VDS: C VPK 增益 */
+#define TV5725_RW_VDS_TEST_BUS_SEL                  TV5725_REG(0x03, 0x50, 0, 4)  /* VDS: 测试 总线 选择 */
+#define TV5725_RW_VDS_TEST_EN                       TV5725_REG(0x03, 0x50, 4, 1)  /* VDS: 测试 使能 */
+#define TV5725_RW_VDS_DO_UV_DEV_BYPS                TV5725_REG(0x03, 0x50, 5, 1)  /* VDS: DO UV DEV 旁路 */
+#define TV5725_RW_VDS_DO_UVSEL_FLIP                 TV5725_REG(0x03, 0x50, 6, 1)  /* VDS: DO UVSEL 翻转 */
+#define TV5725_RW_VDS_DO_16B_EN                     TV5725_REG(0x03, 0x50, 7, 1)  /* VDS: DO 16B 使能 */
+#define TV5725_RW_VDS_GLB_NOISE                     TV5725_REG(0x03, 0x51, 7, 11)  /* VDS: GLB 噪声 */
+#define TV5725_RW_VDS_NR_Y_BYPS                     TV5725_REG(0x03, 0x52, 4, 1)  /* VDS: NR Y 旁路 */
+#define TV5725_RW_VDS_NR_C_BYPS                     TV5725_REG(0x03, 0x52, 5, 1)  /* VDS: NR C 旁路 */
+#define TV5725_RW_VDS_NR_DIF_LPF5_BYPS              TV5725_REG(0x03, 0x52, 6, 1)  /* VDS: NR DIF LPF5 旁路 */
+#define TV5725_RW_VDS_NR_MI_TH_EN                   TV5725_REG(0x03, 0x52, 7, 1)  /* VDS: NR MI 阈值 使能 */
+#define TV5725_RW_VDS_NR_MI_OFFSET                  TV5725_REG(0x03, 0x53, 0, 7)  /* VDS: NR MI 偏移 */
+#define TV5725_RW_VDS_NR_MIG_USER_EN                TV5725_REG(0x03, 0x53, 7, 1)  /* VDS: NR MIG USER 使能 */
+#define TV5725_RW_VDS_NR_MI_GAIN                    TV5725_REG(0x03, 0x54, 0, 4)  /* VDS: NR MI 增益 */
+#define TV5725_RW_VDS_NR_STILL_GAIN                 TV5725_REG(0x03, 0x54, 4, 4)  /* VDS: NR 静止 增益 */
+#define TV5725_RW_VDS_NR_MI_THRES                   TV5725_REG(0x03, 0x55, 0, 4)  /* VDS: NR MI 阈值 */
+#define TV5725_RW_VDS_NR_EN_H_NOISY                 TV5725_REG(0x03, 0x55, 4, 1)  /* VDS: NR 使能 H NOISY */
+#define TV5725_RW_VDS_NR_EN_GLB_STILL               TV5725_REG(0x03, 0x55, 6, 1)  /* VDS: NR 使能 GLB 静止 */
+#define TV5725_RW_VDS_NR_GLB_STILL_MENU             TV5725_REG(0x03, 0x55, 7, 1)  /* VDS: NR GLB 静止 MENU */
+#define TV5725_RW_VDS_NR_NOISY_OFFSET               TV5725_REG(0x03, 0x56, 0, 7)  /* VDS: NR NOISY 偏移 */
+#define TV5725_RW_VDS_W_LEV_BYPS                    TV5725_REG(0x03, 0x56, 7, 1)  /* VDS: W LEV 旁路 */
+#define TV5725_RW_VDS_PROC_57                       TV5725_REG(0x03, 0x57, 0, 8)  /* VDS: PROC 57 */
+#define TV5725_RW_VDS_PROC_58                       TV5725_REG(0x03, 0x58, 0, 8)  /* VDS: PROC 58 */
+#define TV5725_RW_VDS_PROC_59                       TV5725_REG(0x03, 0x59, 0, 8)  /* VDS: PROC 59 */
+#define TV5725_RW_VDS_PROC_5A                       TV5725_REG(0x03, 0x5A, 0, 8)  /* VDS: PROC 5A */
+#define TV5725_RW_VDS_NS_U_GAIN                     TV5725_REG(0x03, 0x5B, 0, 7)  /* VDS: NS U 增益 */
+#define TV5725_RW_VDS_NS_SQUARE_RAD                 TV5725_REG(0x03, 0x5B, 7, 15)  /* VDS: NS SQUARE RAD */
+#define TV5725_RW_VDS_NS_Y_HIGH_TH                  TV5725_REG(0x03, 0x5D, 6, 8)  /* VDS: NS Y 高 阈值 */
+#define TV5725_RW_VDS_NS_V_GAIN                     TV5725_REG(0x03, 0x5E, 6, 7)  /* VDS: NS V 增益 */
+#define TV5725_RW_VDS_NS_Y_LOW_TH                   TV5725_REG(0x03, 0x5F, 5, 5)  /* VDS: NS Y 低 阈值 */
+#define TV5725_RW_VDS_NS_BYPS                       TV5725_REG(0x03, 0x60, 2, 1)  /* VDS: NS 旁路 */
+#define TV5725_RW_VDS_NS_Y_ACTIVE_EN                TV5725_REG(0x03, 0x60, 3, 1)  /* VDS: NS Y 有效 使能 */
+#define TV5725_RW_VDS_C1_TAG_LOW_SLOPE              TV5725_REG(0x03, 0x60, 4, 10)  /* VDS: C1 TAG 低 SLOPE */
+#define TV5725_RW_VDS_C1_TAG_HIGH_SLOPE             TV5725_REG(0x03, 0x61, 6, 10)  /* VDS: C1 TAG 高 SLOPE */
+#define TV5725_RW_VDS_C1_GAIN                       TV5725_REG(0x03, 0x63, 0, 4)  /* VDS: C1 增益 */
+#define TV5725_RW_VDS_C1_U_LOW                      TV5725_REG(0x03, 0x63, 4, 8)  /* VDS: C1 U 低 */
+#define TV5725_RW_VDS_C1_U_HIGH                     TV5725_REG(0x03, 0x64, 4, 8)  /* VDS: C1 U 高 */
+#define TV5725_RW_VDS_C1_BYPS                       TV5725_REG(0x03, 0x65, 4, 1)  /* VDS: C1 旁路 */
+#define TV5725_RW_VDS_C1_Y_THRESH                   TV5725_REG(0x03, 0x65, 5, 8)  /* VDS: C1 Y 阈值 */
+#define TV5725_RW_VDS_C2_TAG_LOW_SLOPE              TV5725_REG(0x03, 0x66, 5, 10)  /* VDS: C2 TAG 低 SLOPE */
+#define TV5725_RW_VDS_C2_TAG_HIGH_SLOPE             TV5725_REG(0x03, 0x67, 7, 10)  /* VDS: C2 TAG 高 SLOPE */
+#define TV5725_RW_VDS_C2_GAIN                       TV5725_REG(0x03, 0x69, 1, 4)  /* VDS: C2 增益 */
+#define TV5725_RW_VDS_C2_U_LOW                      TV5725_REG(0x03, 0x69, 5, 8)  /* VDS: C2 U 低 */
+#define TV5725_RW_VDS_C2_U_HIGH                     TV5725_REG(0x03, 0x6A, 5, 8)  /* VDS: C2 U 高 */
+#define TV5725_RW_VDS_C2_BYPS                       TV5725_REG(0x03, 0x6B, 5, 1)  /* VDS: C2 旁路 */
+#define TV5725_RW_VDS_C2_Y_THRESH                   TV5725_REG(0x03, 0x6B, 6, 8)  /* VDS: C2 Y 阈值 */
+#define TV5725_RW_VDS_EXT_HB_ST                     TV5725_REG(0x03, 0x6D, 0, 12)  /* VDS: EXT 行消隐 起始 */
+#define TV5725_RW_VDS_EXT_HB_SP                     TV5725_REG(0x03, 0x6E, 4, 12)  /* VDS: EXT 行消隐 结束 */
+#define TV5725_RW_VDS_EXT_VB_ST                     TV5725_REG(0x03, 0x70, 0, 11)  /* VDS: EXT 场消隐 起始 */
+#define TV5725_RW_VDS_EXT_VB_SP                     TV5725_REG(0x03, 0x71, 4, 11)  /* VDS: EXT 场消隐 结束 */
+#define TV5725_RW_VDS_SYNC_IN_SEL                   TV5725_REG(0x03, 0x72, 7, 1)  /* VDS: 同步 输入 选择 */
+#define TV5725_RW_VDS_BLUE_RANGE                    TV5725_REG(0x03, 0x73, 0, 3)  /* VDS: BLUE 范围 */
+#define TV5725_RW_VDS_BLUE_BYPS                     TV5725_REG(0x03, 0x73, 3, 1)  /* VDS: BLUE 旁路 */
+#define TV5725_RW_VDS_BLUE_UGAIN                    TV5725_REG(0x03, 0x73, 4, 4)  /* VDS: BLUE UGAIN */
+#define TV5725_RW_VDS_BLUE_VGAIN                    TV5725_REG(0x03, 0x74, 0, 4)  /* VDS: BLUE VGAIN */
+#define TV5725_RW_VDS_BLUE_Y_LEV                    TV5725_REG(0x03, 0x74, 4, 4)  /* VDS: BLUE Y LEV */
+#define TV5725_RW_PIP_UV_FLIP                       TV5725_REG(0x03, 0x80, 0, 1)  /* 画中画: UV 翻转 */
+#define TV5725_RW_PIP_U_DELAY                       TV5725_REG(0x03, 0x80, 1, 1)  /* 画中画: U 延迟 */
+#define TV5725_RW_PIP_V_DELAY                       TV5725_REG(0x03, 0x80, 2, 1)  /* 画中画: V 延迟 */
+#define TV5725_RW_PIP_TAP3_BYPS                     TV5725_REG(0x03, 0x80, 3, 1)  /* 画中画: TAP3 旁路 */
+#define TV5725_RW_PIP_Y_DELAY                       TV5725_REG(0x03, 0x80, 4, 2)  /* 画中画: Y 延迟 */
+#define TV5725_RW_PIP_SUB_16B_SEL                   TV5725_REG(0x03, 0x80, 6, 1)  /* 画中画: SUB 16B 选择 */
+#define TV5725_RW_PIP_DYN_BYPS                      TV5725_REG(0x03, 0x80, 7, 1)  /* 画中画: DYN 旁路 */
+#define TV5725_RW_PIP_CONVT_BYPS                    TV5725_REG(0x03, 0x81, 0, 1)  /* 画中画: CONVT 旁路 */
+#define TV5725_RW_PIP_DREG_BYPS                     TV5725_REG(0x03, 0x81, 3, 1)  /* 画中画: 数据寄存器 旁路 */
+#define TV5725_RW_PIP_EN                            TV5725_REG(0x03, 0x81, 7, 1)  /* 画中画: 使能 */
+#define TV5725_RW_PIP_02                            TV5725_REG(0x03, 0x82, 0, 8)  /* 画中画寄存器 02 */
+#define TV5725_RW_PIP_03                            TV5725_REG(0x03, 0x83, 0, 8)  /* 画中画寄存器 03 */
+#define TV5725_RW_PIP_04                            TV5725_REG(0x03, 0x84, 0, 8)  /* 画中画寄存器 04 */
+#define TV5725_RW_PIP_05                            TV5725_REG(0x03, 0x85, 0, 8)  /* 画中画寄存器 05 */
+#define TV5725_RW_PIP_06                            TV5725_REG(0x03, 0x86, 0, 8)  /* 画中画寄存器 06 */
+#define TV5725_RW_PIP_07                            TV5725_REG(0x03, 0x87, 0, 8)  /* 画中画寄存器 07 */
+#define TV5725_RW_PIP_H_ST                          TV5725_REG(0x03, 0x88, 0, 12)  /* 画中画: H 起始 */
+#define TV5725_RW_PIP_H_SP                          TV5725_REG(0x03, 0x8A, 0, 12)  /* 画中画: H 结束 */
+#define TV5725_RW_PIP_V_ST                          TV5725_REG(0x03, 0x8C, 0, 11)  /* 画中画: V 起始 */
+#define TV5725_RW_PIP_V_SP                          TV5725_REG(0x03, 0x8E, 0, 11)  /* 画中画: V 结束 */
 
 /* ================================================================
    Segment 0x04: MEMORY / CAPTURE / PLAY_BACK / FIFO
    ================================================================ */
 
-#define TV5725_RW_MEMORY_CONTROLLER_00              TV5725_REG(0x04, 0x00, 0, 8)
-#define TV5725_RW_SDRAM_RESET_SIGNAL                TV5725_REG(0x04, 0x00, 4, 1)
-#define TV5725_RW_SDRAM_START_INITIAL_CYCLE         TV5725_REG(0x04, 0x00, 7, 1)
-#define TV5725_RW_MEM_INTER_DLYCELL_SEL             TV5725_REG(0x04, 0x12, 0, 1)
-#define TV5725_RW_MEM_CLK_DLYCELL_SEL               TV5725_REG(0x04, 0x12, 1, 1)
-#define TV5725_RW_MEM_FBK_CLK_DLYCELL_SEL           TV5725_REG(0x04, 0x12, 2, 1)
-#define TV5725_RW_MEM_PAD_CLK_INVERT                TV5725_REG(0x04, 0x13, 0, 1)
-#define TV5725_RW_MEM_RD_DATA_CLK_INVERT            TV5725_REG(0x04, 0x13, 1, 1)
-#define TV5725_RW_MEM_FBK_CLK_INVERT                TV5725_REG(0x04, 0x13, 2, 1)
-#define TV5725_RW_MEM_REQ_PBH_RFFH                  TV5725_REG(0x04, 0x15, 0, 1)
-#define TV5725_RW_MEM_ADR_DLY_REG                   TV5725_REG(0x04, 0x1B, 0, 3)
-#define TV5725_RW_MEM_CLK_DLY_REG                   TV5725_REG(0x04, 0x1B, 4, 3)
-#define TV5725_RW_CAPTURE_ENABLE                    TV5725_REG(0x04, 0x21, 0, 1)
-#define TV5725_RW_CAP_FF_HALF_REQ                   TV5725_REG(0x04, 0x21, 1, 1)
-#define TV5725_RW_CAP_SAFE_GUARD_EN                 TV5725_REG(0x04, 0x21, 5, 1)
-#define TV5725_RW_CAP_REQ_OVER                      TV5725_REG(0x04, 0x22, 0, 1)
-#define TV5725_RW_STATUS_CAP_SEL                    TV5725_REG(0x04, 0x22, 1, 1)
-#define TV5725_RW_CAP_REQ_FREEZ                     TV5725_REG(0x04, 0x22, 3, 1)
-#define TV5725_RW_CAP_SAFE_GUARD_A                  TV5725_REG(0x04, 0x24, 0, 21)
-#define TV5725_RW_CAP_SAFE_GUARD_B                  TV5725_REG(0x04, 0x27, 0, 21)
-#define TV5725_RW_PB_CUT_REFRESH                    TV5725_REG(0x04, 0x2B, 0, 1)
-#define TV5725_RW_PB_REQ_SEL                        TV5725_REG(0x04, 0x2B, 1, 2)
-#define TV5725_RW_PB_BYPASS                         TV5725_REG(0x04, 0x2B, 3, 1)
-#define TV5725_RW_PB_DB_FIELD_EN                    TV5725_REG(0x04, 0x2B, 4, 1)
-#define TV5725_RW_PB_DB_BUFFER_EN                   TV5725_REG(0x04, 0x2B, 5, 1)
-#define TV5725_RW_PB_ENABLE                         TV5725_REG(0x04, 0x2B, 7, 1)
-#define TV5725_RW_PLAY_BACK_01                      TV5725_REG(0x04, 0x2C, 0, 8)
-#define TV5725_RW_PLAY_BACK_02                      TV5725_REG(0x04, 0x2D, 0, 8)
-#define TV5725_RW_PB_CAP_OFFSET                     TV5725_REG(0x04, 0x37, 0, 10)
-#define TV5725_RW_PB_FETCH_NUM                      TV5725_REG(0x04, 0x39, 0, 10)
-#define TV5725_RW_WFF_ENABLE                        TV5725_REG(0x04, 0x42, 0, 1)
-#define TV5725_RW_WFF_FF_STA_INV                    TV5725_REG(0x04, 0x42, 2, 1)
-#define TV5725_RW_WFF_SAFE_GUARD                    TV5725_REG(0x04, 0x42, 3, 1)
-#define TV5725_RW_WFF_ADR_ADD_2                     TV5725_REG(0x04, 0x42, 5, 1)
-#define TV5725_RW_STATUS_WFF_FF_SEL                 TV5725_REG(0x04, 0x42, 7, 1)
-#define TV5725_RW_WFF_SAFE_GUARD_A                  TV5725_REG(0x04, 0x44, 0, 21)
-#define TV5725_RW_WFF_SAFE_GUARD_B                  TV5725_REG(0x04, 0x47, 0, 21)
-#define TV5725_RW_WFF_YUV_DEINTERLACE               TV5725_REG(0x04, 0x4A, 0, 1)
-#define TV5725_RW_WFF_LINE_FLIP                     TV5725_REG(0x04, 0x4A, 4, 1)
-#define TV5725_RW_WFF_HB_DELAY                      TV5725_REG(0x04, 0x4B, 0, 3)
-#define TV5725_RW_WFF_VB_DELAY                      TV5725_REG(0x04, 0x4B, 4, 3)
-#define TV5725_RW_RFF_ADR_ADD_2                     TV5725_REG(0x04, 0x4D, 4, 1)
-#define TV5725_RW_RFF_REQ_SEL                       TV5725_REG(0x04, 0x4D, 5, 2)
-#define TV5725_RW_RFF_ENABLE                        TV5725_REG(0x04, 0x4D, 7, 1)
-#define TV5725_RW_READ_FIFO_01                      TV5725_REG(0x04, 0x4E, 0, 8)
-#define TV5725_RW_RFF_LINE_FLIP                     TV5725_REG(0x04, 0x50, 5, 1)
-#define TV5725_RW_RFF_YUV_DEINTERLACE               TV5725_REG(0x04, 0x50, 6, 1)
-#define TV5725_RW_RFF_LREQ_CUT                      TV5725_REG(0x04, 0x50, 7, 1)
-#define TV5725_RW_RFF_WFF_STA_ADDR_A                TV5725_REG(0x04, 0x51, 0, 21)
-#define TV5725_RW_RFF_WFF_STA_ADDR_B                TV5725_REG(0x04, 0x54, 0, 21)
-#define TV5725_RW_RFF_WFF_OFFSET                    TV5725_REG(0x04, 0x57, 0, 10)
-#define TV5725_RW_RFF_FETCH_NUM                     TV5725_REG(0x04, 0x59, 0, 10)
-#define TV5725_RW_MEM_FF_TOP_FF_SEL                 TV5725_REG(0x04, 0x5B, 7, 1)
+#define TV5725_RW_MEMORY_CONTROLLER_00              TV5725_REG(0x04, 0x00, 0, 8)  /* 存储器: CONTROLLER 00 */
+#define TV5725_RW_SDRAM_RESET_SIGNAL                TV5725_REG(0x04, 0x00, 4, 1)  /* SDRAM: 复位 信号 */
+#define TV5725_RW_SDRAM_START_INITIAL_CYCLE         TV5725_REG(0x04, 0x00, 7, 1)  /* SDRAM: START INITIAL CYCLE */
+#define TV5725_RW_MEM_INTER_DLYCELL_SEL             TV5725_REG(0x04, 0x12, 0, 1)  /* 存储器: INTER DLYCELL 选择 */
+#define TV5725_RW_MEM_CLK_DLYCELL_SEL               TV5725_REG(0x04, 0x12, 1, 1)  /* 存储器: 时钟 DLYCELL 选择 */
+#define TV5725_RW_MEM_FBK_CLK_DLYCELL_SEL           TV5725_REG(0x04, 0x12, 2, 1)  /* 存储器: 反馈 时钟 DLYCELL 选择 */
+#define TV5725_RW_MEM_PAD_CLK_INVERT                TV5725_REG(0x04, 0x13, 0, 1)  /* 存储器: 引脚 时钟 反转 */
+#define TV5725_RW_MEM_RD_DATA_CLK_INVERT            TV5725_REG(0x04, 0x13, 1, 1)  /* 存储器: RD DATA 时钟 反转 */
+#define TV5725_RW_MEM_FBK_CLK_INVERT                TV5725_REG(0x04, 0x13, 2, 1)  /* 存储器: 反馈 时钟 反转 */
+#define TV5725_RW_MEM_REQ_PBH_RFFH                  TV5725_REG(0x04, 0x15, 0, 1)  /* 存储器: REQ PBH RFFH */
+#define TV5725_RW_MEM_ADR_DLY_REG                   TV5725_REG(0x04, 0x1B, 0, 3)  /* 存储器: ADR 延迟 寄存器 */
+#define TV5725_RW_MEM_CLK_DLY_REG                   TV5725_REG(0x04, 0x1B, 4, 3)  /* 存储器: 时钟 延迟 寄存器 */
+#define TV5725_RW_CAPTURE_ENABLE                    TV5725_REG(0x04, 0x21, 0, 1)  /* 捕获: 使能 */
+#define TV5725_RW_CAP_FF_HALF_REQ                   TV5725_REG(0x04, 0x21, 1, 1)  /* 捕获: FIFO 半 REQ */
+#define TV5725_RW_CAP_SAFE_GUARD_EN                 TV5725_REG(0x04, 0x21, 5, 1)  /* 捕获: SAFE 保护 使能 */
+#define TV5725_RW_CAP_REQ_OVER                      TV5725_REG(0x04, 0x22, 0, 1)  /* 捕获: REQ 溢出 */
+#define TV5725_RW_STATUS_CAP_SEL                    TV5725_REG(0x04, 0x22, 1, 1)  /* 捕获状态: 选择 */
+#define TV5725_RW_CAP_REQ_FREEZ                     TV5725_REG(0x04, 0x22, 3, 1)  /* 捕获: REQ 冻结 */
+#define TV5725_RW_CAP_SAFE_GUARD_A                  TV5725_REG(0x04, 0x24, 0, 21)  /* 捕获: SAFE 保护 A */
+#define TV5725_RW_CAP_SAFE_GUARD_B                  TV5725_REG(0x04, 0x27, 0, 21)  /* 捕获: SAFE 保护 B */
+#define TV5725_RW_PB_CUT_REFRESH                    TV5725_REG(0x04, 0x2B, 0, 1)  /* 回放: 切断 刷新 */
+#define TV5725_RW_PB_REQ_SEL                        TV5725_REG(0x04, 0x2B, 1, 2)  /* 回放: REQ 选择 */
+#define TV5725_RW_PB_BYPASS                         TV5725_REG(0x04, 0x2B, 3, 1)  /* 回放: 旁路 */
+#define TV5725_RW_PB_DB_FIELD_EN                    TV5725_REG(0x04, 0x2B, 4, 1)  /* 回放: DB 场 使能 */
+#define TV5725_RW_PB_DB_BUFFER_EN                   TV5725_REG(0x04, 0x2B, 5, 1)  /* 回放: DB BUFFER 使能 */
+#define TV5725_RW_PB_ENABLE                         TV5725_REG(0x04, 0x2B, 7, 1)  /* 回放: 使能 */
+#define TV5725_RW_PLAY_BACK_01                      TV5725_REG(0x04, 0x2C, 0, 8)  /* PLAY: BACK 01 */
+#define TV5725_RW_PLAY_BACK_02                      TV5725_REG(0x04, 0x2D, 0, 8)  /* PLAY: BACK 02 */
+#define TV5725_RW_PB_CAP_OFFSET                     TV5725_REG(0x04, 0x37, 0, 10)  /* 回放: 捕获 偏移 */
+#define TV5725_RW_PB_FETCH_NUM                      TV5725_REG(0x04, 0x39, 0, 10)  /* 回放: 读取 数量 */
+#define TV5725_RW_WFF_ENABLE                        TV5725_REG(0x04, 0x42, 0, 1)  /* 写FIFO: 使能 */
+#define TV5725_RW_WFF_FF_STA_INV                    TV5725_REG(0x04, 0x42, 2, 1)  /* 写FIFO: FIFO STA 反转 */
+#define TV5725_RW_WFF_SAFE_GUARD                    TV5725_REG(0x04, 0x42, 3, 1)  /* 写FIFO: SAFE 保护 */
+#define TV5725_RW_WFF_ADR_ADD_2                     TV5725_REG(0x04, 0x42, 5, 1)  /* 写FIFO: ADR ADD 2 */
+#define TV5725_RW_STATUS_WFF_FF_SEL                 TV5725_REG(0x04, 0x42, 7, 1)  /* 写FIFO状态: FIFO 选择 */
+#define TV5725_RW_WFF_SAFE_GUARD_A                  TV5725_REG(0x04, 0x44, 0, 21)  /* 写FIFO: SAFE 保护 A */
+#define TV5725_RW_WFF_SAFE_GUARD_B                  TV5725_REG(0x04, 0x47, 0, 21)  /* 写FIFO: SAFE 保护 B */
+#define TV5725_RW_WFF_YUV_DEINTERLACE               TV5725_REG(0x04, 0x4A, 0, 1)  /* 写FIFO: YUV DEINTERLACE */
+#define TV5725_RW_WFF_LINE_FLIP                     TV5725_REG(0x04, 0x4A, 4, 1)  /* 写FIFO: 行 翻转 */
+#define TV5725_RW_WFF_HB_DELAY                      TV5725_REG(0x04, 0x4B, 0, 3)  /* 写FIFO: 行消隐 延迟 */
+#define TV5725_RW_WFF_VB_DELAY                      TV5725_REG(0x04, 0x4B, 4, 3)  /* 写FIFO: 场消隐 延迟 */
+#define TV5725_RW_RFF_ADR_ADD_2                     TV5725_REG(0x04, 0x4D, 4, 1)  /* 读FIFO: ADR ADD 2 */
+#define TV5725_RW_RFF_REQ_SEL                       TV5725_REG(0x04, 0x4D, 5, 2)  /* 读FIFO: REQ 选择 */
+#define TV5725_RW_RFF_ENABLE                        TV5725_REG(0x04, 0x4D, 7, 1)  /* 读FIFO: 使能 */
+#define TV5725_RW_READ_FIFO_01                      TV5725_REG(0x04, 0x4E, 0, 8)  /* READ: FIFO 01 */
+#define TV5725_RW_RFF_LINE_FLIP                     TV5725_REG(0x04, 0x50, 5, 1)  /* 读FIFO: 行 翻转 */
+#define TV5725_RW_RFF_YUV_DEINTERLACE               TV5725_REG(0x04, 0x50, 6, 1)  /* 读FIFO: YUV DEINTERLACE */
+#define TV5725_RW_RFF_LREQ_CUT                      TV5725_REG(0x04, 0x50, 7, 1)  /* 读FIFO: LREQ 切断 */
+#define TV5725_RW_RFF_WFF_STA_ADDR_A                TV5725_REG(0x04, 0x51, 0, 21)  /* 读FIFO: 写FIFO STA ADDR A */
+#define TV5725_RW_RFF_WFF_STA_ADDR_B                TV5725_REG(0x04, 0x54, 0, 21)  /* 读FIFO: 写FIFO STA ADDR B */
+#define TV5725_RW_RFF_WFF_OFFSET                    TV5725_REG(0x04, 0x57, 0, 10)  /* 读FIFO: 写FIFO 偏移 */
+#define TV5725_RW_RFF_FETCH_NUM                     TV5725_REG(0x04, 0x59, 0, 10)  /* 读FIFO: 读取 数量 */
+#define TV5725_RW_MEM_FF_TOP_FF_SEL                 TV5725_REG(0x04, 0x5B, 7, 1)  /* 存储器: FIFO TOP FIFO 选择 */
 
 /* ================================================================
    Segment 0x05: ADC / SYNC_PROC / DEC
    ================================================================ */
 
-#define TV5725_RW_CONTROL_ADC_CLK_00                TV5725_REG(0x05, 0x00, 0, 8)
-#define TV5725_RW_ADC_CLK_PA                        TV5725_REG(0x05, 0x00, 0, 2)
-#define TV5725_RW_ADC_CLK_ICLK2X                    TV5725_REG(0x05, 0x00, 3, 1)
-#define TV5725_RW_ADC_CLK_ICLK1X                    TV5725_REG(0x05, 0x00, 4, 1)
-#define TV5725_RW_ADC_SOGEN                         TV5725_REG(0x05, 0x02, 0, 1)
-#define TV5725_RW_ADC_SOGCTRL                       TV5725_REG(0x05, 0x02, 1, 5)
-#define TV5725_RW_ADC_INPUT_SEL                     TV5725_REG(0x05, 0x02, 6, 2)
-#define TV5725_RW_CONTROL_ADC_01                    TV5725_REG(0x05, 0x03, 0, 8)
-#define TV5725_RW_ADC_POWDZ                         TV5725_REG(0x05, 0x03, 0, 1)
-#define TV5725_RW_ADC_RYSEL_R                       TV5725_REG(0x05, 0x03, 1, 1)
-#define TV5725_RW_ADC_RYSEL_G                       TV5725_REG(0x05, 0x03, 2, 1)
-#define TV5725_RW_ADC_RYSEL_B                       TV5725_REG(0x05, 0x03, 3, 1)
-#define TV5725_RW_ADC_FLTR                          TV5725_REG(0x05, 0x03, 4, 2)
-#define TV5725_RW_CONTROL_ADC_02                    TV5725_REG(0x05, 0x04, 0, 8)
-#define TV5725_RW_ADC_TR_RSEL                       TV5725_REG(0x05, 0x04, 0, 2)
-#define TV5725_RW_ADC_TR_RSEL_04_BIT1               TV5725_REG(0x05, 0x04, 1, 1)
-#define TV5725_RW_ADC_TR_ISEL                       TV5725_REG(0x05, 0x04, 2, 3)
-#define TV5725_RW_CONTROL_ADC_03                    TV5725_REG(0x05, 0x05, 0, 8)
-#define TV5725_RW_ADC_TA_05_EN                      TV5725_REG(0x05, 0x05, 0, 1)
-#define TV5725_RW_CONTROL_ADC_04                    TV5725_REG(0x05, 0x06, 0, 8)
-#define TV5725_RW_CONTROL_ADC_05                    TV5725_REG(0x05, 0x07, 0, 8)
-#define TV5725_RW_CONTROL_ADC_06                    TV5725_REG(0x05, 0x08, 0, 8)
-#define TV5725_RW_CONTROL_ADC_07                    TV5725_REG(0x05, 0x09, 0, 8)
-#define TV5725_RW_CONTROL_ADC_08                    TV5725_REG(0x05, 0x0A, 0, 8)
-#define TV5725_RW_CONTROL_ADC_09                    TV5725_REG(0x05, 0x0B, 0, 8)
-#define TV5725_RW_CONTROL_ADC_10                    TV5725_REG(0x05, 0x0C, 0, 8)
-#define TV5725_RW_ADC_TEST_0C_BIT1                  TV5725_REG(0x05, 0x0C, 1, 1)
-#define TV5725_RW_ADC_TEST_0C_BIT3                  TV5725_REG(0x05, 0x0C, 3, 1)
-#define TV5725_RW_ADC_TEST_0C_BIT4                  TV5725_REG(0x05, 0x0C, 4, 1)
-#define TV5725_RW_ADC_AUTO_OFST_EN                  TV5725_REG(0x05, 0x0E, 0, 1)
-#define TV5725_RW_ADC_AUTO_OFST_PRD                 TV5725_REG(0x05, 0x0E, 1, 1)
-#define TV5725_RW_ADC_AUTO_OFST_DELAY               TV5725_REG(0x05, 0x0E, 2, 2)
-#define TV5725_RW_ADC_AUTO_OFST_STEP                TV5725_REG(0x05, 0x0E, 4, 2)
-#define TV5725_RW_ADC_AUTO_OFST_TEST                TV5725_REG(0x05, 0x0E, 7, 1)
-#define TV5725_RW_ADC_AUTO_OFST_01                  TV5725_REG(0x05, 0x0F, 0, 8)
-#define TV5725_RW_CONTROL_PLLAD_00                  TV5725_REG(0x05, 0x11, 0, 8)
-#define TV5725_RW_PLLAD_VCORST                      TV5725_REG(0x05, 0x11, 0, 1)
-#define TV5725_RW_PLLAD_LEN                         TV5725_REG(0x05, 0x11, 1, 1)
-#define TV5725_RW_PLLAD_TEST                        TV5725_REG(0x05, 0x11, 2, 1)
-#define TV5725_RW_PLLAD_TS                          TV5725_REG(0x05, 0x11, 3, 1)
-#define TV5725_RW_PLLAD_PDZ                         TV5725_REG(0x05, 0x11, 4, 1)
-#define TV5725_RW_PLLAD_FS                          TV5725_REG(0x05, 0x11, 5, 1)
-#define TV5725_RW_PLLAD_BPS                         TV5725_REG(0x05, 0x11, 6, 1)
-#define TV5725_RW_PLLAD_LAT                         TV5725_REG(0x05, 0x11, 7, 1)
-#define TV5725_RW_PLLAD_MD                          TV5725_REG(0x05, 0x12, 0, 12)
-#define TV5725_RW_CONTROL_PLLAD_05                  TV5725_REG(0x05, 0x16, 0, 8)
-#define TV5725_RW_PLLAD_R                           TV5725_REG(0x05, 0x16, 0, 2)
-#define TV5725_RW_PLLAD_S                           TV5725_REG(0x05, 0x16, 2, 2)
-#define TV5725_RW_PLLAD_KS                          TV5725_REG(0x05, 0x16, 4, 2)
-#define TV5725_RW_PLLAD_CKOS                        TV5725_REG(0x05, 0x16, 6, 2)
-#define TV5725_RW_PLLAD_ICP                         TV5725_REG(0x05, 0x17, 0, 3)
-#define TV5725_RW_PA_ADC_BYPSZ                      TV5725_REG(0x05, 0x18, 0, 1)
-#define TV5725_RW_PA_ADC_S                          TV5725_REG(0x05, 0x18, 1, 5)
-#define TV5725_RW_PA_ADC_LOCKOFF                    TV5725_REG(0x05, 0x18, 6, 1)
-#define TV5725_RW_PA_ADC_LAT                        TV5725_REG(0x05, 0x18, 7, 1)
-#define TV5725_RW_PA_SP_BYPSZ                       TV5725_REG(0x05, 0x19, 0, 1)
-#define TV5725_RW_PA_SP_S                           TV5725_REG(0x05, 0x19, 1, 5)
-#define TV5725_RW_PA_SP_LOCKOFF                     TV5725_REG(0x05, 0x19, 6, 1)
-#define TV5725_RW_PA_SP_LAT                         TV5725_REG(0x05, 0x19, 7, 1)
-#define TV5725_RW_DEC_WEN_MODE                      TV5725_REG(0x05, 0x1E, 7, 1)
-#define TV5725_RW_DEC_REG_01                        TV5725_REG(0x05, 0x1F, 0, 8)
-#define TV5725_RW_DEC1_BYPS                         TV5725_REG(0x05, 0x1F, 0, 1)
-#define TV5725_RW_DEC2_BYPS                         TV5725_REG(0x05, 0x1F, 1, 1)
-#define TV5725_RW_DEC_MATRIX_BYPS                   TV5725_REG(0x05, 0x1F, 2, 1)
-#define TV5725_RW_DEC_TEST_ENABLE                   TV5725_REG(0x05, 0x1F, 3, 1)
-#define TV5725_RW_DEC_TEST_SEL                      TV5725_REG(0x05, 0x1F, 4, 3)
-#define TV5725_RW_DEC_IDREG_EN                      TV5725_REG(0x05, 0x1F, 7, 1)
-#define TV5725_RW_SP_SOG_SRC_SEL                    TV5725_REG(0x05, 0x20, 0, 1)
-#define TV5725_RW_SP_SOG_P_ATO                      TV5725_REG(0x05, 0x20, 1, 1)
-#define TV5725_RW_SP_SOG_P_INV                      TV5725_REG(0x05, 0x20, 2, 1)
-#define TV5725_RW_SP_EXT_SYNC_SEL                   TV5725_REG(0x05, 0x20, 3, 1)
-#define TV5725_RW_SP_JITTER_SYNC                    TV5725_REG(0x05, 0x20, 4, 1)
-#define TV5725_RW_SP_SYNC_PD_THD                    TV5725_REG(0x05, 0x26, 0, 12)
-#define TV5725_RW_SYNC_PROC_14                      TV5725_REG(0x05, 0x33, 0, 8)
-#define TV5725_RW_SP_DLT_REG                        TV5725_REG(0x05, 0x35, 0, 12)
-#define TV5725_RW_SYNC_PROC_18                      TV5725_REG(0x05, 0x37, 0, 8)
-#define TV5725_RW_SYNC_PROC_19                      TV5725_REG(0x05, 0x38, 0, 8)
-#define TV5725_RW_SYNC_PROC_20                      TV5725_REG(0x05, 0x39, 0, 8)
-#define TV5725_RW_SYNC_PROC_21                      TV5725_REG(0x05, 0x3A, 0, 8)
-#define TV5725_RW_SP_SDCS_VSST_REG_H                TV5725_REG(0x05, 0x3B, 0, 3)
-#define TV5725_RW_SP_SDCS_VSSP_REG_H                TV5725_REG(0x05, 0x3B, 4, 3)
-#define TV5725_RW_SYNC_PROC_23                      TV5725_REG(0x05, 0x3E, 0, 8)
-#define TV5725_RW_SP_CS_P_SWAP                      TV5725_REG(0x05, 0x3E, 0, 1)
-#define TV5725_RW_SP_HD_MODE                        TV5725_REG(0x05, 0x3E, 1, 1)
-#define TV5725_RW_SP_H_COAST                        TV5725_REG(0x05, 0x3E, 2, 1)
-#define TV5725_RW_SP_H_PROTECT                      TV5725_REG(0x05, 0x3E, 4, 1)
-#define TV5725_RW_SP_DIS_SUB_COAST                  TV5725_REG(0x05, 0x3E, 5, 1)
-#define TV5725_RW_SYNC_PROC_24                      TV5725_REG(0x05, 0x3F, 0, 8)
-#define TV5725_RW_SYNC_PROC_25                      TV5725_REG(0x05, 0x40, 0, 8)
-#define TV5725_RW_SP_CS_CLP_ST                      TV5725_REG(0x05, 0x41, 0, 12)
-#define TV5725_RW_SP_CS_CLP_SP                      TV5725_REG(0x05, 0x43, 0, 12)
-#define TV5725_RW_SP_CS_HS_ST                       TV5725_REG(0x05, 0x45, 0, 12)
-#define TV5725_RW_SP_CS_HS_SP                       TV5725_REG(0x05, 0x47, 0, 12)
-#define TV5725_RW_SP_RT_HS_ST                       TV5725_REG(0x05, 0x49, 0, 12)
-#define TV5725_RW_SP_RT_HS_SP                       TV5725_REG(0x05, 0x4B, 0, 12)
-#define TV5725_RW_SP_H_CST_ST                       TV5725_REG(0x05, 0x4D, 0, 12)
-#define TV5725_RW_SP_H_CST_SP                       TV5725_REG(0x05, 0x4F, 0, 12)
-#define TV5725_RW_SP_HS_POL_ATO                     TV5725_REG(0x05, 0x55, 4, 1)
-#define TV5725_RW_SP_VS_POL_ATO                     TV5725_REG(0x05, 0x55, 6, 1)
-#define TV5725_RW_SP_HCST_AUTO_EN                   TV5725_REG(0x05, 0x55, 7, 1)
-#define TV5725_RW_SYNC_PROC_48                      TV5725_REG(0x05, 0x56, 0, 8)
-#define TV5725_RW_SP_SOG_MODE                       TV5725_REG(0x05, 0x56, 0, 1)
-#define TV5725_RW_SP_HS2PLL_INV_REG                 TV5725_REG(0x05, 0x56, 1, 1)
-#define TV5725_RW_SP_CLAMP_MANUAL                   TV5725_REG(0x05, 0x56, 2, 1)
-#define TV5725_RW_SP_CLP_SRC_SEL                    TV5725_REG(0x05, 0x56, 3, 1)
-#define TV5725_RW_SP_SYNC_BYPS                      TV5725_REG(0x05, 0x56, 4, 1)
-#define TV5725_RW_SP_HS_PROC_INV_REG                TV5725_REG(0x05, 0x56, 5, 1)
-#define TV5725_RW_SP_VS_PROC_INV_REG                TV5725_REG(0x05, 0x56, 6, 1)
-#define TV5725_RW_SP_CLAMP_INV_REG                  TV5725_REG(0x05, 0x56, 7, 1)
-#define TV5725_RW_SYNC_PROC_49                      TV5725_REG(0x05, 0x57, 0, 8)
-#define TV5725_RW_SP_NO_CLAMP_REG                   TV5725_REG(0x05, 0x57, 0, 1)
-#define TV5725_RW_SP_COAST_INV_REG                  TV5725_REG(0x05, 0x57, 1, 1)
-#define TV5725_RW_SP_NO_COAST_REG                   TV5725_REG(0x05, 0x57, 2, 1)
-#define TV5725_RW_SP_HS_LOOP_SEL                    TV5725_REG(0x05, 0x57, 6, 1)
-#define TV5725_RW_SP_HS_REG                         TV5725_REG(0x05, 0x57, 7, 1)
-#define TV5725_RW_ADC_UNUSED_60                     TV5725_REG(0x05, 0x60, 0, 8)
-#define TV5725_RW_ADC_UNUSED_61                     TV5725_REG(0x05, 0x61, 0, 8)
-#define TV5725_RW_ADC_UNUSED_62                     TV5725_REG(0x05, 0x62, 0, 8)
-#define TV5725_RW_SYNC_PROC_55                      TV5725_REG(0x05, 0x63, 0, 8)
-#define TV5725_RW_ADC_UNUSED_64                     TV5725_REG(0x05, 0x64, 0, 8)
-#define TV5725_RW_ADC_UNUSED_65                     TV5725_REG(0x05, 0x65, 0, 8)
-#define TV5725_RW_ADC_UNUSED_66                     TV5725_REG(0x05, 0x66, 0, 8)
-#define TV5725_RW_ADC_UNUSED_67                     TV5725_REG(0x05, 0x67, 0, 16)
-#define TV5725_RW_ADC_UNUSED_69                     TV5725_REG(0x05, 0x69, 0, 8)
-#define TV5725_RW_VERYWIDEDUMMYREG                  TV5725_REG(0x05, 0xD0, 0, 32)
+#define TV5725_RW_CONTROL_ADC_CLK_00                TV5725_REG(0x05, 0x00, 0, 8)  /* ADC控制: 时钟 00 */
+#define TV5725_RW_ADC_CLK_PA                        TV5725_REG(0x05, 0x00, 0, 2)  /* ADC: 时钟 PA */
+#define TV5725_RW_ADC_CLK_ICLK2X                    TV5725_REG(0x05, 0x00, 3, 1)  /* ADC: 时钟 ICLK2X */
+#define TV5725_RW_ADC_CLK_ICLK1X                    TV5725_REG(0x05, 0x00, 4, 1)  /* ADC: 时钟 ICLK1X */
+#define TV5725_RW_ADC_SOGEN                         TV5725_REG(0x05, 0x02, 0, 1)  /* ADC: SOGEN */
+#define TV5725_RW_ADC_SOGCTRL                       TV5725_REG(0x05, 0x02, 1, 5)  /* ADC: SOGCTRL */
+#define TV5725_RW_ADC_INPUT_SEL                     TV5725_REG(0x05, 0x02, 6, 2)  /* ADC: 输入 选择 */
+#define TV5725_RW_CONTROL_ADC_01                    TV5725_REG(0x05, 0x03, 0, 8)  /* ADC控制: 01 */
+#define TV5725_RW_ADC_POWDZ                         TV5725_REG(0x05, 0x03, 0, 1)  /* ADC: 掉电(低有效) */
+#define TV5725_RW_ADC_RYSEL_R                       TV5725_REG(0x05, 0x03, 1, 1)  /* ADC: RYSEL R */
+#define TV5725_RW_ADC_RYSEL_G                       TV5725_REG(0x05, 0x03, 2, 1)  /* ADC: RYSEL G */
+#define TV5725_RW_ADC_RYSEL_B                       TV5725_REG(0x05, 0x03, 3, 1)  /* ADC: RYSEL B */
+#define TV5725_RW_ADC_FLTR                          TV5725_REG(0x05, 0x03, 4, 2)  /* ADC: 滤波 */
+#define TV5725_RW_CONTROL_ADC_02                    TV5725_REG(0x05, 0x04, 0, 8)  /* ADC控制: 02 */
+#define TV5725_RW_ADC_TR_RSEL                       TV5725_REG(0x05, 0x04, 0, 2)  /* ADC: TR RSEL */
+#define TV5725_RW_ADC_TR_RSEL_04_BIT1               TV5725_REG(0x05, 0x04, 1, 1)  /* ADC: TR RSEL 04 BIT1 */
+#define TV5725_RW_ADC_TR_ISEL                       TV5725_REG(0x05, 0x04, 2, 3)  /* ADC: TR ISEL */
+#define TV5725_RW_CONTROL_ADC_03                    TV5725_REG(0x05, 0x05, 0, 8)  /* ADC控制: 03 */
+#define TV5725_RW_ADC_TA_05_EN                      TV5725_REG(0x05, 0x05, 0, 1)  /* ADC: TA 05 使能 */
+#define TV5725_RW_CONTROL_ADC_04                    TV5725_REG(0x05, 0x06, 0, 8)  /* ADC控制: 04 */
+#define TV5725_RW_CONTROL_ADC_05                    TV5725_REG(0x05, 0x07, 0, 8)  /* ADC控制: 05 */
+#define TV5725_RW_CONTROL_ADC_06                    TV5725_REG(0x05, 0x08, 0, 8)  /* ADC控制: 06 */
+#define TV5725_RW_CONTROL_ADC_07                    TV5725_REG(0x05, 0x09, 0, 8)  /* ADC控制: 07 */
+#define TV5725_RW_CONTROL_ADC_08                    TV5725_REG(0x05, 0x0A, 0, 8)  /* ADC控制: 08 */
+#define TV5725_RW_CONTROL_ADC_09                    TV5725_REG(0x05, 0x0B, 0, 8)  /* ADC控制: 09 */
+#define TV5725_RW_CONTROL_ADC_10                    TV5725_REG(0x05, 0x0C, 0, 8)  /* ADC控制: 10 */
+#define TV5725_RW_ADC_TEST_0C_BIT1                  TV5725_REG(0x05, 0x0C, 1, 1)  /* ADC: 测试 0C BIT1 */
+#define TV5725_RW_ADC_TEST_0C_BIT3                  TV5725_REG(0x05, 0x0C, 3, 1)  /* ADC: 测试 0C BIT3 */
+#define TV5725_RW_ADC_TEST_0C_BIT4                  TV5725_REG(0x05, 0x0C, 4, 1)  /* ADC: 测试 0C BIT4 */
+#define TV5725_RW_ADC_AUTO_OFST_EN                  TV5725_REG(0x05, 0x0E, 0, 1)  /* ADC: 自动 偏移 使能 */
+#define TV5725_RW_ADC_AUTO_OFST_PRD                 TV5725_REG(0x05, 0x0E, 1, 1)  /* ADC: 自动 偏移 PRD */
+#define TV5725_RW_ADC_AUTO_OFST_DELAY               TV5725_REG(0x05, 0x0E, 2, 2)  /* ADC: 自动 偏移 延迟 */
+#define TV5725_RW_ADC_AUTO_OFST_STEP                TV5725_REG(0x05, 0x0E, 4, 2)  /* ADC: 自动 偏移 STEP */
+#define TV5725_RW_ADC_AUTO_OFST_TEST                TV5725_REG(0x05, 0x0E, 7, 1)  /* ADC: 自动 偏移 测试 */
+#define TV5725_RW_ADC_AUTO_OFST_01                  TV5725_REG(0x05, 0x0F, 0, 8)  /* ADC: 自动 偏移 01 */
+#define TV5725_RW_CONTROL_PLLAD_00                  TV5725_REG(0x05, 0x11, 0, 8)  /* ADC PLL控制: 00 */
+#define TV5725_RW_PLLAD_VCORST                      TV5725_REG(0x05, 0x11, 0, 1)  /* ADC PLL: VCO复位 */
+#define TV5725_RW_PLLAD_LEN                         TV5725_REG(0x05, 0x11, 1, 1)  /* ADC PLL: 长度 */
+#define TV5725_RW_PLLAD_TEST                        TV5725_REG(0x05, 0x11, 2, 1)  /* ADC PLL: 测试 */
+#define TV5725_RW_PLLAD_TS                          TV5725_REG(0x05, 0x11, 3, 1)  /* ADC PLL: 测试选择 */
+#define TV5725_RW_PLLAD_PDZ                         TV5725_REG(0x05, 0x11, 4, 1)  /* ADC PLL: 掉电(低有效) */
+#define TV5725_RW_PLLAD_FS                          TV5725_REG(0x05, 0x11, 5, 1)  /* ADC PLL: 频率选择 */
+#define TV5725_RW_PLLAD_BPS                         TV5725_REG(0x05, 0x11, 6, 1)  /* ADC PLL: 旁路 */
+#define TV5725_RW_PLLAD_LAT                         TV5725_REG(0x05, 0x11, 7, 1)  /* ADC PLL: 锁存 */
+#define TV5725_RW_PLLAD_MD                          TV5725_REG(0x05, 0x12, 0, 12)  /* ADC PLL: 模式 */
+#define TV5725_RW_CONTROL_PLLAD_05                  TV5725_REG(0x05, 0x16, 0, 8)  /* ADC PLL控制: 05 */
+#define TV5725_RW_PLLAD_R                           TV5725_REG(0x05, 0x16, 0, 2)  /* ADC PLL: R */
+#define TV5725_RW_PLLAD_S                           TV5725_REG(0x05, 0x16, 2, 2)  /* ADC PLL: S */
+#define TV5725_RW_PLLAD_KS                          TV5725_REG(0x05, 0x16, 4, 2)  /* ADC PLL: KS */
+#define TV5725_RW_PLLAD_CKOS                        TV5725_REG(0x05, 0x16, 6, 2)  /* ADC PLL: CKOS */
+#define TV5725_RW_PLLAD_ICP                         TV5725_REG(0x05, 0x17, 0, 3)  /* ADC PLL: 充电泵电流 */
+#define TV5725_RW_PA_ADC_BYPSZ                      TV5725_REG(0x05, 0x18, 0, 1)  /* PA: ADC BYPSZ */
+#define TV5725_RW_PA_ADC_S                          TV5725_REG(0x05, 0x18, 1, 5)  /* PA: ADC S */
+#define TV5725_RW_PA_ADC_LOCKOFF                    TV5725_REG(0x05, 0x18, 6, 1)  /* PA: ADC LOCKOFF */
+#define TV5725_RW_PA_ADC_LAT                        TV5725_REG(0x05, 0x18, 7, 1)  /* PA: ADC 锁存 */
+#define TV5725_RW_PA_SP_BYPSZ                       TV5725_REG(0x05, 0x19, 0, 1)  /* PA: 结束 BYPSZ */
+#define TV5725_RW_PA_SP_S                           TV5725_REG(0x05, 0x19, 1, 5)  /* PA: 结束 S */
+#define TV5725_RW_PA_SP_LOCKOFF                     TV5725_REG(0x05, 0x19, 6, 1)  /* PA: 结束 LOCKOFF */
+#define TV5725_RW_PA_SP_LAT                         TV5725_REG(0x05, 0x19, 7, 1)  /* PA: 结束 锁存 */
+#define TV5725_RW_DEC_WEN_MODE                      TV5725_REG(0x05, 0x1E, 7, 1)  /* 解码器: WEN 模式 */
+#define TV5725_RW_DEC_REG_01                        TV5725_REG(0x05, 0x1F, 0, 8)  /* 解码器: 寄存器 01 */
+#define TV5725_RW_DEC1_BYPS                         TV5725_REG(0x05, 0x1F, 0, 1)  /* DEC1: 旁路 */
+#define TV5725_RW_DEC2_BYPS                         TV5725_REG(0x05, 0x1F, 1, 1)  /* DEC2: 旁路 */
+#define TV5725_RW_DEC_MATRIX_BYPS                   TV5725_REG(0x05, 0x1F, 2, 1)  /* 解码器: 矩阵 旁路 */
+#define TV5725_RW_DEC_TEST_ENABLE                   TV5725_REG(0x05, 0x1F, 3, 1)  /* 解码器: 测试 使能 */
+#define TV5725_RW_DEC_TEST_SEL                      TV5725_REG(0x05, 0x1F, 4, 3)  /* 解码器: 测试 选择 */
+#define TV5725_RW_DEC_IDREG_EN                      TV5725_REG(0x05, 0x1F, 7, 1)  /* 解码器: IDREG 使能 */
+#define TV5725_RW_SP_SOG_SRC_SEL                    TV5725_REG(0x05, 0x20, 0, 1)  /* 同步处理器: 绿同步 SRC 选择 */
+#define TV5725_RW_SP_SOG_P_ATO                      TV5725_REG(0x05, 0x20, 1, 1)  /* 同步处理器: 绿同步 P ATO */
+#define TV5725_RW_SP_SOG_P_INV                      TV5725_REG(0x05, 0x20, 2, 1)  /* 同步处理器: 绿同步 P 反转 */
+#define TV5725_RW_SP_EXT_SYNC_SEL                   TV5725_REG(0x05, 0x20, 3, 1)  /* 同步处理器: EXT 同步 选择 */
+#define TV5725_RW_SP_JITTER_SYNC                    TV5725_REG(0x05, 0x20, 4, 1)  /* 同步处理器: 抖动 同步 */
+#define TV5725_RW_SP_SYNC_PD_THD                    TV5725_REG(0x05, 0x26, 0, 12)  /* 同步处理器: 同步 PD 阈值 */
+#define TV5725_RW_SYNC_PROC_14                      TV5725_REG(0x05, 0x33, 0, 8)  /* 同步: PROC 14 */
+#define TV5725_RW_SP_DLT_REG                        TV5725_REG(0x05, 0x35, 0, 12)  /* 同步处理器: DLT 寄存器 */
+#define TV5725_RW_SYNC_PROC_18                      TV5725_REG(0x05, 0x37, 0, 8)  /* 同步: PROC 18 */
+#define TV5725_RW_SYNC_PROC_19                      TV5725_REG(0x05, 0x38, 0, 8)  /* 同步: PROC 19 */
+#define TV5725_RW_SYNC_PROC_20                      TV5725_REG(0x05, 0x39, 0, 8)  /* 同步: PROC 20 */
+#define TV5725_RW_SYNC_PROC_21                      TV5725_REG(0x05, 0x3A, 0, 8)  /* 同步: PROC 21 */
+#define TV5725_RW_SP_SDCS_VSST_REG_H                TV5725_REG(0x05, 0x3B, 0, 3)  /* 同步处理器: SDCS VSST 寄存器 H */
+#define TV5725_RW_SP_SDCS_VSSP_REG_H                TV5725_REG(0x05, 0x3B, 4, 3)  /* 同步处理器: SDCS VSSP 寄存器 H */
+#define TV5725_RW_SYNC_PROC_23                      TV5725_REG(0x05, 0x3E, 0, 8)  /* 同步: PROC 23 */
+#define TV5725_RW_SP_CS_P_SWAP                      TV5725_REG(0x05, 0x3E, 0, 1)  /* 同步处理器: CS P 交换 */
+#define TV5725_RW_SP_HD_MODE                        TV5725_REG(0x05, 0x3E, 1, 1)  /* 同步处理器: 高清 模式 */
+#define TV5725_RW_SP_H_COAST                        TV5725_REG(0x05, 0x3E, 2, 1)  /* 同步处理器: H Coast */
+#define TV5725_RW_SP_H_PROTECT                      TV5725_REG(0x05, 0x3E, 4, 1)  /* 同步处理器: H 保护 */
+#define TV5725_RW_SP_DIS_SUB_COAST                  TV5725_REG(0x05, 0x3E, 5, 1)  /* 同步处理器: 显示 SUB Coast */
+#define TV5725_RW_SYNC_PROC_24                      TV5725_REG(0x05, 0x3F, 0, 8)  /* 同步: PROC 24 */
+#define TV5725_RW_SYNC_PROC_25                      TV5725_REG(0x05, 0x40, 0, 8)  /* 同步: PROC 25 */
+#define TV5725_RW_SP_CS_CLP_ST                      TV5725_REG(0x05, 0x41, 0, 12)  /* 同步处理器: CS CLP 起始 */
+#define TV5725_RW_SP_CS_CLP_SP                      TV5725_REG(0x05, 0x43, 0, 12)  /* 同步处理器: CS CLP 结束 */
+#define TV5725_RW_SP_CS_HS_ST                       TV5725_REG(0x05, 0x45, 0, 12)  /* 同步处理器: CS 行同步 起始 */
+#define TV5725_RW_SP_CS_HS_SP                       TV5725_REG(0x05, 0x47, 0, 12)  /* 同步处理器: CS 行同步 结束 */
+#define TV5725_RW_SP_RT_HS_ST                       TV5725_REG(0x05, 0x49, 0, 12)  /* 同步处理器: RT 行同步 起始 */
+#define TV5725_RW_SP_RT_HS_SP                       TV5725_REG(0x05, 0x4B, 0, 12)  /* 同步处理器: RT 行同步 结束 */
+#define TV5725_RW_SP_H_CST_ST                       TV5725_REG(0x05, 0x4D, 0, 12)  /* 同步处理器: H CST 起始 */
+#define TV5725_RW_SP_H_CST_SP                       TV5725_REG(0x05, 0x4F, 0, 12)  /* 同步处理器: H CST 结束 */
+#define TV5725_RW_SP_HS_POL_ATO                     TV5725_REG(0x05, 0x55, 4, 1)  /* 同步处理器: 行同步 极性 ATO */
+#define TV5725_RW_SP_VS_POL_ATO                     TV5725_REG(0x05, 0x55, 6, 1)  /* 同步处理器: 场同步 极性 ATO */
+#define TV5725_RW_SP_HCST_AUTO_EN                   TV5725_REG(0x05, 0x55, 7, 1)  /* 同步处理器: HCST 自动 使能 */
+#define TV5725_RW_SYNC_PROC_48                      TV5725_REG(0x05, 0x56, 0, 8)  /* 同步: PROC 48 */
+#define TV5725_RW_SP_SOG_MODE                       TV5725_REG(0x05, 0x56, 0, 1)  /* 同步处理器: 绿同步 模式 */
+#define TV5725_RW_SP_HS2PLL_INV_REG                 TV5725_REG(0x05, 0x56, 1, 1)  /* 同步处理器: HS2PLL 反转 寄存器 */
+#define TV5725_RW_SP_CLAMP_MANUAL                   TV5725_REG(0x05, 0x56, 2, 1)  /* 同步处理器: CLAMP 手动 */
+#define TV5725_RW_SP_CLP_SRC_SEL                    TV5725_REG(0x05, 0x56, 3, 1)  /* 同步处理器: CLP SRC 选择 */
+#define TV5725_RW_SP_SYNC_BYPS                      TV5725_REG(0x05, 0x56, 4, 1)  /* 同步处理器: 同步 旁路 */
+#define TV5725_RW_SP_HS_PROC_INV_REG                TV5725_REG(0x05, 0x56, 5, 1)  /* 同步处理器: 行同步 PROC 反转 寄存器 */
+#define TV5725_RW_SP_VS_PROC_INV_REG                TV5725_REG(0x05, 0x56, 6, 1)  /* 同步处理器: 场同步 PROC 反转 寄存器 */
+#define TV5725_RW_SP_CLAMP_INV_REG                  TV5725_REG(0x05, 0x56, 7, 1)  /* 同步处理器: CLAMP 反转 寄存器 */
+#define TV5725_RW_SYNC_PROC_49                      TV5725_REG(0x05, 0x57, 0, 8)  /* 同步: PROC 49 */
+#define TV5725_RW_SP_NO_CLAMP_REG                   TV5725_REG(0x05, 0x57, 0, 1)  /* 同步处理器: NO CLAMP 寄存器 */
+#define TV5725_RW_SP_COAST_INV_REG                  TV5725_REG(0x05, 0x57, 1, 1)  /* 同步处理器: Coast 反转 寄存器 */
+#define TV5725_RW_SP_NO_COAST_REG                   TV5725_REG(0x05, 0x57, 2, 1)  /* 同步处理器: NO Coast 寄存器 */
+#define TV5725_RW_SP_HS_LOOP_SEL                    TV5725_REG(0x05, 0x57, 6, 1)  /* 同步处理器: 行同步 LOOP 选择 */
+#define TV5725_RW_SP_HS_REG                         TV5725_REG(0x05, 0x57, 7, 1)  /* 同步处理器: 行同步 寄存器 */
+#define TV5725_RW_ADC_UNUSED_60                     TV5725_REG(0x05, 0x60, 0, 8)  /* ADC: 未使用 60 */
+#define TV5725_RW_ADC_UNUSED_61                     TV5725_REG(0x05, 0x61, 0, 8)  /* ADC: 未使用 61 */
+#define TV5725_RW_ADC_UNUSED_62                     TV5725_REG(0x05, 0x62, 0, 8)  /* ADC: 未使用 62 */
+#define TV5725_RW_SYNC_PROC_55                      TV5725_REG(0x05, 0x63, 0, 8)  /* 同步: PROC 55 */
+#define TV5725_RW_ADC_UNUSED_64                     TV5725_REG(0x05, 0x64, 0, 8)  /* ADC: 未使用 64 */
+#define TV5725_RW_ADC_UNUSED_65                     TV5725_REG(0x05, 0x65, 0, 8)  /* ADC: 未使用 65 */
+#define TV5725_RW_ADC_UNUSED_66                     TV5725_REG(0x05, 0x66, 0, 8)  /* ADC: 未使用 66 */
+#define TV5725_RW_ADC_UNUSED_67                     TV5725_REG(0x05, 0x67, 0, 16)  /* ADC: 未使用 67 */
+#define TV5725_RW_ADC_UNUSED_69                     TV5725_REG(0x05, 0x69, 0, 8)  /* ADC: 未使用 69 */
+#define TV5725_RW_VERYWIDEDUMMYREG                  TV5725_REG(0x05, 0xD0, 0, 32)  /* VERYWIDEDUMMYREG */
 
 // clang-format on
 /* ================================================================
    Function prototypes
    ================================================================ */
 
+#include <stdint.h>
+/* Input signal type */
+
+int32_t tv5725_init(void);
+uint32_t tv5725_get_chip_id(void);
+void tv5725_chip_reset(void);
+
+uint32_t tv5725_reg_read(tv5725_reg_t reg);
+void tv5725_reg_write(tv5725_reg_t reg, uint32_t value);
+
+int32_t tv5725_read_byte(uint8_t seg, uint8_t offset, uint8_t *value);
+int32_t tv5725_write_byte(uint8_t seg, uint8_t offset, uint8_t value);
+int32_t tv5725_read_buf(uint8_t seg, uint8_t offset, uint8_t *buf, uint8_t len);
+int32_t tv5725_write_buf(uint8_t seg, uint8_t offset, const uint8_t *buf, uint8_t len);
+
+void tv5725_set_segment(uint8_t segment);
+void tv5725_load_preset(const uint8_t *preset);
+
+int32_t tv5725_input_config_rgbs(void);
+int32_t tv5725_input_config_rgsb(void);
+int32_t tv5725_input_config_yuv(void);
+int32_t tv5725_input_set_mode(tv5725_input_mode_t mode);
+void tv5725_input_auto_detect(void);
+int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv);
+
 /* ================================================================
    Input mode selection
    ================================================================ */
-
-/* Input signal type */
-typedef enum
-{
-   TV5725_INPUT_AUTO = 0,
-   TV5725_INPUT_YUV,
-   TV5725_INPUT_RGBS,
-   TV5725_INPUT_COUNT
-} tv5725_input_mode_t;
-
-/* Analog switch control: PB12-PB15, composite sync routing */
-#define TV5725_ASW_PORT (GPIO_PORT_B)
-#define TV5725_ASW_MASK (GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15)
-#define TV5725_ASW01 (GPIO_PIN_12)
-#define TV5725_ASW02 (GPIO_PIN_13)
-#define TV5725_ASW03 (GPIO_PIN_14)
-#define TV5725_ASW04 (GPIO_PIN_15)
 
 #endif /* TV5725_H */

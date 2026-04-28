@@ -189,17 +189,20 @@ void tv5725_chip_reset(void)
         tv5725_reg_write(bits[i], 1);
 }
 
-uint8_t tv5725_get_chip_id(void)
+uint32_t tv5725_get_chip_id(void)
 {
-    // return (uint8_t)tv5725_reg_read(TV5725_CHIP_ID_PRODUCT);
+    uint8_t buf[3];
+    if (tv5725_read_buf(0x00, 0x0B, buf, 3) != LL_OK)
+        return 0;
+    return (uint32_t)buf[0] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16);
 }
 
 int32_t tv5725_init(void)
 {
-    uint8_t id = tv5725_get_chip_id();
-    if (id == 0x00 || id == 0xFF)
+    uint32_t id = tv5725_get_chip_id();
+    if (id == 0x00 || id == 0xFFFFFFFF)
         return LL_ERR;
-    printf("TV5725 Chip ID: 0x%02X\n", id);
+    printf("TV5725 Chip ID: 0x%06lX\n", id);
     return LL_OK;
 }
 
@@ -262,100 +265,6 @@ void tv5725_load_preset(const uint8_t *preset)
 }
 
 /* ==================================================================
-   Frame buffer pipeline
-   ================================================================== */
-
-void tv5725_sdram_init(void)
-{
-    // tv5725_reg_write(TV5725_SDRAM_RESET_CONTROL, 0x02);
-    // tv5725_reg_write(TV5725_SDRAM_RESET_SIGNAL, 1);
-    // tv5725_reg_write(TV5725_SDRAM_RESET_SIGNAL, 0);
-    // tv5725_reg_write(TV5725_SDRAM_RESET_CONTROL, 0x82);
-}
-
-void tv5725_capture_start(void)
-{
-    // tv5725_reg_write(TV5725_WFF_ENABLE, 1);
-    // tv5725_reg_write(TV5725_RFF_ENABLE, 1);
-    // tv5725_reg_write(TV5725_CAPTURE_ENABLE, 1);
-}
-
-void tv5725_capture_stop(void)
-{
-    // tv5725_reg_write(TV5725_CAPTURE_ENABLE, 0);
-    // tv5725_reg_write(TV5725_WFF_ENABLE, 0);
-    // tv5725_reg_write(TV5725_RFF_ENABLE, 0);
-}
-
-/* ==================================================================
-   Color matrix
-   ================================================================== */
-
-void tv5725_apply_rgb_patches(void)
-{
-    // tv5725_reg_write(TV5725_ADC_RYSEL_R, 0);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_G, 0);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_B, 0);
-    // tv5725_reg_write(TV5725_DEC_MATRIX_BYPS, 0);
-    // tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
-    // tv5725_reg_write(TV5725_VDS_Y_GAIN, 0x80);
-    // tv5725_reg_write(TV5725_VDS_UCOS_GAIN, 0x1C);
-    // tv5725_reg_write(TV5725_VDS_VCOS_GAIN, 0x29);
-    // tv5725_reg_write(TV5725_VDS_Y_OFST, 0x00);
-    // tv5725_reg_write(TV5725_VDS_U_OFST, 0x00);
-    // tv5725_reg_write(TV5725_VDS_V_OFST, 0x00);
-}
-
-void tv5725_apply_yuv_patches(void)
-{
-    // tv5725_reg_write(TV5725_ADC_RYSEL_R, 1);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_G, 0);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_B, 1);
-    // tv5725_reg_write(TV5725_DEC_MATRIX_BYPS, 1);
-    // tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
-    // tv5725_reg_write(TV5725_VDS_Y_GAIN, 128);
-    // tv5725_reg_write(TV5725_VDS_UCOS_GAIN, 28);
-    // tv5725_reg_write(TV5725_VDS_VCOS_GAIN, 41);
-    // tv5725_reg_write(TV5725_VDS_Y_OFST, 0x0E);
-    // tv5725_reg_write(TV5725_VDS_U_OFST, 0x03);
-    // tv5725_reg_write(TV5725_VDS_V_OFST, 0x04);
-}
-
-/* ==================================================================
-   Output path init
-   ================================================================== */
-
-int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv)
-{
-    tv5725_load_preset(preset);
-    tv5725_sdram_init();
-
-    // tv5725_reg_write(TV5725_DAC_RGBS_PWDNZ, 1);
-    // tv5725_reg_write(TV5725_DAC_RGBS_R0ENZ, 0); /* 0 = enable Red DAC */
-    // tv5725_reg_write(TV5725_DAC_RGBS_G0ENZ, 0); /* 0 = enable Green DAC */
-    // tv5725_reg_write(TV5725_DAC_RGBS_B0ENZ, 0); /* 0 = enable Blue DAC */
-    // tv5725_reg_write(TV5725_DAC_RGBS_SPD, 0);
-    // tv5725_reg_write(TV5725_DAC_RGBS_S0ENZ, 0);
-    // tv5725_reg_write(TV5725_DAC_RGBS_S1EN, 1);
-    // tv5725_reg_write(TV5725_PAD_SYNC_OUT_ENZ, 0);
-    // tv5725_reg_write(TV5725_OUT_SYNC_CNTRL, 1);
-
-    if (input_is_yuv)
-        tv5725_apply_yuv_patches();
-    else
-        tv5725_apply_rgb_patches();
-
-    // tv5725_reg_write(TV5725_ADC_AUTO_OFST_PRD, 1);
-    // tv5725_reg_write(TV5725_ADC_AUTO_OFST_DELAY, 0);
-    // tv5725_reg_write(TV5725_ADC_AUTO_OFST_STEP, 0);
-    // tv5725_reg_write(TV5725_ADC_AUTO_OFST_TEST, 1);
-    // tv5725_reg_write(TV5725_ADC_AUTO_OFST_RANGE_REG, 0x00);
-
-    tv5725_capture_start();
-    return LL_OK;
-}
-
-/* ==================================================================
    Input mode config
    ================================================================== */
 
@@ -363,48 +272,71 @@ static tv5725_input_mode_t g_input_mode = TV5725_INPUT_AUTO;
 
 static void input_adc_common(void)
 {
-    // tv5725_reg_write(TV5725_ADC_CLK_PA, 0x00);
-    // tv5725_reg_write(TV5725_ADC_CLK_PLLAD, 1);
-    // tv5725_reg_write(TV5725_ADC_CLK_ICLK2X, 0);
-    // tv5725_reg_write(TV5725_ADC_CLK_ICLK1X, 0);
-    // tv5725_reg_write(TV5725_ADC_INPUT_SEL, 0x00);
-    // tv5725_reg_write(TV5725_ADC_POWDZ, 1);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_R, 1);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_G, 1);
-    // tv5725_reg_write(TV5725_ADC_RYSEL_B, 1);
-    // tv5725_reg_write(TV5725_ADC_FLTR, 0x01);
+    /* ADC clock: PA=0, ICLK2X=0, ICLK1X=0, PLLAD clock disabled */
+    tv5725_reg_write(TV5725_RW_CONTROL_ADC_CLK_00, 0x00);
 
-    // tv5725_write_byte(0x05, 0x06, 0x00);
-    // tv5725_write_byte(0x05, 0x07, 0x00);
-    // tv5725_write_byte(0x05, 0x08, 0x00);
-    // tv5725_write_byte(0x05, 0x09, 0x80);
-    // tv5725_write_byte(0x05, 0x0A, 0x80);
-    // tv5725_write_byte(0x05, 0x0B, 0x80);
+    /* ADC input: disable SOG, analog input select = 0 */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 0x00);
 
-    // tv5725_reg_write(TV5725_PLLAD_PDZ, 1);
-    // tv5725_reg_write(TV5725_PLLAD_BPS, 1);
-    // tv5725_reg_write(TV5725_PLLAD_FS, 0);
+    /* ADC power up, R/G/B clamp enabled, filter = 01 */
+    tv5725_reg_write(TV5725_RW_ADC_POWDZ, 1);
+    tv5725_reg_write(TV5725_RW_ADC_RYSEL_R, 1);
+    tv5725_reg_write(TV5725_RW_ADC_RYSEL_G, 1);
+    tv5725_reg_write(TV5725_RW_ADC_RYSEL_B, 1);
+    tv5725_reg_write(TV5725_RW_ADC_FLTR, 0x01);
+
+    /* ADC gain/offset defaults */
+    tv5725_write_byte(0x05, 0x06, 0x00);
+    tv5725_write_byte(0x05, 0x07, 0x00);
+    tv5725_write_byte(0x05, 0x08, 0x00);
+    tv5725_write_byte(0x05, 0x09, 0x80);
+    tv5725_write_byte(0x05, 0x0A, 0x80);
+    tv5725_write_byte(0x05, 0x0B, 0x80);
+
+    /* PLLAD: power up, bypass off, normal frequency */
+    tv5725_reg_write(TV5725_RW_PLLAD_PDZ, 1);
+    tv5725_reg_write(TV5725_RW_PLLAD_BPS, 1);
+    tv5725_reg_write(TV5725_RW_PLLAD_FS, 0);
 }
 
 int32_t tv5725_input_config_rgbs(void)
 {
     input_adc_common();
 
-    // tv5725_reg_write(TV5725_ADC_SOGEN, 0);
-    // tv5725_reg_write(TV5725_SP_SOG_SRC_SEL, 0);
-    // tv5725_reg_write(TV5725_SP_EXT_SYNC_SEL, 0);
-    // tv5725_reg_write(TV5725_SP_HS_POL_ATO, 1);
-    // tv5725_reg_write(TV5725_SP_VS_POL_ATO, 1);
-    // tv5725_reg_write(TV5725_IF_SEL24BIT, 1);
-    // tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 1);
-    // tv5725_reg_write(TV5725_IF_IN_DREG_BYPS, 1);
+    /* RGB mode: disable SOG, external H/V sync, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
+    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
 
-    //    tv5725_asw_set(TV5725_ASW01, 1);
-    //    tv5725_asw_set(TV5725_ASW02, 0);
-    //    tv5725_asw_set(TV5725_ASW03, 0);
-    //    tv5725_asw_set(TV5725_ASW04, 0);
+    /* IF: 24-bit input, bypass color matrix, bypass data register */
+    tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
+    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
+    tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
 
     g_input_mode = TV5725_INPUT_RGBS;
+    return LL_OK;
+}
+
+int32_t tv5725_input_config_rgsb(void)
+{
+    input_adc_common();
+
+    /* RGsB mode: enable SOG on green channel, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
+
+    /* IF: 24-bit input, bypass color matrix (RGB), bypass data register */
+    tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
+    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
+    tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
+
+    g_input_mode = TV5725_INPUT_RGSB;
     return LL_OK;
 }
 
@@ -412,19 +344,17 @@ int32_t tv5725_input_config_yuv(void)
 {
     input_adc_common();
 
-    // tv5725_reg_write(TV5725_ADC_SOGEN, 1);
-    // tv5725_reg_write(TV5725_SP_SOG_SRC_SEL, 1);
-    // tv5725_reg_write(TV5725_SP_SOG_P_ATO, 1);
-    // tv5725_reg_write(TV5725_SP_HS_POL_ATO, 1);
-    // tv5725_reg_write(TV5725_SP_VS_POL_ATO, 1);
-    // tv5725_reg_write(TV5725_IF_SEL24BIT, 1);
-    // tv5725_reg_write(TV5725_IF_MATRIX_BYPS, 0);
-    // tv5725_reg_write(TV5725_IF_IN_DREG_BYPS, 1);
+    /* YUV mode: enable SOG, SOG source = Y, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
 
-    //    tv5725_asw_set(TV5725_ASW01, 0);
-    //    tv5725_asw_set(TV5725_ASW02, 0);
-    //    tv5725_asw_set(TV5725_ASW03, 0);
-    //    tv5725_asw_set(TV5725_ASW04, 0);
+    /* IF: 24-bit input, enable color matrix, bypass data register */
+    tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
+    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 0);
+    tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
 
     g_input_mode = TV5725_INPUT_YUV;
     return LL_OK;
@@ -433,19 +363,19 @@ int32_t tv5725_input_config_yuv(void)
 void tv5725_input_auto_detect(void)
 {
     uint8_t status;
-    // tv5725_read_byte(0x00, 0x05, &status);
+    tv5725_read_byte(0x00, 0x05, &status);
 
     if (status == 0x00 || status == 0xFF)
     {
-        // tv5725_input_config_rgbs();
+        tv5725_input_config_rgbs();
         return;
     }
     if (!(status & 0x02))
         tv5725_input_config_rgbs();
     else
     {
-        // tv5725_input_config_yuv();
-        // g_input_mode = TV5725_INPUT_AUTO;
+        tv5725_input_config_yuv();
+        g_input_mode = TV5725_INPUT_AUTO;
     }
 }
 
@@ -457,6 +387,8 @@ int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
         return tv5725_input_config_yuv();
     case TV5725_INPUT_RGBS:
         return tv5725_input_config_rgbs();
+    case TV5725_INPUT_RGSB:
+        return tv5725_input_config_rgsb();
     default:
         tv5725_input_auto_detect();
         return LL_OK;
@@ -472,16 +404,8 @@ void tv5725_asw_init(void)
     stc_gpio_init_t cfg;
     GPIO_StructInit(&cfg);
     cfg.u16PinDir = PIN_DIR_OUT;
-    GPIO_Init(TV5725_ASW_PORT, TV5725_ASW01, &cfg);
-    GPIO_Init(TV5725_ASW_PORT, TV5725_ASW02, &cfg);
-    GPIO_Init(TV5725_ASW_PORT, TV5725_ASW03, &cfg);
-    GPIO_Init(TV5725_ASW_PORT, TV5725_ASW04, &cfg);
+    GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1, &cfg);
+    GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2, &cfg);
+    GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3, &cfg);
+    GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4, &cfg);
 }
-
-// void tv5725_asw_set(uint16_t pin, uint8_t high)
-// {
-//     if (high)
-//         GPIO_SetPins(TV5725_ASW_PORT, pin);
-//     else
-//         GPIO_ResetPins(TV5725_ASW_PORT, pin);
-// }
