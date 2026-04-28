@@ -67,22 +67,22 @@ void cb_input_vga(xpMenu Menu)
 void cb_sog_normal(xpMenu Menu)
 {
     (void)Menu;
-    tv5725_reg_write(TV5725_SP_SOG_MODE, 0x00);
-    uint32_t val = tv5725_reg_read(TV5725_SP_SOG_MODE);
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_48, 0x00);
+    uint32_t val = tv5725_reg_read(TV5725_RW_SYNC_PROC_48);
     printf("SOG Mode: Normal (0x%01lX)\n", val);
 }
 
 void cb_sog_force(xpMenu Menu)
 {
     (void)Menu;
-    tv5725_reg_write(TV5725_RFF_ENABLE, 0x01);
-    uint32_t val = tv5725_reg_read(TV5725_RFF_ENABLE);
+    tv5725_reg_write(TV5725_RW_MODE_DET_00, 0x01);
+    uint32_t val = tv5725_reg_read(TV5725_RW_MODE_DET_00);
     printf("TV5725_RFF_ENABLE: Force (0x%01lX)\n", val);
 }
 void cb_sog_show(xpMenu Menu)
 {
     (void)Menu;
-    uint32_t val = tv5725_reg_read(TV5725_SP_SOG_MODE);
+    uint32_t val = tv5725_reg_read(TV5725_RW_SYNC_PROC_48);
     printf("SOG Mode = 0x%01lX\n", val);
 }
 
