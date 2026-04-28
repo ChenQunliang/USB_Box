@@ -156,8 +156,8 @@ void tv5725_reg_write(tv5725_reg_t reg, uint32_t value)
 
 void tv5725_chip_reset(void)
 {
-    // tv5725_reg_write(TV5725_RW_RESET_CONTROL_00, 0x00);
-    // tv5725_reg_write(TV5725_RW_RESET_CONTROL_01, 0x00);
+    // tv5725_reg_write(TV5725_RW_CONTROL_RESET_00, 0x00);
+    // tv5725_reg_write(TV5725_RW_CONTROL_RESET_01, 0x00);
 
     for (uint8_t seg = 0; seg < TV5725_SEG_COUNT; seg++)
     {
@@ -171,7 +171,7 @@ void tv5725_chip_reset(void)
 
     /* Assert then release all reset bits */
     const tv5725_reg_t bits[] = {
-        TV5725_RW_MODE_DET_00,
+        TV5725_RW_PIP_V_SP,
         // TV5725_SFTRST_IF_RSTZ,
         // TV5725_SFTRST_DEINT_RSTZ,
         // TV5725_SFTRST_MEM_FF_RSTZ,

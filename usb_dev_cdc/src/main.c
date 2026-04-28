@@ -55,16 +55,16 @@ int32_t main(void)
 
     LL_PERIPH_WE(LL_PERIPH_GPIO);
     V_I2C_Init();
-    // tv5725_reg_write(TV5725_SP_SOG_MODE, 0x00); /* default SOG normal mode (also settable via OLED menu) */
+    tv5725_reg_write(TV5725_RW_SP_SOG_MODE, 0x00); /* default SOG normal mode (also settable via OLED menu) */
 
     /* Initialize TV5725 for VGA (480p) output */
     // tv5725_asw_init();
     // tv5725_input_set_mode(TV5725_INPUT_AUTO);
-    if (tv5725_init() == LL_OK)
-    {
-        tv5725_output_path_init(preset_480p, 0); /* 480p VGA preset, RGB input */
-        printf("TV5725 VGA output initialized (480p)\n");
-    }
+    // if (tv5725_init() == LL_OK)
+    // {
+    //     tv5725_output_path_init(preset_480p, 0); /* 480p VGA preset, RGB input */
+    //     printf("TV5725 VGA output initialized (480p)\n");
+    // }
 
     Menu_Init(&menu);
 
