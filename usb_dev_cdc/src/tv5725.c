@@ -203,6 +203,13 @@ int32_t tv5725_init(void)
     if (id == 0x00 || id == 0xFFFFFFFF)
         return LL_ERR;
     printf("TV5725 Chip ID: 0x%06lX\n", id);
+    tv5725_reg_write(TV5725_RW_CONTROL_RESET_00, 0x00); /* Reset all blocks except ADC */
+    tv5725_reg_write(TV5725_RW_CONTROL_RESET_01, 0x00); /* Reset all blocks except ADC */
+    tv5725_reg_write(TV5725_RW_PLLAD_VCORST, 1);        /* PLLAD VCO reset */
+    tv5725_reg_write(TV5725_RW_PLLAD_PDZ, 0);           /* PLLAD power down */
+
+    tv5725_reg_write(TV5725_RW_PAD_CKIN_ENZ, 1); /* Enable external clock input  */
+
     return LL_OK;
 }
 
