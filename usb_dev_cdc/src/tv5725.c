@@ -310,6 +310,9 @@ int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv)
     tv5725_sdram_init();
 
     tv5725_reg_write(TV5725_DAC_RGBS_PWDNZ, 1);
+    tv5725_reg_write(TV5725_DAC_RGBS_R0ENZ, 0); /* 0 = enable Red DAC */
+    tv5725_reg_write(TV5725_DAC_RGBS_G0ENZ, 0); /* 0 = enable Green DAC */
+    tv5725_reg_write(TV5725_DAC_RGBS_B0ENZ, 0); /* 0 = enable Blue DAC */
     tv5725_reg_write(TV5725_DAC_RGBS_SPD, 0);
     tv5725_reg_write(TV5725_DAC_RGBS_S0ENZ, 0);
     tv5725_reg_write(TV5725_DAC_RGBS_S1EN, 1);

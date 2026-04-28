@@ -16,7 +16,7 @@ void cb_input_sv(xpMenu Menu)
 {
     (void)Menu;
     /* S-Video → YUV mode via ASW */
-//    tv5725_input_set_mode(TV5725_INPUT_YUV);
+    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
     /* TODO: set ASW pins for S-Video connector routing */
 }
 
@@ -24,7 +24,7 @@ void cb_input_cvbs(xpMenu Menu)
 {
     (void)Menu;
     /* Composite → YUV mode via ASW */
-//    tv5725_input_set_mode(TV5725_INPUT_YUV);
+    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
     /* TODO: set ASW pins for CVBS connector routing */
 }
 
@@ -32,7 +32,7 @@ void cb_input_rgb0(xpMenu Menu)
 {
     (void)Menu;
     /* RGB input 0 → RGBS mode */
-//    tv5725_input_set_mode(TV5725_INPUT_RGBS);
+    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
     /* Current ASW defaults route RGB0 (ASW01=H, others=L) */
 }
 
@@ -40,7 +40,7 @@ void cb_input_rgb1(xpMenu Menu)
 {
     (void)Menu;
     /* RGB input 1 → RGBS mode */
-//    tv5725_input_set_mode(TV5725_INPUT_RGBS);
+    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
     /* TODO: set ASW pins for RGB1 connector routing */
 }
 
@@ -48,7 +48,7 @@ void cb_input_yuv(xpMenu Menu)
 {
     (void)Menu;
     /* YPbPr component → YUV mode */
-//    tv5725_input_set_mode(TV5725_INPUT_YUV);
+    //    tv5725_input_set_mode(TV5725_INPUT_YUV);
     /* Current ASW defaults route YUV (all ASW pins low) */
 }
 
@@ -56,8 +56,34 @@ void cb_input_vga(xpMenu Menu)
 {
     (void)Menu;
     /* VGA → RGBS mode (RGBHV, external H/V sync) */
-//    tv5725_input_set_mode(TV5725_INPUT_RGBS);
+    //    tv5725_input_set_mode(TV5725_INPUT_RGBS);
     /* TODO: set ASW pins for VGA connector routing */
+}
+
+/* ====================================================================
+   SOG mode callbacks
+   ==================================================================== */
+
+void cb_sog_normal(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_reg_write(TV5725_SP_SOG_MODE, 0x00);
+    uint32_t val = tv5725_reg_read(TV5725_SP_SOG_MODE);
+    printf("SOG Mode: Normal (0x%01lX)\n", val);
+}
+
+void cb_sog_force(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_reg_write(TV5725_RFF_ENABLE, 0x01);
+    uint32_t val = tv5725_reg_read(TV5725_RFF_ENABLE);
+    printf("TV5725_RFF_ENABLE: Force (0x%01lX)\n", val);
+}
+void cb_sog_show(xpMenu Menu)
+{
+    (void)Menu;
+    uint32_t val = tv5725_reg_read(TV5725_SP_SOG_MODE);
+    printf("SOG Mode = 0x%01lX\n", val);
 }
 
 /* ====================================================================
@@ -72,23 +98,23 @@ void cb_input_vga(xpMenu Menu)
 void cb_res_720p_4_3(xpMenu Menu)
 {
     (void)Menu;
-//    tv5725_output_path_init(preset_720p, 0);
+    //    tv5725_output_path_init(preset_720p, 0);
 }
 
 void cb_res_720p_16_9(xpMenu Menu)
 {
     (void)Menu;
-//    tv5725_output_path_init(preset_720p, 0);
+    //    tv5725_output_path_init(preset_720p, 0);
 }
 
 void cb_res_1080p_4_3(xpMenu Menu)
 {
     (void)Menu;
-//    tv5725_output_path_init(preset_1080p, 0);
+    //    tv5725_output_path_init(preset_1080p, 0);
 }
 
 void cb_res_1080p_16_9(xpMenu Menu)
 {
     (void)Menu;
-//    tv5725_output_path_init(preset_1080p, 0);
+    //    tv5725_output_path_init(preset_1080p, 0);
 }

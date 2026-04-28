@@ -17,4 +17,9 @@ void cb_res_720p_16_9(xpMenu Menu);
 void cb_res_1080p_4_3(xpMenu Menu);
 void cb_res_1080p_16_9(xpMenu Menu);
 
+/* SOG mode selection callbacks */
+void cb_sog_normal(xpMenu Menu);
+void cb_sog_force(xpMenu Menu);
+void cb_sog_show(xpMenu Menu);
+
 #endif /* TV5725_CALLBACKS_H */

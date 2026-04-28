@@ -36,13 +36,15 @@ SOFTWARE.
 //#include "AirPlane.h"
 
 /* Page*/
-xPage Home_Page, Input_Page, Format_Page, Color_Page, Screen_Page, OutPut_Page;
+xPage Home_Page, Input_Page, Format_Page, Color_Page, Screen_Page, OutPut_Page, SOG_Page;
 /* item */
 xItem HomeHead_Item; 
 xItem InputHead_Item, ColorHead_Item, FormatHead_Item, ScreenHead_Item, OutPutHead_Item;
 xItem Input_Item    , Color_Item    , Format_Item    , Screen_Item    , OutPut_Item    ;
 /*signal*/
 xItem SV_Item, CVBS_Item, RGB0_Item, RGB1_Item, YUV_Item, VGA_Item;
+/*SOG*/
+xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item;
 /*Format*/
 xItem Auto_Item, Ntsc_Item, Ntsc443_Item, Pal_Item, Pal_M_Item, Secam_Item;
 /*Color*/
@@ -241,6 +243,12 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -RGB1", ONCE_FUNCTION,   NULL, &RGB1_Item, &Input_Page, NULL, cb_input_rgb1);
                 AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, cb_input_yuv);
                 AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
+                AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Input_Page, &SOG_Page, NULL);
+                    AddPage("[Back]", &SOG_Page, TEXT);
+                        AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Input_Page, NULL);
+                        AddItem(" -Normal", ONCE_FUNCTION, NULL, &SOG_Normal_Item, &SOG_Page, NULL, cb_sog_normal);
+                        AddItem(" -Force" , ONCE_FUNCTION, NULL, &SOG_Force_Item , &SOG_Page, NULL, cb_sog_force);
+                        AddItem(" -Read"  , ONCE_FUNCTION, NULL, &SOG_Show_Item  , &SOG_Page, NULL, cb_sog_show);
         AddItem(" +VideoFormat", PARENTS, logo_allArray[2], &Format_Item, &Home_Page, &Format_Page, NULL);
             AddPage("[Back]", &Format_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &FormatHead_Item    , &Format_Page  , &Home_Page, NULL);
