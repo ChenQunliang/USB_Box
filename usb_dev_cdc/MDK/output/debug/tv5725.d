@@ -47,3 +47,4 @@
 .\output\debug\tv5725.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\output\debug\tv5725.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\limits.h
 .\output\debug\tv5725.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\output\debug\tv5725.o: ..\headers\si5351.h

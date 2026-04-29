@@ -188,6 +188,19 @@ uint32_t tv5725_get_chip_id(void)
     return (uint32_t)buf[0] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[2] << 16);
 }
 
+static int32_t tv5725_PowerDetect(void)
+{
+    tv5725_reg_write(TV5725_RW_ADC_UNUSED_69, 0x69); /* Assert reset on all blocks except ADC */
+    if (tv5725_reg_read(TV5725_RW_ADC_UNUSED_69) == 0x69)
+    {
+        tv5725_reg_write(TV5725_RW_ADC_UNUSED_69, 00);
+        return 1;
+    }
+    tv5725_reg_write(TV5725_RW_ADC_UNUSED_69, 00);
+    printf("No power\n");
+    return 0;
+}
+
 int32_t tv5725_init(void)
 {
     uint32_t id = tv5725_get_chip_id();
@@ -203,6 +216,7 @@ int32_t tv5725_init(void)
 
     si5351_external_clock_init();
 
+    tv5725_PowerDetect();
     return LL_OK;
 }
 
