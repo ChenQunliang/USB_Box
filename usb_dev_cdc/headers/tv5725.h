@@ -2,6 +2,7 @@
 #define TV5725_H
 
 #include "main.h"
+#include <stdbool.h>
 
 /* TV5725 GBS I2C 7-bit address */
 #define TV5725_I2C_ADDR (0x17U)
@@ -15,13 +16,26 @@
 #define TV5725_SEG_COUNT (6U)
 
 /* Sync analog-switch GPIO: PB12-PB15, each pin independently controls one
-   analog switch for routing the composite-sync signal of one input source. */
+   analog switch for routing the composite-sync signal of one input source.
+
+   Pin-to-ASW mapping (matching hardware schematic):
+     PB15 = ASW1, PB14 = ASW2, PB13 = ASW3, PB12 = ASW4   */
 #define TV5725_SYNC_ASW_PORT (GPIO_PORT_B)
 #define TV5725_SYNC_ASW_MASK (GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15)
-#define TV5725_SYNC_ASW1 (GPIO_PIN_12)
-#define TV5725_SYNC_ASW2 (GPIO_PIN_13)
-#define TV5725_SYNC_ASW3 (GPIO_PIN_14)
-#define TV5725_SYNC_ASW4 (GPIO_PIN_15)
+#define TV5725_SYNC_ASW1 (GPIO_PIN_15)
+#define TV5725_SYNC_ASW2 (GPIO_PIN_14)
+#define TV5725_SYNC_ASW3 (GPIO_PIN_13)
+#define TV5725_SYNC_ASW4 (GPIO_PIN_12)
+
+/* ASW on/off helpers */
+#define ASW1_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1)
+#define ASW2_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2)
+#define ASW3_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3)
+#define ASW4_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4)
+#define ASW1_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1)
+#define ASW2_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2)
+#define ASW3_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3)
+#define ASW4_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4)
 
 /* Register descriptor */
 typedef struct
@@ -32,12 +46,23 @@ typedef struct
    uint8_t bit_width;
 } tv5725_reg_t;
 
+/* 全局配置结构体 — 用于掉电保存 */
+typedef struct
+{
+    bool asw_01;        /* ASW 模拟开关状态 */
+    bool asw_02;        /* （asw_02 为兼容性控制，可独立存储） */
+    bool asw_03;
+    bool asw_04;
+} tv5725_config_t;
+
+extern tv5725_config_t g_tv5725_cfg;
+
 typedef enum
 {
    TV5725_INPUT_AUTO = 0,
-   TV5725_INPUT_YUV,
-   TV5725_INPUT_RGBS,
-   TV5725_INPUT_RGSB,
+   TV5725_INPUT_VGA,     /* RGBHV: separate H/V sync */
+   TV5725_INPUT_RGBS,    /* RGB + composite sync */
+   TV5725_INPUT_RGSB,    /* RGsB: sync on green */
    TV5725_INPUT_COUNT
 } tv5725_input_mode_t;
 
@@ -478,6 +503,13 @@ typedef enum
 #define TV5725_RW_VDS_PROC_3C                       TV5725_REG(0x03, 0x3C, 0, 8)  /* VDS: PROC 3C */
 #define TV5725_RW_VDS_SYNC_LEV                      TV5725_REG(0x03, 0x3D, 0, 9)  /* VDS: 同步 LEV */
 #define TV5725_RW_VDS_CONVT_BYPS                    TV5725_REG(0x03, 0x3E, 3, 1)  /* VDS: CONVT 旁路 */
+/* 描述性别名 */
+#define TV5725_RW_VDS_Y_GAIN                        TV5725_RW_VDS_PROC_35        /* VDS: Y 增益 */
+#define TV5725_RW_VDS_UCOS_GAIN                     TV5725_RW_VDS_PROC_36        /* VDS: U COS 增益 */
+#define TV5725_RW_VDS_VCOS_GAIN                     TV5725_RW_VDS_PROC_37        /* VDS: V COS 增益 */
+#define TV5725_RW_VDS_Y_OFST                        TV5725_RW_VDS_PROC_3A        /* VDS: Y 偏移 */
+#define TV5725_RW_VDS_U_OFST                        TV5725_RW_VDS_PROC_3B        /* VDS: U 偏移 */
+#define TV5725_RW_VDS_V_OFST                        TV5725_RW_VDS_PROC_3C        /* VDS: V 偏移 */
 #define TV5725_RW_VDS_DYN_BYPS                      TV5725_REG(0x03, 0x3E, 4, 1)  /* VDS: DYN 旁路 */
 #define TV5725_RW_VDS_BLK_BF_EN                     TV5725_REG(0x03, 0x3E, 7, 1)  /* VDS: 消隐 BF 使能 */
 #define TV5725_RW_VDS_PROC_3F                       TV5725_REG(0x03, 0x3F, 0, 8)  /* VDS: PROC 3F */
@@ -728,6 +760,10 @@ typedef enum
 #define TV5725_RW_SYNC_PROC_19                      TV5725_REG(0x05, 0x38, 0, 8)  /* 同步: PROC 19 */
 #define TV5725_RW_SYNC_PROC_20                      TV5725_REG(0x05, 0x39, 0, 8)  /* 同步: PROC 20 */
 #define TV5725_RW_SYNC_PROC_21                      TV5725_REG(0x05, 0x3A, 0, 8)  /* 同步: PROC 21 */
+/* 描述性别名 */
+#define TV5725_RW_SP_H_PULSE_IGNOR                  TV5725_RW_SYNC_PROC_18       /* 同 PROC_18: H 脉冲 忽略 */
+#define TV5725_RW_SP_PRE_COAST                      TV5725_RW_SYNC_PROC_19       /* 同 PROC_19: PRE Coast */
+#define TV5725_RW_SP_POST_COAST                     TV5725_RW_SYNC_PROC_20       /* 同 PROC_20: POST Coast */
 #define TV5725_RW_SP_SDCS_VSST_REG_H                TV5725_REG(0x05, 0x3B, 0, 3)  /* 同步处理器: SDCS VSST 寄存器 H */
 #define TV5725_RW_SP_SDCS_VSSP_REG_H                TV5725_REG(0x05, 0x3B, 4, 3)  /* 同步处理器: SDCS VSSP 寄存器 H */
 #define TV5725_RW_SYNC_PROC_23                      TV5725_REG(0x05, 0x3E, 0, 8)  /* 同步: PROC 23 */
@@ -797,13 +833,26 @@ int32_t tv5725_write_buf(uint8_t seg, uint8_t offset, const uint8_t *buf, uint8_
 
 void tv5725_set_segment(uint8_t segment);
 void tv5725_load_preset(const uint8_t *preset);
+void tv5725_sync_processor_init(void);
+void tv5725_sync_config(void);
 
+int32_t tv5725_input_config_vga(void);
 int32_t tv5725_input_config_rgbs(void);
 int32_t tv5725_input_config_rgsb(void);
 int32_t tv5725_input_config_yuv(void);
 int32_t tv5725_input_set_mode(tv5725_input_mode_t mode);
 void tv5725_input_auto_detect(void);
 int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv);
+
+/* ASW analog switch control */
+void tv5725_asw_init(void);
+void tv5725_asw_ctrl(bool sw1, bool sw2, bool sw3, bool sw4);
+void tv5725_asw_set_vga(void);
+void tv5725_asw_set_rgbs(void);
+void tv5725_asw_set_rgsb(void);
+
+/* ASW state variables (external, accessed from callbacks) */
+extern tv5725_config_t g_tv5725_cfg;
 
 /* ================================================================
    Input mode selection

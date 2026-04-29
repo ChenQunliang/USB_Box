@@ -47,3 +47,4 @@
 .\output\debug\tv5725_callbacks.o: ..\headers\main.h
 .\output\debug\tv5725_callbacks.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
 .\output\debug\tv5725_callbacks.o: ..\headers\v_i2c.h
+.\output\debug\tv5725_callbacks.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

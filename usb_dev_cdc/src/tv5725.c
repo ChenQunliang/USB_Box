@@ -2,6 +2,10 @@
 #include "v_i2c.h"
 #include <string.h>
 #include "si5351.h"
+
+/* ASW analog switch state */
+tv5725_config_t g_tv5725_cfg = {false, false, false, false};
+
 /* ==================================================================
    I2C address mapping (7-bit 0x17, unshift mode)
    W: 0x17 << 1 = 0x2E    R: (0x17 << 1) | 1 = 0x2F
@@ -201,6 +205,218 @@ static int32_t tv5725_PowerDetect(void)
     return 0;
 }
 
+/* ==================================================================
+   Sync processor initialisation (segment 5)
+
+   Mirrors gbs-control's prepareSyncProcessor().
+   Configures sync polarity, jitter filtering, clamp/coast behaviour,
+   and HS/VS output timing.
+   ================================================================== */
+static void tv5725_sync_processor_init(void)
+{
+    tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 0);
+    tv5725_reg_write(TV5725_RW_SP_JITTER_SYNC, 0);
+
+    /* Sync timing / filter registers (raw byte writes) */
+    tv5725_write_byte(5, 0x21, 0x18);
+    tv5725_write_byte(5, 0x22, 0x0F);
+    tv5725_write_byte(5, 0x23, 0x00);
+    tv5725_write_byte(5, 0x24, 0x40);
+    tv5725_write_byte(5, 0x25, 0x00);
+    tv5725_reg_write(TV5725_RW_SP_SYNC_PD_THD, 0x04);
+    tv5725_write_byte(5, 0x27, 0x00);
+    tv5725_write_byte(5, 0x2a, 0x0F);
+    tv5725_write_byte(5, 0x2d, 0x03);
+    tv5725_write_byte(5, 0x2e, 0x00);
+    tv5725_write_byte(5, 0x2f, 0x02);
+    tv5725_write_byte(5, 0x31, 0x2f);
+
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_14, 0x3a);
+    tv5725_write_byte(5, 0x34, 0x06);
+
+    /* Delay-line threshold (default for progressive inputs) */
+    tv5725_reg_write(TV5725_RW_SP_DLT_REG, 0x70);
+    /* H-pulse ignore (default for non-SD inputs) */
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_18, 0x02);
+
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_21, 3);
+
+    /* SDCS vsync start/stop */
+    tv5725_reg_write(TV5725_RW_SP_SDCS_VSST_REG_H, 0);
+    tv5725_reg_write(TV5725_RW_SP_SDCS_VSSP_REG_H, 0);
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_24, 4);
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_25, 1);
+
+    /* CS HS start/stop */
+    tv5725_reg_write(TV5725_RW_SP_CS_HS_ST, 0x10);
+    tv5725_reg_write(TV5725_RW_SP_CS_HS_SP, 0x00);
+
+    /* RT HS start/stop */
+    tv5725_reg_write(TV5725_RW_SP_RT_HS_ST, 0);
+    tv5725_reg_write(TV5725_RW_SP_RT_HS_SP, 0x44);
+
+    tv5725_write_byte(5, 0x51, 0x02);
+    tv5725_write_byte(5, 0x52, 0x00);
+    tv5725_write_byte(5, 0x53, 0x00);
+    tv5725_write_byte(5, 0x54, 0x00);
+
+    /* Clamp / coast / SOG */
+    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 0);
+    tv5725_reg_write(TV5725_RW_SP_CLP_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_NO_CLAMP_REG, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_MODE, 1);
+    tv5725_reg_write(TV5725_RW_SP_H_CST_ST, 0x10);
+    tv5725_reg_write(TV5725_RW_SP_H_CST_SP, 0x100);
+    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 0);
+    tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 1);
+    tv5725_reg_write(TV5725_RW_SP_HCST_AUTO_EN, 0);
+    tv5725_reg_write(TV5725_RW_SP_NO_COAST_REG, 0);
+
+    /* HS / VS processing */
+    tv5725_reg_write(TV5725_RW_SP_HS_REG, 1);
+    tv5725_reg_write(TV5725_RW_SP_HS_PROC_INV_REG, 0);
+    tv5725_reg_write(TV5725_RW_SP_VS_PROC_INV_REG, 0);
+
+    tv5725_write_byte(5, 0x58, 0x05);
+    tv5725_write_byte(5, 0x59, 0x00);
+    tv5725_write_byte(5, 0x5a, 0x01);
+    tv5725_write_byte(5, 0x5b, 0x00);
+    tv5725_write_byte(5, 0x5c, 0x03);
+    tv5725_write_byte(5, 0x5d, 0x02);
+}
+
+/* ==================================================================
+   ADC 偏移自动校准（G/R/B）
+
+   移植自 gbs-control 的 calibrateAdcOffset()。
+   将每个 ADC 通道通过测试总线引出，调整偏移寄存器
+   使输出接近零（< 7 counts）。
+   ================================================================== */
+static void tv5725_calibrate_adc_offset(void)
+{
+    uint8_t r_off, g_off, b_off;
+    uint8_t readout = 0;
+    uint8_t miss_target;
+    uint16_t hit_target;
+    uint16_t readout16;
+
+    /* 进入测试模式 */
+    tv5725_reg_write(TV5725_RW_PAD_BOUT_EN, 0);
+    tv5725_reg_write(TV5725_RW_CONTROL_PLL648_01, 0xA5);
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 2);
+    tv5725_reg_write(TV5725_RW_DEC_MATRIX_BYPS, 1);
+    tv5725_reg_write(TV5725_RW_DEC_TEST_ENABLE, 1);
+    tv5725_write_byte(5, 0x03, 0x31);
+    tv5725_write_byte(5, 0x04, 0x00);
+    tv5725_reg_write(TV5725_RW_SP_CS_CLP_ST, 0x00);
+    tv5725_reg_write(TV5725_RW_SP_CS_CLP_SP, 0x00);
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_48, 0x05);
+    tv5725_reg_write(TV5725_RW_SYNC_PROC_49, 0x80);
+    tv5725_write_byte(5, 0x00, 0x02);
+    tv5725_reg_write(TV5725_RW_TEST_BUS_SEL, 0x0B);
+    tv5725_reg_write(TV5725_RW_TEST_BUS_EN, 1);
+
+    /* 软复位数字模块 */
+    tv5725_reg_write(TV5725_RW_CONTROL_RESET_01, 0x17);
+    tv5725_reg_write(TV5725_RW_CONTROL_RESET_00, 0x41);
+    tv5725_reg_write(TV5725_RW_CONTROL_RESET_00, 0x7F);
+
+    /* 增益设为中值 */
+    tv5725_write_byte(5, 0x09, 0x7F);
+    tv5725_write_byte(5, 0x0A, 0x7F);
+    tv5725_write_byte(5, 0x0B, 0x7F);
+
+    /* 初始偏移 */
+    tv5725_write_byte(5, 0x06, 0x7F);
+    tv5725_write_byte(5, 0x07, 0x3D);
+    tv5725_write_byte(5, 0x08, 0x7F);
+    tv5725_reg_write(TV5725_RW_DEC_TEST_SEL, 1);
+
+    /* 依次校准 G (ch=0), R (ch=1), B (ch=2) */
+    for (uint8_t ch = 0; ch < 3; ch++)
+    {
+        miss_target = 0;
+        hit_target = 0;
+
+        volatile uint32_t timeout = 800000;
+
+        while (timeout--)
+        {
+            readout16 = (uint16_t)tv5725_reg_read(TV5725_RO_TEST_BUS) & 0x7FFFU;
+
+            if (readout16 < 7)
+            {
+                hit_target++;
+                miss_target = 0;
+            }
+            else if (miss_target++ > 2)
+            {
+                if (ch == 0)
+                {
+                    tv5725_read_byte(5, 0x07, &readout);
+                    readout++;
+                    tv5725_write_byte(5, 0x07, readout);
+                }
+                else if (ch == 1)
+                {
+                    tv5725_read_byte(5, 0x06, &readout);
+                    readout++;
+                    tv5725_write_byte(5, 0x06, readout);
+                }
+                else
+                {
+                    tv5725_read_byte(5, 0x08, &readout);
+                    readout++;
+                    tv5725_write_byte(5, 0x08, readout);
+                }
+
+                if (readout >= 0x52)
+                    break;
+
+                /* 短暂延时等待稳定 */
+                for (volatile uint32_t d = 0; d < 5000; d++)
+                    continue;
+
+                hit_target = 0;
+                miss_target = 0;
+                timeout = 800000;
+            }
+
+            if (hit_target > 1500)
+                break;
+        }
+
+        /* 保存当前通道结果，切换到下一通道 */
+        if (ch == 0)
+        {
+            tv5725_read_byte(5, 0x07, &g_off);
+            tv5725_write_byte(5, 0x07, 0x7F);
+            tv5725_write_byte(5, 0x06, 0x3D);
+            tv5725_reg_write(TV5725_RW_DEC_TEST_SEL, 2);
+        }
+        else if (ch == 1)
+        {
+            tv5725_read_byte(5, 0x06, &r_off);
+            tv5725_write_byte(5, 0x06, 0x7F);
+            tv5725_write_byte(5, 0x08, 0x3D);
+            tv5725_reg_write(TV5725_RW_DEC_TEST_SEL, 3);
+        }
+        else
+        {
+            tv5725_read_byte(5, 0x08, &b_off);
+        }
+    }
+
+    /* 校准失败保护 — 强制设为中值 */
+    if (readout >= 0x52)
+        r_off = g_off = b_off = 0x40;
+
+    /* 写入最终校准后的偏移值 */
+    tv5725_write_byte(5, 0x07, g_off);
+    tv5725_write_byte(5, 0x06, r_off);
+    tv5725_write_byte(5, 0x08, b_off);
+}
+
 int32_t tv5725_init(void)
 {
     uint32_t id = tv5725_get_chip_id();
@@ -217,6 +433,12 @@ int32_t tv5725_init(void)
     si5351_external_clock_init();
 
     tv5725_PowerDetect();
+
+    tv5725_asw_init();
+
+    tv5725_sync_processor_init();
+
+    tv5725_calibrate_adc_offset();
     return LL_OK;
 }
 
@@ -289,9 +511,9 @@ static void input_adc_common(void)
     /* ADC clock: PA=0, ICLK2X=0, ICLK1X=0, PLLAD clock disabled */
     tv5725_reg_write(TV5725_RW_CONTROL_ADC_CLK_00, 0x00);
 
-    /* ADC input: disable SOG, analog input select = 0 */
+    /* ADC input: disable SOG, select RGB input channel (1=RGB, 0=YUV) */
     tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
-    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 0x00);
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 1);
 
     /* ADC power up, R/G/B clamp enabled, filter = 01 */
     tv5725_reg_write(TV5725_RW_ADC_POWDZ, 1);
@@ -314,14 +536,14 @@ static void input_adc_common(void)
     tv5725_reg_write(TV5725_RW_PLLAD_FS, 0);
 }
 
-int32_t tv5725_input_config_rgbs(void)
+int32_t tv5725_input_config_vga(void)
 {
     input_adc_common();
 
-    /* RGB mode: disable SOG, external H/V sync, auto polarity */
+    /* VGA (RGBHV) mode: disable SOG, separate H/V sync, auto polarity */
     tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
     tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
-    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0);   /* HS_HS: H from H pin, V from V pin */
     tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
     tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
 
@@ -329,6 +551,32 @@ int32_t tv5725_input_config_rgbs(void)
     tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
     tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
     tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
+
+    /* ASW: VGA */
+    tv5725_asw_set_vga();
+
+    g_input_mode = TV5725_INPUT_VGA;
+    return LL_OK;
+}
+
+int32_t tv5725_input_config_rgbs(void)
+{
+    input_adc_common();
+
+    /* RGBS mode: disable SOG, composite sync on CS pin, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
+    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 1);   /* CS_HS: composite sync from CS pin */
+    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
+
+    /* IF: 24-bit input, bypass color matrix, bypass data register */
+    tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
+    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
+    tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
+
+    /* ASW: RGBS */
+    tv5725_asw_set_rgbs();
 
     g_input_mode = TV5725_INPUT_RGBS;
     return LL_OK;
@@ -350,27 +598,8 @@ int32_t tv5725_input_config_rgsb(void)
     tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
     tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
 
-    g_input_mode = TV5725_INPUT_RGSB;
-    return LL_OK;
-}
-
-int32_t tv5725_input_config_yuv(void)
-{
-    input_adc_common();
-
-    /* YUV mode: enable SOG, SOG source = Y, auto polarity */
-    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
-    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 1);
-    tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 1);
-    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
-    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
-
-    /* IF: 24-bit input, enable color matrix, bypass data register */
-    tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
-    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 0);
-    tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
-
-    g_input_mode = TV5725_INPUT_YUV;
+    /* ASW: RGsB */
+    tv5725_asw_set_rgsb();
     return LL_OK;
 }
 
@@ -381,14 +610,14 @@ void tv5725_input_auto_detect(void)
 
     if (status == 0x00 || status == 0xFF)
     {
-        tv5725_input_config_rgbs();
+        tv5725_input_config_vga();
         return;
     }
     if (!(status & 0x02))
-        tv5725_input_config_rgbs();
+        tv5725_input_config_vga();
     else
     {
-        tv5725_input_config_yuv();
+        tv5725_input_config_rgbs();
         g_input_mode = TV5725_INPUT_AUTO;
     }
 }
@@ -397,8 +626,8 @@ int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
 {
     switch (mode)
     {
-    case TV5725_INPUT_YUV:
-        return tv5725_input_config_yuv();
+    case TV5725_INPUT_VGA:
+        return tv5725_input_config_vga();
     case TV5725_INPUT_RGBS:
         return tv5725_input_config_rgbs();
     case TV5725_INPUT_RGSB:
@@ -410,7 +639,132 @@ int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
 }
 
 /* ==================================================================
-   ASW GPIO (PB12-PB15)
+   同步通道选择 — 所有输入模式共用
+
+   配置同步源选择（外部 H/V）、SOG 源、极性自动检测、
+   及 coast/clamp 相关寄存器。
+   ================================================================== */
+
+void tv5725_sync_config(void)
+{
+    /* 外部同步源选择：0 = HS_HS（H 从 H 引脚，V 从 V 引脚） */
+    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0);
+
+    /* SOG 源选择：0 = 绿色通道 */
+    tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+
+    /* 极性自动检测 */
+    tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
+
+    /* 同步处理 */
+    tv5725_reg_write(TV5725_RW_SP_HS_LOOP_SEL, 1);
+    tv5725_reg_write(TV5725_RW_SP_SYNC_BYPS, 0);
+    tv5725_reg_write(TV5725_RW_SP_HS_PROC_INV_REG, 0);
+    tv5725_reg_write(TV5725_RW_SP_VS_PROC_INV_REG, 0);
+
+    /* Coast / Clamp 配置 */
+    tv5725_reg_write(TV5725_RW_SP_PRE_COAST, 4);
+    tv5725_reg_write(TV5725_RW_SP_POST_COAST, 7);
+    tv5725_reg_write(TV5725_RW_SP_H_PULSE_IGNOR, 0xFF);
+    tv5725_reg_write(TV5725_RW_SP_NO_COAST_REG, 0);
+    tv5725_reg_write(TV5725_RW_SP_NO_CLAMP_REG, 1);
+    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 0);
+    tv5725_reg_write(TV5725_RW_SP_COAST_INV_REG, 0);
+    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 0);
+    tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 1);
+    tv5725_reg_write(TV5725_RW_SP_HCST_AUTO_EN, 0);
+}
+
+/* ==================================================================
+   输出路径初始化 — YPbPr 分量输出
+
+   移植自 gbs-control 的 applyComponentColorMixing() 和
+   doPostPresetLoadSteps()。
+   加载预设、配置 VDS 色彩空间转换（RGB→YPbPr）、
+   DAC 和同步输出。
+
+   @param preset      预设数据指针（432 字节 GBSCpro 格式）
+   @param input_is_yuv 保留参数，已忽略（输出固定为 YPbPr）
+   ================================================================== */
+
+int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv)
+{
+    (void)input_is_yuv; /* 输出固定为 YPbPr，忽略输入类型 */
+
+    /* === 加载预设 === */
+    tv5725_load_preset(preset);
+
+    /* === 同步通道配置 === */
+    tv5725_sync_config();
+
+    /* === YPbPr 输出配置（VDS 色彩空间转换） === */
+
+    /* 使能 VDS 色彩转换（RGB→YPbPr），不旁路 */
+    tv5725_reg_write(TV5725_RW_VDS_CONVT_BYPS, 0);
+    tv5725_reg_write(TV5725_RW_PIP_CONVT_BYPS, 0);
+
+    /* Y/C 增益 — YPbPr 电平（移植自 gbs-control applyComponentColorMixing） */
+    tv5725_reg_write(TV5725_RW_VDS_Y_GAIN, 0x64);      /* Y 增益: 100 */
+    tv5725_reg_write(TV5725_RW_VDS_UCOS_GAIN, 0x19);   /* U/Cb 增益: 25 */
+    tv5725_reg_write(TV5725_RW_VDS_VCOS_GAIN, 0x19);   /* V/Cr 增益: 25 */
+    tv5725_reg_write(TV5725_RW_VDS_Y_OFST, 0xFE);      /* Y 偏移: 254 */
+    tv5725_reg_write(TV5725_RW_VDS_U_OFST, 0x01);      /* U 偏移: 1 */
+    tv5725_reg_write(TV5725_RW_VDS_V_OFST, 0x00);      /* V 偏移: 0 */
+
+    /* === 输出 DAC 配置（YPbPr 输出） === */
+
+    /* 使能同步输入引脚 */
+    tv5725_reg_write(TV5725_RW_PAD_SYNC1_IN_ENZ, 0);
+    tv5725_reg_write(TV5725_RW_PAD_SYNC2_IN_ENZ, 0);
+
+    /* DAC 输出使能 */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_R0ENZ, 1);     /* R → Pr */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_G0ENZ, 1);     /* G → Y  */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_B0ENZ, 1);     /* B → Pb */
+
+    /* 同步 DAC 配置（同步叠加在 Y 通道上） */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_SPD, 0);
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_S0ENZ, 0);     /* 使能同步 DAC 输出 */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_S1EN, 1);      /* 使能同步输出 1 */
+
+    /* 输出同步选择与控制 */
+    tv5725_reg_write(TV5725_RW_OUT_SYNC_SEL, 1);
+    tv5725_reg_write(TV5725_RW_OUT_SYNC_CNTRL, 1);
+
+    /* DAC 上电 */
+    tv5725_reg_write(TV5725_RW_DAC_RGBS_PWDNZ, 1);
+
+    /* 矩阵配置 — RGB 输入旁路，YPbPr 靠 VDS 转换 */
+    tv5725_reg_write(TV5725_RW_DEC_MATRIX_BYPS, 1);    /* 旁路解码器 YUV→RGB（输入已是 RGB） */
+    tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);     /* 旁路 IF 矩阵 */
+    tv5725_reg_write(TV5725_RW_HD_MATRIX_BYPS, 1);     /* 旁路 HD 矩阵 */
+    tv5725_reg_write(TV5725_RW_HD_DYN_BYPS, 1);        /* 旁路 HD 动态 */
+
+    /* === ADC 自动偏移 === */
+    tv5725_reg_write(TV5725_RW_ADC_AUTO_OFST_PRD, 1);
+    tv5725_reg_write(TV5725_RW_ADC_AUTO_OFST_DELAY, 0);
+    tv5725_reg_write(TV5725_RW_ADC_AUTO_OFST_STEP, 0);
+    tv5725_reg_write(TV5725_RW_ADC_AUTO_OFST_TEST, 1);
+    tv5725_reg_write(TV5725_RW_ADC_AUTO_OFST_01, 0x00);
+
+    return LL_OK;
+}
+
+/* ==================================================================
+   ASW analog switch — PB12-PB15
+
+   Pin mapping (matching hardware schematic):
+     PB15 = ASW1    PB14 = ASW2    PB13 = ASW3    PB12 = ASW4
+
+   Each ASW controls an analog switch that routes the sync signal
+   from a specific input connector to the TV5725.
+
+   Input mode → ASW table (移植自 usart_uart_dma 工程):
+     VGA:   asw_01=1, asw_02=var, asw_03=1, asw_04=1
+     RGBS:  asw_01=0, asw_02=0,   asw_03=0, asw_04=1
+     RGsB:  asw_01=0, asw_02=0,   asw_03=1, asw_04=0
+     YPbPr: asw_01=0, asw_02=0,   asw_03=1, asw_04=0
    ================================================================== */
 
 void tv5725_asw_init(void)
@@ -418,8 +772,57 @@ void tv5725_asw_init(void)
     stc_gpio_init_t cfg;
     GPIO_StructInit(&cfg);
     cfg.u16PinDir = PIN_DIR_OUT;
+
+    /* Init all 4 pins as outputs */
     GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1, &cfg);
     GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2, &cfg);
     GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3, &cfg);
     GPIO_Init(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4, &cfg);
+
+    /* Default: all off (reset state) */
+    ASW1_Off(); ASW2_Off(); ASW3_Off(); ASW4_Off();
+}
+
+void tv5725_asw_ctrl(bool sw1, bool sw2, bool sw3, bool sw4)
+{
+    if (sw1)
+        ASW1_On();
+    else
+        ASW1_Off();
+
+    if (sw2)
+        ASW2_On();
+    else
+        ASW2_Off();
+
+    if (sw3)
+        ASW3_On();
+    else
+        ASW3_Off();
+
+    if (sw4)
+        ASW4_On();
+    else
+        ASW4_Off();
+
+    g_tv5725_cfg.asw_01 = sw1;
+    g_tv5725_cfg.asw_02 = sw2;
+    g_tv5725_cfg.asw_03 = sw3;
+    g_tv5725_cfg.asw_04 = sw4;
+}
+
+/* 封装：各输入模式专用 ASW 设置 */
+void tv5725_asw_set_vga(void)
+{
+    tv5725_asw_ctrl(1, g_tv5725_cfg.asw_02, 1, 1);
+}
+
+void tv5725_asw_set_rgbs(void)
+{
+    tv5725_asw_ctrl(0, 0, 0, 1);
+}
+
+void tv5725_asw_set_rgsb(void)
+{
+    tv5725_asw_ctrl(0, 0, 1, 0);
 }

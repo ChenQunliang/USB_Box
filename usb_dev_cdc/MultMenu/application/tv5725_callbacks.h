@@ -4,15 +4,14 @@
 #include "menu.h"
 
 /* Input source selection callbacks */
+void cb_input_vga(xpMenu Menu);
 void cb_input_rgbs(xpMenu Menu);
 void cb_input_rgsb(xpMenu Menu);
-void cb_input_yuv(xpMenu Menu);
 
 /* Output resolution selection callbacks */
-void cb_res_720p_4_3(xpMenu Menu);
-void cb_res_720p_16_9(xpMenu Menu);
-void cb_res_1080p_4_3(xpMenu Menu);
-void cb_res_1080p_16_9(xpMenu Menu);
+void cb_res_480p(xpMenu Menu);
+void cb_res_720p(xpMenu Menu);
+void cb_res_1080p(xpMenu Menu);
 
 /* SOG mode selection callbacks */
 void cb_sog_normal(xpMenu Menu);

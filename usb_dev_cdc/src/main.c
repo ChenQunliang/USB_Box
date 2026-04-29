@@ -57,8 +57,9 @@ int32_t main(void)
     V_I2C_Init();
     if (tv5725_init() == LL_OK)
     {
-        // tv5725_output_path_init(preset_480p, 0); /* 480p VGA preset, RGB input */
-        printf("TV5725 VGA output initialized (480p)\n");
+        tv5725_output_path_init(preset_480p, 0); /* 480p 预设 + YPbPr 输出 */
+        tv5725_input_set_mode(TV5725_INPUT_VGA); /* 默认 VGA 输入 */
+        printf("TV5725 YPbPr output / VGA input initialized (480p)\n");
     }
 
     Menu_Init(&menu);

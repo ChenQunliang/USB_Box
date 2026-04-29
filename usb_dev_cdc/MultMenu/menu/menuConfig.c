@@ -42,7 +42,7 @@ xItem HomeHead_Item;
 xItem InputHead_Item, ColorHead_Item, FormatHead_Item, ScreenHead_Item, OutPutHead_Item;
 xItem Input_Item    , Color_Item    , Format_Item    , Screen_Item    , OutPut_Item    ;
 /*signal*/
-xItem RGBS_Item, RGSB_Item, YUV_Item;
+xItem RGBS_Item, RGSB_Item, VGA_Item;
 /*ChipID*/
 xItem ChipID_Item;
 /*SOG*/
@@ -54,7 +54,7 @@ xItem Brightness_Item, Contrast_Item, Saturation_Item, Hues_Item;
 /*Screen*/
 xItem LeftAndRight_Item, UpAndDown_Item;
 /*Resolution*/
-xItem  Resolution720_4_Item,    Resolution720_16_Item,  Resolution1080_4_Item,  Resolution1080_16_Item;
+xItem  Resolution480_Item, Resolution720_Item,  Resolution1080_Item;
 /*Save*/
 xItem Save_Item;
 /*Load*/
@@ -240,9 +240,9 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +Input", PARENTS, logo_allArray[1], &Input_Item, &Home_Page, &Input_Page, NULL);
             AddPage("[Back]", &Input_Page, TEXT);
                 AddItem("[Back]", RETURN, NULL, &InputHead_Item,   &Input_Page, &Home_Page, NULL);
+                AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
                 AddItem(" -RGBS", ONCE_FUNCTION,   NULL, &RGBS_Item, &Input_Page, NULL, cb_input_rgbs);
                 AddItem(" -RGSB", ONCE_FUNCTION,   NULL, &RGSB_Item, &Input_Page, NULL, cb_input_rgsb);
-                AddItem(" -YUV" , ONCE_FUNCTION,   NULL, &YUV_Item,  &Input_Page, NULL, cb_input_yuv);
                 AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Input_Page, NULL, cb_chip_id_show);
                 AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Input_Page, &SOG_Page, NULL);
                     AddPage("[Back]", &SOG_Page, TEXT);
@@ -274,10 +274,9 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +OutPut", PARENTS, logo_allArray[4], &OutPut_Item, &Home_Page, &OutPut_Page, NULL);
             AddPage("[Back]", &OutPut_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &OutPutHead_Item     , &OutPut_Page  , &Home_Page, NULL);
-                AddItem(" -720P(4*3)"    , ONCE_FUNCTION,   NULL, &Resolution720_4_Item    , &OutPut_Page, NULL, cb_res_720p_4_3);
-                AddItem(" -720P(16*9)"   , ONCE_FUNCTION,   NULL, &Resolution720_16_Item   , &OutPut_Page, NULL, cb_res_720p_16_9);
-                AddItem(" -1080P(4*3)"   , ONCE_FUNCTION,   NULL, &Resolution1080_4_Item   , &OutPut_Page, NULL, cb_res_1080p_4_3);
-                AddItem(" -1080P(16*9)"  , ONCE_FUNCTION,   NULL, &Resolution1080_16_Item  , &OutPut_Page, NULL, cb_res_1080p_16_9);
+                AddItem(" -480P"        , ONCE_FUNCTION,   NULL, &Resolution480_Item      , &OutPut_Page, NULL, cb_res_480p);
+                AddItem(" -720P"        , ONCE_FUNCTION,   NULL, &Resolution720_Item      , &OutPut_Page, NULL, cb_res_720p);
+                AddItem(" -1080P"       , ONCE_FUNCTION,   NULL, &Resolution1080_Item     , &OutPut_Page, NULL, cb_res_1080p);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);
                 
