@@ -5,6 +5,7 @@
 extern const uint8_t preset_480p[];
 extern const uint8_t preset_720p[];
 extern const uint8_t preset_1080p[];
+extern const uint8_t preset_960p[];
 
 /* ====================================================================
    当前状态跟踪
@@ -110,6 +111,14 @@ void cb_res_720p(xpMenu Menu)
     (void)Menu;
     s_cur_preset = preset_720p;
     printf("Output: 720p\n");
+    reload_output();
+}
+
+void cb_res_960p(xpMenu Menu)
+{
+    (void)Menu;
+    s_cur_preset = preset_960p;
+    printf("Output: 960p\n");
     reload_output();
 }
 

@@ -54,7 +54,7 @@ xItem Brightness_Item, Contrast_Item, Saturation_Item, Hues_Item;
 /*Screen*/
 xItem LeftAndRight_Item, UpAndDown_Item;
 /*Resolution*/
-xItem  Resolution480_Item, Resolution720_Item,  Resolution1080_Item;
+xItem  Resolution480_Item, Resolution720_Item,  Resolution960_Item, Resolution1080_Item;
 /*Save*/
 xItem Save_Item;
 /*Load*/
@@ -276,6 +276,7 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem("[Back]" , RETURN, NULL, &OutPutHead_Item     , &OutPut_Page  , &Home_Page, NULL);
                 AddItem(" -480P"        , ONCE_FUNCTION,   NULL, &Resolution480_Item      , &OutPut_Page, NULL, cb_res_480p);
                 AddItem(" -720P"        , ONCE_FUNCTION,   NULL, &Resolution720_Item      , &OutPut_Page, NULL, cb_res_720p);
+                AddItem(" -960P"        , ONCE_FUNCTION,   NULL, &Resolution960_Item      , &OutPut_Page, NULL, cb_res_960p);
                 AddItem(" -1080P"       , ONCE_FUNCTION,   NULL, &Resolution1080_Item     , &OutPut_Page, NULL, cb_res_1080p);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);

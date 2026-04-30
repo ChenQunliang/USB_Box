@@ -11,6 +11,7 @@ void cb_input_rgsb(xpMenu Menu);
 /* Output resolution selection callbacks */
 void cb_res_480p(xpMenu Menu);
 void cb_res_720p(xpMenu Menu);
+void cb_res_960p(xpMenu Menu);
 void cb_res_1080p(xpMenu Menu);
 
 /* SOG mode selection callbacks */

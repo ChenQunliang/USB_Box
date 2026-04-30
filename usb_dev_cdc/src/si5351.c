@@ -333,6 +333,7 @@ void si5351_external_clock_init(void)
     si5351_init(&si5351, 25000000UL);
     si5351_write(SI5351_REG_XTAL_LOAD, SI5351_XTAL_LOAD_DEFAULT);
     si5351_set_power(&si5351, 0, SI5351_DRIVE_6mA);
-    si5351_set_freq(&si5351, 0, 81000000UL);
+    si5351_set_freq(&si5351, 0, 27000000UL);
     si5351_disable(&si5351, 0);
+    printf("Si5351 CLK0 disabled\n");
 }

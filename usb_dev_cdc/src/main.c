@@ -5,6 +5,7 @@
 #include "preset_md_section.h"
 #include "preset_480p.h"
 #include "preset_720p.h"
+#include "preset_960p.h"
 #include "preset_1080p.h"
 
 extern uint16_t g_u16_sys_timer;

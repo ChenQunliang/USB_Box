@@ -52,4 +52,5 @@
 .\output\debug\main.o: ..\headers\preset_md_section.h
 .\output\debug\main.o: ..\headers\preset_480p.h
 .\output\debug\main.o: ..\headers\preset_720p.h
+.\output\debug\main.o: ..\headers\preset_960p.h
 .\output\debug\main.o: ..\headers\preset_1080p.h
