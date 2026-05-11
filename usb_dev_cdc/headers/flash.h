@@ -41,40 +41,36 @@ extern "C"
  * Global pre-processor symbols/macros ('#define')
  ******************************************************************************/
 /* Flash definitions */
-#define FLASH_BASE                      (EFM_START_ADDR)
-#define FLASH_SIZE                      (EFM_END_ADDR + 1U)
-#define FLASH_SECTOR_SIZE               (SECTOR_SIZE)
-#define FLASH_SECTOR_NUM                (64U)
+#define FLASH_BASE (EFM_START_ADDR)
+#define FLASH_SIZE (EFM_END_ADDR + 1U)
+#define FLASH_SECTOR_SIZE (SECTOR_SIZE)
+#define FLASH_SECTOR_NUM (64U)
 
 /* SRAM definitions */
-#define SRAM_SIZE                       (0x020000UL)
+#define SRAM_SIZE (0x020000UL)
 /* Vector table */
-#define VECT_TAB_STEP                   (0x400UL)
+#define VECT_TAB_STEP (0x400UL)
 
-/*******************************************************************************
- * Global variable definitions ('extern')
- ******************************************************************************/
+  /*******************************************************************************
+   * Global variable definitions ('extern')
+   ******************************************************************************/
 
-/*******************************************************************************
-  Global function prototypes (definition in C source)
- ******************************************************************************/
-int32_t FLASH_CheckAddrAlign(uint32_t u32Addr);
-int32_t FLASH_EraseSector(uint32_t u32Addr, uint32_t u32Size);
-int32_t FLASH_WriteData(uint32_t u32Addr, uint8_t *pu8Buff, uint32_t u32Len);
-int32_t FLASH_ReadData(uint32_t u32Addr, uint8_t *pu8Buff, uint32_t u32Len);
+  /*******************************************************************************
+    Global function prototypes (definition in C source)
+   ******************************************************************************/
+  int32_t FLASH_CheckAddrAlign(uint32_t u32Addr);
+  int32_t FLASH_EraseSector(uint32_t u32Addr, uint32_t u32Size);
+  int32_t FLASH_WriteData(uint32_t u32Addr, uint8_t *pu8Buff, uint32_t u32Len);
+  int32_t FLASH_ReadData(uint32_t u32Addr, uint8_t *pu8Buff, uint32_t u32Len);
 
+  void user_settings_init(void);
+  void FLASH_SAVE_DEFAULT(void);
+  void FLASH_READ_MS1824_DATA(void);
 
-void user_settings_init(void);
-void FLASH_SAVE_DEFAULT(void);
-void FLASH_READ_MS1824_DATA(void);
-
-void mem_mygui_default(void);
-void mem_mygui_settings(void);
-void my_home_read(UINT8 com);
-void color_default(uint8_t m);
-
-void Save_Run(xpMenu Menu);
-void Load_Run(xpMenu Menu);
+  void mem_mygui_default(void);
+  void mem_mygui_settings(void);
+  void my_home_read(uint8_t com);
+  void color_default(uint8_t m);
 
 #ifdef __cplusplus
 }

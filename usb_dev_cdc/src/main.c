@@ -58,9 +58,9 @@ int32_t main(void)
     V_I2C_Init();
     if (tv5725_init() == LL_OK)
     {
-        tv5725_output_path_init(preset_480p, 0); /* 480p 预设 + YPbPr 输出 */
-        tv5725_input_set_mode(TV5725_INPUT_VGA); /* 默认 VGA 输入 */
-        printf("TV5725 YPbPr output / VGA input initialized (480p)\n");
+        tv5725_output_path_init(preset_1080p);    /* 480p 预设 + YPbPr 输出 */
+        tv5725_input_set_mode(TV5725_INPUT_RGBS); /* 默认 VGA 输入 */
+        printf("TV5725 YPbPr output(480p) / RGBS input \n");
     }
 
     Menu_Init(&menu);
@@ -87,9 +87,9 @@ int32_t main(void)
             {
                 g_u16_mis_timer = 0;
             }
-            if (g_u16_osd_timer >= SYS_TIMEOUT_500MS) // 500MS   OSD
+            if (g_u16_osd_timer >= SYS_TIMEOUT_4SEC) // 500MS   OSD
             {
-
+                tv5725_diag(); // 串口输出全状态
                 g_u16_osd_timer = 0;
             }
         }

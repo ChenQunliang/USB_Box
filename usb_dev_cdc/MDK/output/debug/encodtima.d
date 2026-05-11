@@ -39,6 +39,7 @@
 .\output\debug\encodtima.o: ..\headers\EncodTimA.h
 .\output\debug\encodtima.o: ..\headers\v_i2c.h
 .\output\debug\encodtima.o: ..\headers\main.h
+.\output\debug\encodtima.o: ..\headers\flash.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menu.h
 .\output\debug\encodtima.o: ..\MultMenu\menu\menuConfig.h
 .\output\debug\encodtima.o: ..\u8g2Drive\u8g2Lib\inc\u8g2.h

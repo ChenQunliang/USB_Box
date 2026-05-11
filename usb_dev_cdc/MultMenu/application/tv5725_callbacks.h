@@ -18,8 +18,14 @@ void cb_res_1080p(xpMenu Menu);
 void cb_sog_normal(xpMenu Menu);
 void cb_sog_force(xpMenu Menu);
 void cb_sog_show(xpMenu Menu);
+void cb_sog_calibrate(xpMenu Menu);
+void cb_asw_sweep(xpMenu Menu);
+void cb_asw_sweep_reset(xpMenu Menu);
 
 /* Chip ID callbacks */
 void cb_chip_id_show(xpMenu Menu);
+
+/* OTA */
+void cb_ota_show(xpMenu Menu);
 
 #endif /* TV5725_CALLBACKS_H */

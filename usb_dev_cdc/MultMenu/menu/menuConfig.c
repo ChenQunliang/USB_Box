@@ -36,23 +36,21 @@ SOFTWARE.
 //#include "AirPlane.h"
 
 /* Page*/
-xPage Home_Page, Input_Page, Format_Page, Color_Page, Screen_Page, OutPut_Page, SOG_Page;
+xPage Home_Page, Input_Page, Format_Page, Color_Page, Test_Page, OutPut_Page, SOG_Page;
 /* item */
-xItem HomeHead_Item; 
-xItem InputHead_Item, ColorHead_Item, FormatHead_Item, ScreenHead_Item, OutPutHead_Item;
-xItem Input_Item    , Color_Item    , Format_Item    , Screen_Item    , OutPut_Item    ;
+xItem HomeHead_Item;
+xItem InputHead_Item, ColorHead_Item, FormatHead_Item, TestHead_Item, OutPutHead_Item;
+xItem Input_Item    , Color_Item    , Format_Item    , Test_Item    , OutPut_Item    ;
 /*signal*/
 xItem RGBS_Item, RGSB_Item, VGA_Item;
 /*ChipID*/
 xItem ChipID_Item;
 /*SOG*/
-xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item;
+xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item, SOG_Calibrate_Item, ASW_Step_Item, ASW_Reset_Item, OTA_Item;
 /*Format*/
 xItem Auto_Item, Ntsc_Item, Ntsc443_Item, Pal_Item, Pal_M_Item, Secam_Item;
 /*Color*/
 xItem Brightness_Item, Contrast_Item, Saturation_Item, Hues_Item;
-/*Screen*/
-xItem LeftAndRight_Item, UpAndDown_Item;
 /*Resolution*/
 xItem  Resolution480_Item, Resolution720_Item,  Resolution960_Item, Resolution1080_Item;
 /*Save*/
@@ -151,35 +149,6 @@ void Create_Parameter(void)
 
 
 
-//    static int LeftAndRight = 0;
-    static data_t LeftAndRight_data;
-    LeftAndRight_data.name = "LeftAndRight";
-    LeftAndRight_data.ptr = &Brightness;
-    LeftAndRight_data.function = NULL;
-    LeftAndRight_data.Function_Type = STEP_EXECUTE;
-    LeftAndRight_data.Data_Type = DATA_INT;
-    LeftAndRight_data.Operate_Type = READ_WRITE;
-    LeftAndRight_data.max = 20;
-    LeftAndRight_data.min = -20;
-    LeftAndRight_data.step = 1;
-    static element_t LeftAndRight_element;
-    LeftAndRight_element.data = &LeftAndRight_data;
-    Create_element(&LeftAndRight_Item, &LeftAndRight_element);
-
-//    static int UpAndDown = 0;
-    static data_t UpAndDown_data;
-    UpAndDown_data.name = "UpAndDown";
-    UpAndDown_data.ptr = &Brightness;
-    UpAndDown_data.function = NULL;
-    UpAndDown_data.Function_Type = STEP_EXECUTE;
-    UpAndDown_data.Data_Type = DATA_INT;
-    UpAndDown_data.Operate_Type = READ_WRITE;
-    UpAndDown_data.max = 20;
-    UpAndDown_data.min = -20;
-    UpAndDown_data.step = 1;
-    static element_t UpAndDown_element;
-    UpAndDown_element.data = &UpAndDown_data;
-    Create_element(&UpAndDown_Item, &UpAndDown_element);
 //    static uint8_t power = true;
 //    static data_t Power_switch_data;
 //    Power_switch_data.ptr = &power;
@@ -243,22 +212,15 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
                 AddItem(" -RGBS", ONCE_FUNCTION,   NULL, &RGBS_Item, &Input_Page, NULL, cb_input_rgbs);
                 AddItem(" -RGSB", ONCE_FUNCTION,   NULL, &RGSB_Item, &Input_Page, NULL, cb_input_rgsb);
-                AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Input_Page, NULL, cb_chip_id_show);
-                AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Input_Page, &SOG_Page, NULL);
-                    AddPage("[Back]", &SOG_Page, TEXT);
-                        AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Input_Page, NULL);
-                        AddItem(" -Normal", ONCE_FUNCTION, NULL, &SOG_Normal_Item, &SOG_Page, NULL, cb_sog_normal);
-                        AddItem(" -Force" , ONCE_FUNCTION, NULL, &SOG_Force_Item , &SOG_Page, NULL, cb_sog_force);
-                        AddItem(" -Read"  , ONCE_FUNCTION, NULL, &SOG_Show_Item  , &SOG_Page, NULL, cb_sog_show);
         AddItem(" +VideoFormat", PARENTS, logo_allArray[2], &Format_Item, &Home_Page, &Format_Page, NULL);
             AddPage("[Back]", &Format_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &FormatHead_Item    , &Format_Page  , &Home_Page, NULL);
-                AddItem(" -Auto"    , ONCE_FUNCTION,   NULL, &Auto_Item     , &Format_Page, NULL, NULL   );       
-                AddItem(" -NTSC"    , ONCE_FUNCTION,   NULL, &Ntsc_Item     , &Format_Page, NULL, NULL   ); 
-                AddItem(" -NTSC443" , ONCE_FUNCTION,   NULL, &Ntsc443_Item  , &Format_Page, NULL, NULL); 
-                AddItem(" -PAL"     , ONCE_FUNCTION,   NULL, &Pal_Item      , &Format_Page, NULL, NULL    ); 
-                AddItem(" -PAL_M"   , ONCE_FUNCTION,   NULL, &Pal_M_Item    , &Format_Page, NULL, NULL  ); 
-                AddItem(" -SECAM"   , ONCE_FUNCTION,   NULL, &Secam_Item    , &Format_Page, NULL, NULL  ); 
+                AddItem(" -Auto"    , ONCE_FUNCTION,   NULL, &Auto_Item     , &Format_Page, NULL, NULL   );
+                AddItem(" -NTSC"    , ONCE_FUNCTION,   NULL, &Ntsc_Item     , &Format_Page, NULL, NULL   );
+                AddItem(" -NTSC443" , ONCE_FUNCTION,   NULL, &Ntsc443_Item  , &Format_Page, NULL, NULL);
+                AddItem(" -PAL"     , ONCE_FUNCTION,   NULL, &Pal_Item      , &Format_Page, NULL, NULL    );
+                AddItem(" -PAL_M"   , ONCE_FUNCTION,   NULL, &Pal_M_Item    , &Format_Page, NULL, NULL  );
+                AddItem(" -SECAM"   , ONCE_FUNCTION,   NULL, &Secam_Item    , &Format_Page, NULL, NULL  );
         AddItem(" +Color", PARENTS, logo_allArray[3], &Color_Item, &Home_Page, &Color_Page, NULL);
             AddPage("[Back]", &Color_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &ColorHead_Item    , &Color_Page  , &Home_Page, NULL);
@@ -266,11 +228,20 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -Contrast"    , DATA  , NULL, &Contrast_Item      , &Color_Page  , NULL      , NULL);
                 AddItem(" -Saturation"  , DATA  , NULL, &Saturation_Item    , &Color_Page  , NULL      , NULL);
                 AddItem(" -Hues"        , DATA  , NULL, &Hues_Item          , &Color_Page  , NULL      , NULL);
-        AddItem(" +ScreenPosition", PARENTS, logo_allArray[7], &Screen_Item, &Home_Page, &Screen_Page, NULL);
-            AddPage("[Back]", &Screen_Page, TEXT);
-                AddItem("[Back]" , RETURN, NULL, &ScreenHead_Item     , &Screen_Page  , &Home_Page, NULL);
-                AddItem(" -Left&Right" , DATA  , NULL, &LeftAndRight_Item   , &Screen_Page  , NULL      , NULL);
-                AddItem(" -Up&Down"    , DATA  , NULL, &UpAndDown_Item      , &Screen_Page  , NULL      , NULL);
+        AddItem(" +Test", PARENTS, logo_allArray[7], &Test_Item, &Home_Page, &Test_Page, NULL);
+            AddPage("[Back]", &Test_Page, TEXT);
+                AddItem("[Back]" , RETURN, NULL, &TestHead_Item, &Test_Page, &Home_Page, NULL);
+                AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Test_Page, NULL, cb_chip_id_show);
+                AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Test_Page, &SOG_Page, NULL);
+                    AddPage("[Back]", &SOG_Page, TEXT);
+                        AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Test_Page, NULL);
+                        AddItem(" -Normal", ONCE_FUNCTION, NULL, &SOG_Normal_Item, &SOG_Page, NULL, cb_sog_normal);
+                        AddItem(" -Force" , ONCE_FUNCTION, NULL, &SOG_Force_Item , &SOG_Page, NULL, cb_sog_force);
+                        AddItem(" -Read"  , ONCE_FUNCTION, NULL, &SOG_Show_Item  , &SOG_Page, NULL, cb_sog_show);
+                        AddItem(" -Calibrate", ONCE_FUNCTION, NULL, &SOG_Calibrate_Item, &SOG_Page, NULL, cb_sog_calibrate);
+                AddItem(" -ASW Step", ONCE_FUNCTION, NULL, &ASW_Step_Item, &Test_Page, NULL, cb_asw_sweep);
+                AddItem(" -ASW Reset", ONCE_FUNCTION, NULL, &ASW_Reset_Item, &Test_Page, NULL, cb_asw_sweep_reset);
+                AddItem(" -OTA", ONCE_FUNCTION, NULL, &OTA_Item, &Test_Page, NULL, cb_ota_show);
         AddItem(" +OutPut", PARENTS, logo_allArray[4], &OutPut_Item, &Home_Page, &OutPut_Page, NULL);
             AddPage("[Back]", &OutPut_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &OutPutHead_Item     , &OutPut_Page  , &Home_Page, NULL);
@@ -280,14 +251,6 @@ void Create_MenuTree(xpMenu Menu)
                 AddItem(" -1080P"       , ONCE_FUNCTION,   NULL, &Resolution1080_Item     , &OutPut_Page, NULL, cb_res_1080p);
         AddItem(" -Save", ONCE_FUNCTION, logo_allArray[5], &Save_Item, &Home_Page, NULL, NULL);
         AddItem(" -LoadDefault", ONCE_FUNCTION, logo_allArray[6], &Load_Item, &Home_Page, NULL, NULL);
-                
-//        AddItem(" -Image", LOOP_FUNCTION, logo_allArray[6], &Image_Item, &Home_Page, NULL, Show_Logo);
-//        AddItem(" -Github", _TEXT_, logo_allArray[5], &Github_Item, &Home_Page, NULL, NULL);
-//        AddItem(" -Bilibili", _TEXT_, logo_allArray[7], &Bilibili_Item, &Home_Page, NULL, NULL);
-//        AddItem(" -Wave", WAVE, logo_allArray[9], &Wave_Item, &Home_Page, NULL, NULL);
-//        AddItem(" -DinoGame", LOOP_FUNCTION, logo_allArray[3], &Dino_Item, &Home_Page, NULL, DinoGame_Run);
-//        AddItem(" -AirPlane", LOOP_FUNCTION, logo_allArray[0], &AirPlane_Item, &Home_Page, NULL, AirPlane_Run);
-    
 }
 
 void Menu_Init(xpMenu Menu)

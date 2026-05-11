@@ -47,75 +47,75 @@ extern "C"
  * Library.
  * @note LL_PRINT_ENABLE must be turned on(DDL_ON) if using printf function.
  */
-#define LL_ICG_ENABLE                               (DDL_OFF)
-#define LL_UTILITY_ENABLE                           (DDL_ON)
-#define LL_PRINT_ENABLE                             (DDL_ON)
+#define LL_ICG_ENABLE (DDL_OFF)
+#define LL_UTILITY_ENABLE (DDL_ON)
+#define LL_PRINT_ENABLE (DDL_ON)
 
-#define LL_ADC_ENABLE                               (DDL_OFF)
-#define LL_AES_ENABLE                               (DDL_OFF)
-#define LL_AOS_ENABLE                               (DDL_OFF)
-#define LL_CAN_ENABLE                               (DDL_OFF)
-#define LL_CLK_ENABLE                               (DDL_ON)
-#define LL_CMP_ENABLE                               (DDL_OFF)
-#define LL_CRC_ENABLE                               (DDL_OFF)
-#define LL_CTC_ENABLE                               (DDL_OFF)
-#define LL_DAC_ENABLE                               (DDL_OFF)
-#define LL_DCU_ENABLE                               (DDL_OFF)
-#define LL_DMA_ENABLE                               (DDL_OFF)
-#define LL_DMC_ENABLE                               (DDL_OFF)
-#define LL_DVP_ENABLE                               (DDL_OFF)
-#define LL_EFM_ENABLE                               (DDL_ON)
-#define LL_EMB_ENABLE                               (DDL_OFF)
-#define LL_ETH_ENABLE                               (DDL_OFF)
-#define LL_EVENT_PORT_ENABLE                        (DDL_OFF)
-#define LL_FCG_ENABLE                               (DDL_ON)
-#define LL_FCM_ENABLE                               (DDL_ON)
-#define LL_FMAC_ENABLE                              (DDL_OFF)
-#define LL_GPIO_ENABLE                              (DDL_ON)
-#define LL_HASH_ENABLE                              (DDL_OFF)
-#define LL_HRPWM_ENABLE                             (DDL_OFF)
-#define LL_I2C_ENABLE                               (DDL_ON)
-#define LL_I2S_ENABLE                               (DDL_OFF)
-#define LL_INTERRUPTS_ENABLE                        (DDL_ON)
-#define LL_INTERRUPTS_SHARE_ENABLE                  (DDL_ON)
-#define LL_KEYSCAN_ENABLE                           (DDL_ON)
-#define LL_MAU_ENABLE                               (DDL_OFF)
-#define LL_MDIO_ENABLE                              (DDL_OFF)
-#define LL_MPU_ENABLE                               (DDL_OFF)
-#define LL_NFC_ENABLE                               (DDL_OFF)
-#define LL_OTS_ENABLE                               (DDL_OFF)
-#define LL_PLA_ENABLE                               (DDL_OFF)
-#define LL_PWC_ENABLE                               (DDL_ON)
-#define LL_QSPI_ENABLE                              (DDL_ON)
-#define LL_RMU_ENABLE                               (DDL_OFF)
-#define LL_RTC_ENABLE                               (DDL_OFF)
-#define LL_SDIOC_ENABLE                             (DDL_OFF)
-#define LL_SMC_ENABLE                               (DDL_OFF)
-#define LL_SPI_ENABLE                               (DDL_OFF)
-#define LL_SRAM_ENABLE                              (DDL_ON)
-#define LL_SWDT_ENABLE                              (DDL_OFF)
-#define LL_TMR0_ENABLE                              (DDL_ON)
-#define LL_TMR2_ENABLE                              (DDL_OFF)
-#define LL_TMR4_ENABLE                              (DDL_OFF)
-#define LL_TMR6_ENABLE                              (DDL_OFF)
-#define LL_TMRA_ENABLE                              (DDL_ON)
-#define LL_TRNG_ENABLE                              (DDL_OFF)
-#define LL_USART_ENABLE                             (DDL_ON)
-#define LL_USB_ENABLE                               (DDL_OFF)
-#define LL_VREF_ENABLE                              (DDL_OFF)
-#define LL_WDT_ENABLE                               (DDL_OFF)
+#define LL_ADC_ENABLE (DDL_OFF)
+#define LL_AES_ENABLE (DDL_OFF)
+#define LL_AOS_ENABLE (DDL_OFF)
+#define LL_CAN_ENABLE (DDL_OFF)
+#define LL_CLK_ENABLE (DDL_ON)
+#define LL_CMP_ENABLE (DDL_OFF)
+#define LL_CRC_ENABLE (DDL_OFF)
+#define LL_CTC_ENABLE (DDL_OFF)
+#define LL_DAC_ENABLE (DDL_OFF)
+#define LL_DCU_ENABLE (DDL_OFF)
+#define LL_DMA_ENABLE (DDL_OFF)
+#define LL_DMC_ENABLE (DDL_OFF)
+#define LL_DVP_ENABLE (DDL_OFF)
+#define LL_EFM_ENABLE (DDL_ON)
+#define LL_EMB_ENABLE (DDL_OFF)
+#define LL_ETH_ENABLE (DDL_OFF)
+#define LL_EVENT_PORT_ENABLE (DDL_OFF)
+#define LL_FCG_ENABLE (DDL_ON)
+#define LL_FCM_ENABLE (DDL_ON)
+#define LL_FMAC_ENABLE (DDL_OFF)
+#define LL_GPIO_ENABLE (DDL_ON)
+#define LL_HASH_ENABLE (DDL_OFF)
+#define LL_HRPWM_ENABLE (DDL_OFF)
+#define LL_I2C_ENABLE (DDL_ON)
+#define LL_I2S_ENABLE (DDL_OFF)
+#define LL_INTERRUPTS_ENABLE (DDL_ON)
+#define LL_INTERRUPTS_SHARE_ENABLE (DDL_ON)
+#define LL_KEYSCAN_ENABLE (DDL_ON)
+#define LL_MAU_ENABLE (DDL_OFF)
+#define LL_MDIO_ENABLE (DDL_OFF)
+#define LL_MPU_ENABLE (DDL_OFF)
+#define LL_NFC_ENABLE (DDL_OFF)
+#define LL_OTS_ENABLE (DDL_OFF)
+#define LL_PLA_ENABLE (DDL_OFF)
+#define LL_PWC_ENABLE (DDL_ON)
+#define LL_QSPI_ENABLE (DDL_ON)
+#define LL_RMU_ENABLE (DDL_OFF)
+#define LL_RTC_ENABLE (DDL_OFF)
+#define LL_SDIOC_ENABLE (DDL_OFF)
+#define LL_SMC_ENABLE (DDL_OFF)
+#define LL_SPI_ENABLE (DDL_OFF)
+#define LL_SRAM_ENABLE (DDL_ON)
+#define LL_SWDT_ENABLE (DDL_OFF)
+#define LL_TMR0_ENABLE (DDL_ON)
+#define LL_TMR2_ENABLE (DDL_OFF)
+#define LL_TMR4_ENABLE (DDL_OFF)
+#define LL_TMR6_ENABLE (DDL_OFF)
+#define LL_TMRA_ENABLE (DDL_ON)
+#define LL_TRNG_ENABLE (DDL_OFF)
+#define LL_USART_ENABLE (DDL_ON)
+#define LL_USB_ENABLE (DDL_OFF)
+#define LL_VREF_ENABLE (DDL_OFF)
+#define LL_WDT_ENABLE (DDL_OFF)
 
 /**
  * @brief The following is a list of currently supported BSP boards.
  */
-#define BSP_EV_HC32F4A0_LQFP176                     (1U)
-#define BSP_EV_HC32F4A0_LQFP176_MEM                 (2U)
-#define BSP_EV_HC32F460_LQFP100_V1                  (3U)
-#define BSP_EV_HC32F460_LQFP100_V2                  (4U)
-#define BSP_EV_HC32F451_LQFP100                     (5U)
-#define BSP_EV_HC32F452_LQFP100                     (6U)
-#define BSP_EV_HC32F472_LQFP100                     (7U)
-#define BSP_SK_HC32F4A0_LQFP100                     (8U)
+#define BSP_EV_HC32F4A0_LQFP176 (1U)
+#define BSP_EV_HC32F4A0_LQFP176_MEM (2U)
+#define BSP_EV_HC32F460_LQFP100_V1 (3U)
+#define BSP_EV_HC32F460_LQFP100_V2 (4U)
+#define BSP_EV_HC32F451_LQFP100 (5U)
+#define BSP_EV_HC32F452_LQFP100 (6U)
+#define BSP_EV_HC32F472_LQFP100 (7U)
+#define BSP_SK_HC32F4A0_LQFP100 (8U)
 
 /**
  * @brief The macro BSP_EV_HC32F4XX is used to specify the BSP board currently
@@ -124,43 +124,41 @@ extern "C"
  * @note  If there is no supported BSP board or the BSP function is not used,
  * the value needs to be set to 0U.
  */
-#define BSP_EV_HC32F4XX                             (BSP_EV_HC32F460_LQFP100_V2)
+#define BSP_EV_HC32F4XX (BSP_EV_HC32F460_LQFP100_V2)
 
 /**
  * @brief This is the list of BSP components to be used.
  * Select the components you need to use to DDL_ON.
  */
-#define BSP_24CXX_ENABLE                            (DDL_OFF)
-#define BSP_CY62167EV30LL_ENABLE                    (DDL_OFF)
-#define BSP_IS42S16400J7TLI_ENABLE                  (DDL_OFF)
-#define BSP_IS62WV51216_ENABLE                      (DDL_OFF)
-#define BSP_MT29F2G08AB_ENABLE                      (DDL_OFF)
-#define BSP_NT35510_ENABLE                          (DDL_OFF)
-#define BSP_OV5640_ENABLE                           (DDL_OFF)
-#define BSP_S29GL064N90TFI03_ENABLE                 (DDL_OFF)
-#define BSP_TCA9539_ENABLE                          (DDL_ON)
-#define BSP_W25QXX_ENABLE                           (DDL_OFF)
-#define BSP_WM8731_ENABLE                           (DDL_OFF)
+#define BSP_24CXX_ENABLE (DDL_OFF)
+#define BSP_CY62167EV30LL_ENABLE (DDL_OFF)
+#define BSP_IS42S16400J7TLI_ENABLE (DDL_OFF)
+#define BSP_IS62WV51216_ENABLE (DDL_OFF)
+#define BSP_MT29F2G08AB_ENABLE (DDL_OFF)
+#define BSP_NT35510_ENABLE (DDL_OFF)
+#define BSP_OV5640_ENABLE (DDL_OFF)
+#define BSP_S29GL064N90TFI03_ENABLE (DDL_OFF)
+#define BSP_TCA9539_ENABLE (DDL_ON)
+#define BSP_W25QXX_ENABLE (DDL_OFF)
+#define BSP_WM8731_ENABLE (DDL_OFF)
 
+#define IAP_BOOT_SIZE (0x10000UL) // 16K
 
+#define IAP_APP_ADDR (EFM_BASE + IAP_BOOT_SIZE)
 
-#define IAP_BOOT_SIZE                                 (0x10000UL)   //16K
+/* Vector table ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0x400 ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½*/
+#define VECT_TAB_OFFSET (EFM_BASE + IAP_APP_ADDR)
 
-#define IAP_APP_ADDR                                (EFM_BASE   + IAP_BOOT_SIZE)
+#define APP_OTA_FLAG_ADDR (EFM_BASE + 0x78000U) // FLASH_LEAF_ADDR(3)
+#define APP_OTA_FLAG (0xA6B7C8D9UL)
 
-/* Vector table ¸ÃÖµ±ØÐëÊÇ 0x400 µÄ±¶Êý¡£*/
-#define VECT_TAB_OFFSET                             (EFM_BASE + IAP_APP_ADDR)
+  /*******************************************************************************
+   * Global variable definitions ('extern')
+   ******************************************************************************/
 
-
-/*******************************************************************************
- * Global variable definitions ('extern')
- ******************************************************************************/
-
-
-
-/*******************************************************************************
- * Global function prototypes (definition in C source)
- ******************************************************************************/
+  /*******************************************************************************
+   * Global function prototypes (definition in C source)
+   ******************************************************************************/
 
 #ifdef __cplusplus
 }

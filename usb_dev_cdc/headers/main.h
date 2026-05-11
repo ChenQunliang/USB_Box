@@ -26,7 +26,7 @@
 #include "v_i2c.h"
 //#include "tim0.h"
 
-// #include "flash.h"
+#include "flash.h"
 
 #include "menu.h"
 

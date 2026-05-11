@@ -28,10 +28,10 @@
 #define TV5725_SYNC_ASW4 (GPIO_PIN_12)
 
 /* ASW on/off helpers */
-#define ASW1_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1)
-#define ASW2_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2)
-#define ASW3_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3)
-#define ASW4_On()  GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4)
+#define ASW1_On() GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1)
+#define ASW2_On() GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2)
+#define ASW3_On() GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3)
+#define ASW4_On() GPIO_SetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW4)
 #define ASW1_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW1)
 #define ASW2_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW2)
 #define ASW3_Off() GPIO_ResetPins(TV5725_SYNC_ASW_PORT, TV5725_SYNC_ASW3)
@@ -49,10 +49,10 @@ typedef struct
 /* 全局配置结构体 — 用于掉电保存 */
 typedef struct
 {
-    bool asw_01;        /* ASW 模拟开关状态 */
-    bool asw_02;        /* （asw_02 为兼容性控制，可独立存储） */
-    bool asw_03;
-    bool asw_04;
+   bool asw_01; /* ASW 模拟开关状态 */
+   bool asw_02; /* （asw_02 为兼容性控制，可独立存储） */
+   bool asw_03;
+   bool asw_04;
 } tv5725_config_t;
 
 extern tv5725_config_t g_tv5725_cfg;
@@ -60,9 +60,9 @@ extern tv5725_config_t g_tv5725_cfg;
 typedef enum
 {
    TV5725_INPUT_AUTO = 0,
-   TV5725_INPUT_VGA,     /* RGBHV: separate H/V sync */
-   TV5725_INPUT_RGBS,    /* RGB + composite sync */
-   TV5725_INPUT_RGSB,    /* RGsB: sync on green */
+   TV5725_INPUT_VGA,  /* RGBHV: separate H/V sync */
+   TV5725_INPUT_RGBS, /* RGB + composite sync */
+   TV5725_INPUT_RGSB, /* RGsB: sync on green */
    TV5725_INPUT_COUNT
 } tv5725_input_mode_t;
 
@@ -839,10 +839,14 @@ void tv5725_sync_config(void);
 int32_t tv5725_input_config_vga(void);
 int32_t tv5725_input_config_rgbs(void);
 int32_t tv5725_input_config_rgsb(void);
-int32_t tv5725_input_config_yuv(void);
+
 int32_t tv5725_input_set_mode(tv5725_input_mode_t mode);
 void tv5725_input_auto_detect(void);
-int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv);
+void tv5725_diag(void);
+void tv5725_sog_calibrate(void);
+void tv5725_asw_sweep_diag(void);
+void tv5725_asw_sweep_reset(void);
+int32_t tv5725_output_path_init(const uint8_t *preset);
 
 /* ASW analog switch control */
 void tv5725_asw_init(void);

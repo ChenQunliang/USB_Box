@@ -1,6 +1,7 @@
 #include "tv5725_callbacks.h"
 #include "tv5725.h"
-
+#include "flash.h"
+#include "hc32f4xx_conf.h"
 /* 预设声明（定义在 preset_*.h 中） */
 extern const uint8_t preset_480p[];
 extern const uint8_t preset_720p[];
@@ -11,14 +12,13 @@ extern const uint8_t preset_960p[];
    当前状态跟踪
    ==================================================================== */
 static const uint8_t *s_cur_preset = preset_480p; /* 当前输出分辨率预设 */
-static uint8_t        s_input_is_yuv = 0;          /* 1 = YUV 输入，0 = RGB */
 
 /* ====================================================================
    输出路径重载（保持当前分辨率和输入模式）
    ==================================================================== */
 static void reload_output(void)
 {
-    tv5725_output_path_init(s_cur_preset, s_input_is_yuv);
+    tv5725_output_path_init(s_cur_preset);
 }
 
 /* ====================================================================
@@ -30,15 +30,15 @@ static void reload_output(void)
 void cb_input_rgbs(xpMenu Menu)
 {
     (void)Menu;
-    s_input_is_yuv = 0;
-    reload_output();                       /* 先加载预设 + 配置输出 */
-    tv5725_input_set_mode(TV5725_INPUT_RGBS);  /* 再覆盖输入寄存器 */
+    printf("Input: RGBS\n");
+    reload_output();
+    tv5725_input_set_mode(TV5725_INPUT_RGBS);
 }
 
 void cb_input_rgsb(xpMenu Menu)
 {
     (void)Menu;
-    s_input_is_yuv = 0;
+    printf("Input: RGSB\n");
     reload_output();
     tv5725_input_set_mode(TV5725_INPUT_RGSB);
 }
@@ -46,7 +46,7 @@ void cb_input_rgsb(xpMenu Menu)
 void cb_input_vga(xpMenu Menu)
 {
     (void)Menu;
-    s_input_is_yuv = 0;
+    printf("Input: VGA\n");
     reload_output();
     tv5725_input_set_mode(TV5725_INPUT_VGA);
 }
@@ -78,6 +78,24 @@ void cb_sog_show(xpMenu Menu)
     printf("SOG Mode = 0x%02X\n", val);
 }
 
+void cb_sog_calibrate(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_sog_calibrate();
+}
+
+void cb_asw_sweep(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_asw_sweep_diag();
+}
+
+void cb_asw_sweep_reset(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_asw_sweep_reset();
+}
+
 /* ====================================================================
    Chip ID callbacks
    ==================================================================== */
@@ -87,6 +105,20 @@ void cb_chip_id_show(xpMenu Menu)
     (void)Menu;
     uint32_t id = tv5725_get_chip_id();
     printf("TV5725 Chip ID: 0x%06lX\n", id);
+}
+
+void cb_ota_show(xpMenu Menu)
+{
+    __disable_irq();
+    uint32_t u32Temp;
+    u32Temp = APP_OTA_FLAG;
+    FLASH_EraseSector(APP_OTA_FLAG_ADDR, 0U);
+    FLASH_WriteData(APP_OTA_FLAG_ADDR, (uint8_t *)&u32Temp, 4U);
+    u32Temp = 0;
+    FLASH_ReadData(APP_OTA_FLAG_ADDR, (uint8_t *)&u32Temp, 4U);
+    __enable_irq();
+    SysTick_Delay(1);
+    NVIC_SystemReset();
 }
 
 /* ====================================================================

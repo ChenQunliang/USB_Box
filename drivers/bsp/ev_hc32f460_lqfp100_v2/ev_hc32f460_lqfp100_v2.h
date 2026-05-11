@@ -142,7 +142,7 @@ extern "C"
 #define SYS_TIMEOUT_100MS (9)
 #define SYS_TIMEOUT_500MS (50)
 #define SYS_TIMEOUT_1SEC (100)
-#define SYS_TIMEOUT_2SEC (200)
+#define SYS_TIMEOUT_4SEC (300)
 
   void TMR0_CHB_Config(void);
   void TMR02_A_Config(void);

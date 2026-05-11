@@ -53,3 +53,4 @@
 .\output\debug\menu.o: ..\headers\main.h
 .\output\debug\menu.o: ../../drivers/bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2_bsp.h
 .\output\debug\menu.o: ..\headers\v_i2c.h
+.\output\debug\menu.o: ..\headers\flash.h

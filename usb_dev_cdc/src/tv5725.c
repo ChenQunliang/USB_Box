@@ -511,9 +511,8 @@ static void input_adc_common(void)
     /* ADC clock: PA=0, ICLK2X=0, ICLK1X=0, PLLAD clock disabled */
     tv5725_reg_write(TV5725_RW_CONTROL_ADC_CLK_00, 0x00);
 
-    /* ADC input: disable SOG, select RGB input channel (1=RGB, 0=YUV) */
-    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
-    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 1);
+    /* ADC input: enable SOG (required for all modes per gbs-control) */
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
 
     /* ADC power up, R/G/B clamp enabled, filter = 01 */
     tv5725_reg_write(TV5725_RW_ADC_POWDZ, 1);
@@ -547,9 +546,11 @@ int32_t tv5725_input_config_vga(void)
         continue; /* ~10µs @ 200MHz */
     tv5725_reg_write(TV5725_RW_SFTRST_SYNC_RSTZ, 1);
 
-    /* VGA (RGBHV) mode: disable SOG, separate H/V sync, auto polarity */
-    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
+    /* VGA: ADC channel 1, separate H/V sync, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 1);
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
     tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_SOG_MODE, 0);
     tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0); /* HS_HS: H from H pin, V from V pin */
     tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
     tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
@@ -559,6 +560,9 @@ int32_t tv5725_input_config_vga(void)
     tv5725_reg_write(TV5725_RW_SP_PRE_COAST, 0);
     tv5725_reg_write(TV5725_RW_SP_POST_COAST, 0);
     tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 0);
+    tv5725_reg_write(TV5725_RW_SP_H_PULSE_IGNOR, 0xFF);
+    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 1);
+    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 1);
 
     /* 告知 TV5725 输入为 RGBHV 逐行，禁用去隔行 */
     tv5725_reg_write(TV5725_RW_GBS_OPTION_SCALING_RGBHV, 1);
@@ -585,18 +589,25 @@ int32_t tv5725_input_config_rgbs(void)
         continue; /* ~10µs @ 200MHz */
     tv5725_reg_write(TV5725_RW_SFTRST_SYNC_RSTZ, 1);
 
-    /* RGBS mode: disable SOG, composite sync on CS pin, auto polarity */
-    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 0);
+    /* RGBS: ADC channel 1 (SOG1), SOG mode for CSYNC separation */
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 1);
+    tv5725_reg_write(TV5725_RW_ADC_SOGCTRL, 5);
+    tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
     tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_SOG_MODE, 1);
     tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 1); /* CS_HS: composite sync from CS pin */
     tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
     tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 1);
 
     /* RGBS: 复合同步，海岸线使能 */
     tv5725_reg_write(TV5725_RW_SP_NO_COAST_REG, 0);
     tv5725_reg_write(TV5725_RW_SP_PRE_COAST, 4);
     tv5725_reg_write(TV5725_RW_SP_POST_COAST, 7);
     tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 1);
+    tv5725_reg_write(TV5725_RW_SP_H_PULSE_IGNOR, 0xFF);
+    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 1);
+    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 1);
 
     /* IF: 24-bit input, bypass color matrix, bypass data register */
     tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
@@ -612,6 +623,9 @@ int32_t tv5725_input_config_rgbs(void)
 
 int32_t tv5725_input_config_rgsb(void)
 {
+    /* ASW: RGsB */
+    tv5725_asw_set_rgsb();
+
     input_adc_common();
 
     /* 复位同步处理器状态机 */
@@ -620,9 +634,13 @@ int32_t tv5725_input_config_rgsb(void)
         continue; /* ~10µs @ 200MHz */
     tv5725_reg_write(TV5725_RW_SFTRST_SYNC_RSTZ, 1);
 
-    /* RGsB mode: enable SOG on green channel, auto polarity */
+    /* RGsB: ADC channel 0 (SOG0), SOG mode, auto polarity */
+    tv5725_reg_write(TV5725_RW_ADC_INPUT_SEL, 0);
+    tv5725_reg_write(TV5725_RW_ADC_SOGCTRL, 5);
     tv5725_reg_write(TV5725_RW_ADC_SOGEN, 1);
     tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
+    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 1);
+    tv5725_reg_write(TV5725_RW_SP_SOG_MODE, 1);
     tv5725_reg_write(TV5725_RW_SP_SOG_P_ATO, 1);
     tv5725_reg_write(TV5725_RW_SP_HS_POL_ATO, 1);
     tv5725_reg_write(TV5725_RW_SP_VS_POL_ATO, 1);
@@ -632,14 +650,15 @@ int32_t tv5725_input_config_rgsb(void)
     tv5725_reg_write(TV5725_RW_SP_PRE_COAST, 4);
     tv5725_reg_write(TV5725_RW_SP_POST_COAST, 7);
     tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 1);
+    tv5725_reg_write(TV5725_RW_SP_H_PULSE_IGNOR, 0xFF);
+    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 1);
+    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 1);
 
     /* IF: 24-bit input, bypass color matrix (RGB), bypass data register */
     tv5725_reg_write(TV5725_RW_IF_SEL24BIT, 1);
     tv5725_reg_write(TV5725_RW_IF_MATRIX_BYPS, 1);
     tv5725_reg_write(TV5725_RW_IF_IN_DREG_BYPS, 1);
 
-    /* ASW: RGsB */
-    tv5725_asw_set_rgsb();
     return LL_OK;
 }
 
@@ -660,6 +679,169 @@ void tv5725_input_auto_detect(void)
         tv5725_input_config_rgbs();
         g_input_mode = TV5725_INPUT_AUTO;
     }
+}
+
+/* ==================================================================
+   ASW 步进切换 — 每次调用切换到下一个组合，观察同步状态变化
+   On=0(LOW), Off=1(HIGH)
+   ================================================================== */
+static int s_asw_combo = 0;
+static bool s_asw_first = true;
+
+void tv5725_asw_sweep_diag(void)
+{
+    if (s_asw_first)
+    {
+        printf("=== ASW Step (sw1 sw2 sw3 sw4) ===\n");
+        printf("  On=0(LOW) Off=1(HIGH)\n");
+        s_asw_first = false;
+        s_asw_combo = 0;
+    }
+
+    bool s1 = (s_asw_combo >> 3) & 1;
+    bool s2 = (s_asw_combo >> 2) & 1;
+    bool s3 = (s_asw_combo >> 1) & 1;
+    bool s4 = s_asw_combo & 1;
+
+    tv5725_asw_ctrl(s1, s2, s3, s4);
+
+    /* 复位同步处理器 */
+    tv5725_reg_write(TV5725_RW_SFTRST_SYNC_RSTZ, 0);
+    for (volatile uint32_t i = 0; i < 200; i++)
+        continue;
+    tv5725_reg_write(TV5725_RW_SFTRST_SYNC_RSTZ, 1);
+
+    /* 等待稳定 (~50ms) */
+    for (volatile uint32_t d = 0; d < 1000000; d++)
+        continue;
+
+    uint8_t st05, st09, st0F;
+    tv5725_read_byte(0x00, 0x05, &st05);
+    tv5725_read_byte(0x00, 0x09, &st09);
+    tv5725_read_byte(0x00, 0x0F, &st0F);
+
+    uint8_t no_sync = (st05 >> 1) & 1;
+    uint8_t ad_lock = (st09 >> 7) & 1;
+    uint8_t sog_ok = (st0F >> 2) & 1;
+    uint8_t sog_sw = (st0F >> 1) & 1;
+    uint8_t sog_bad = st0F & 1;
+
+    printf("  #%2d: %d %d %d %d  NO_SYNC=%d AD_LOCK=%d SOG:B=%d S=%d OK=%d (05=0x%02X 09=0x%02X 0F=0x%02X)",
+           s_asw_combo, s1, s2, s3, s4, no_sync, ad_lock,
+           sog_bad, sog_sw, sog_ok, st05, st09, st0F);
+
+    if (!no_sync || sog_ok || ad_lock)
+        printf(" ***");
+
+    printf("\n");
+
+    s_asw_combo++;
+    if (s_asw_combo >= 16)
+    {
+        printf("ASW loop done, restarting from #0\n");
+        s_asw_combo = 0;
+        s_asw_first = true;
+    }
+}
+
+void tv5725_asw_sweep_reset(void)
+{
+    s_asw_combo = 0;
+    s_asw_first = true;
+    printf("ASW step reset to #0\n");
+}
+
+/* ==================================================================
+   SOG 阈值校准 — 扫描 SOGCTRL 0~31，寻找能使 SOG 锁定的阈值
+   ================================================================== */
+void tv5725_sog_calibrate(void)
+{
+    uint8_t sog_save;
+    tv5725_read_byte(0x05, 0x02, &sog_save);
+
+    printf("=== SOG Calibrate (SOGCTRL 0~31) ===\n");
+    int ok_count = 0;
+    for (int level = 0; level < 32; level++)
+    {
+        /* 设置 SOGCTRL，保持其他位不变 */
+        uint8_t val = (sog_save & 0x01) | ((level & 0x1F) << 1);
+        tv5725_reg_write(TV5725_RW_ADC_SOGCTRL, level);
+
+        /* 清除 SOG 中断状态 */
+        tv5725_reg_write(TV5725_RW_CONTROL_INT_RST_SOGBAD, 1);
+        tv5725_reg_write(TV5725_RW_CONTROL_INT_RST_SOGSWITCH, 1);
+
+        /* 等待 SOG 稳定 (~10ms) */
+        for (volatile uint32_t d = 0; d < 200000; d++)
+            continue;
+
+        uint8_t st0F;
+        tv5725_read_byte(0x00, 0x0F, &st0F);
+        uint8_t sog_ok = (st0F >> 2) & 1;
+        uint8_t sog_sw = (st0F >> 1) & 1;
+        uint8_t sog_bad = st0F & 1;
+
+        if (sog_ok)
+        {
+            printf("  SOGCTRL=%2d: OK\n", level);
+            ok_count++;
+        }
+        else if (level == 0 || level == 10 || level == 20 || level == 31)
+        {
+            printf("  SOGCTRL=%2d: BAD=%d SW=%d OK=%d (0x0F=0x%02X)\n",
+                   level, sog_bad, sog_sw, sog_ok, st0F);
+        }
+    }
+
+    /* 恢复原值 */
+    tv5725_reg_write(TV5725_RW_ADC_SOGCTRL, (sog_save >> 1) & 0x1F);
+    printf("SOG calibrate done: %d/32 levels locked\n", ok_count);
+}
+
+void tv5725_diag(void)
+{
+    uint8_t st05, st09, st0A, st0F, st10, st11, st13, st16;
+
+    tv5725_read_byte(0x00, 0x05, &st05);
+    tv5725_read_byte(0x00, 0x09, &st09);
+    tv5725_read_byte(0x00, 0x0A, &st0A);
+    tv5725_read_byte(0x00, 0x0F, &st0F);
+    tv5725_read_byte(0x00, 0x10, &st10);
+    tv5725_read_byte(0x00, 0x11, &st11);
+    tv5725_read_byte(0x00, 0x13, &st13);
+    tv5725_read_byte(0x00, 0x16, &st16);
+
+    printf("=== TV5725 Diag ===\n");
+    printf("ASW:    sw1=%d sw2=%d sw3=%d sw4=%d\n",
+           g_tv5725_cfg.asw_01, g_tv5725_cfg.asw_02,
+           g_tv5725_cfg.asw_03, g_tv5725_cfg.asw_04);
+    printf("INPUT:  NO_SYNC=%d HT_BAD=%d VT_BAD=%d (0x05=0x%02X)\n",
+           (st05 >> 1) & 1, (st05 >> 2) & 1, (st05 >> 3) & 1, st05);
+    uint8_t sog_reg;
+    tv5725_read_byte(0x05, 0x02, &sog_reg);
+    printf("SOG:    BAD=%d SW=%d OK=%d SOGCTRL=%d (0x0F=0x%02X, S5_02=0x%02X)\n",
+           st0F & 1, (st0F >> 1) & 1, (st0F >> 2) & 1,
+           (sog_reg >> 1) & 0x1F, st0F, sog_reg);
+    printf("PLL:    AD_LOCK=%d P648_LOCK=%d (0x09=0x%02X)\n",
+           (st09 >> 7) & 1, (st09 >> 6) & 1, st09);
+    printf("SYNC:   HSYNC=%d VSYNC=%d VBLK=%d HBLK=%d (0x0A=0x%02X)\n",
+           (st0A >> 7) & 1, (st0A >> 6) & 1, (st0A >> 4) & 1, (st0A >> 5) & 1, st0A);
+    printf("VDS:    OUT_HS=%d OUT_VS=%d FIELD=%d BLANK=%d (0x10=0x%02X, 0x11=0x%02X)\n",
+           (st10 >> 5) & 1, (st10 >> 4) & 1, st11 & 1, (st11 >> 1) & 1, st10, st11);
+    printf("FIFO:   WFF_EMPTY=%d RFF_EMPTY=%d (0x13=0x%02X)\n",
+           (st13 >> 1) & 1, (st13 >> 3) & 1, st13);
+    printf("POL:    HS_POL=%d HS_ACT=%d VS_POL=%d VS_ACT=%d (0x16=0x%02X)\n",
+           st16 & 1, (st16 >> 1) & 1, (st16 >> 2) & 1, (st16 >> 3) & 1, st16);
+
+    uint8_t ht_l, ht_h, vt_l, vt_h;
+    tv5725_read_byte(0x00, 0x17, &ht_l);
+    tv5725_read_byte(0x00, 0x18, &ht_h);
+    tv5725_read_byte(0x00, 0x1B, &vt_l);
+    tv5725_read_byte(0x00, 0x1C, &vt_h);
+
+    uint16_t htotal = ht_l | ((ht_h & 0x0F) << 8);
+    uint16_t vtotal = vt_l | ((vt_h & 0x07) << 8);
+    printf("MEAS:   H-total=%u V-total=%u\n", htotal, vtotal);
 }
 
 int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
@@ -687,9 +869,6 @@ int32_t tv5725_input_set_mode(tv5725_input_mode_t mode)
 
 void tv5725_sync_config(void)
 {
-    /* 外部同步源选择：0 = HS_HS（H 从 H 引脚，V 从 V 引脚） */
-    tv5725_reg_write(TV5725_RW_SP_EXT_SYNC_SEL, 0);
-
     /* SOG 源选择：0 = 绿色通道 */
     tv5725_reg_write(TV5725_RW_SP_SOG_SRC_SEL, 0);
 
@@ -703,17 +882,11 @@ void tv5725_sync_config(void)
     tv5725_reg_write(TV5725_RW_SP_HS_PROC_INV_REG, 0);
     tv5725_reg_write(TV5725_RW_SP_VS_PROC_INV_REG, 0);
 
-    /* Coast / Clamp 配置 */
-    tv5725_reg_write(TV5725_RW_SP_PRE_COAST, 4);
-    tv5725_reg_write(TV5725_RW_SP_POST_COAST, 7);
-    tv5725_reg_write(TV5725_RW_SP_H_PULSE_IGNOR, 0xFF);
-    tv5725_reg_write(TV5725_RW_SP_NO_COAST_REG, 0);
+    /* 通用 Clamp 配置 */
     tv5725_reg_write(TV5725_RW_SP_NO_CLAMP_REG, 1);
-    tv5725_reg_write(TV5725_RW_SP_CLAMP_MANUAL, 0);
     tv5725_reg_write(TV5725_RW_SP_COAST_INV_REG, 0);
-    tv5725_reg_write(TV5725_RW_SP_DIS_SUB_COAST, 0);
-    tv5725_reg_write(TV5725_RW_SP_H_PROTECT, 1);
     tv5725_reg_write(TV5725_RW_SP_HCST_AUTO_EN, 0);
+    tv5725_reg_write(TV5725_RW_SP_HS_REG, 1);
 }
 
 /* ==================================================================
@@ -776,13 +949,10 @@ static void tv5725_output_config_ypbpr(void)
    然后调用 tv5725_output_config_ypbpr() 设置 YPbPr 输出。
 
    @param preset      预设数据指针（432 字节 GBSCpro 格式）
-   @param input_is_yuv 保留参数，已忽略（输出固定为 YPbPr）
    ================================================================== */
 
-int32_t tv5725_output_path_init(const uint8_t *preset, uint8_t input_is_yuv)
+int32_t tv5725_output_path_init(const uint8_t *preset)
 {
-    (void)input_is_yuv;
-
     uint8_t s4_1b_saved;
     tv5725_read_byte(0x04, 0x1B, &s4_1b_saved);
 
@@ -854,7 +1024,7 @@ void tv5725_asw_ctrl(bool sw1, bool sw2, bool sw3, bool sw4)
 /* 封装：各输入模式专用 ASW 设置 */
 void tv5725_asw_set_vga(void)
 {
-    tv5725_asw_ctrl(1, g_tv5725_cfg.asw_02, 1, 1);
+    tv5725_asw_ctrl(1, 1, 1, 1);
 }
 
 void tv5725_asw_set_rgbs(void)
@@ -866,3 +1036,27 @@ void tv5725_asw_set_rgsb(void)
 {
     tv5725_asw_ctrl(0, 0, 1, 0);
 }
+
+/*
+RGB模拟输入，模拟输出
+
+S0_48'0 = 0 禁用VB_[7:0]（test_out_[7:0]）输出
+S0_48'1 = 1 禁用 VB_[7:0] 输入
+S0_48'2 = 0 禁用VR_[7:0]（test_out_[15:8]）输出
+S0_48'3 = 1 禁用VR_[7:0]输入
+S0_48'4 = 0 禁用VG_[7:0]（test_out_[23:16]）输出
+S0_48'5 = 1 禁用VG_[7:0]输入
+
+S0_49'1 = 1 禁用 CLKOUT 输出
+S0_49'2 = 0 启用 HSOUT / VSOUT 输出
+S0_49'3 = 0 启用 HBOUT / VBOUT 输出
+S0_50'0 = 0 输出 VBOUT 垂直空白
+S3_50'7 = 0 数字输出为24位
+S1_28'2 = 1 选择ADC同步至数据路径
+S1_00'3 = 0 输入为 CCIR 601模式。选择CCIR601模式计时
+S1_00'4 = 0 源数据8位656/601输入
+S1_01'7 = 1 选择24位数据路径
+
+S5_02'7:6 = 01 ADC以R1/G1/B1/SOG1作为输入
+
+*/
