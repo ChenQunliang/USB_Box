@@ -9,16 +9,11 @@ extern const uint8_t preset_1080p[];
 extern const uint8_t preset_960p[];
 
 /* ====================================================================
-   当前状态跟踪
-   ==================================================================== */
-static const uint8_t *s_cur_preset = preset_480p; /* 当前输出分辨率预设 */
-
-/* ====================================================================
    输出路径重载（保持当前分辨率和输入模式）
    ==================================================================== */
 static void reload_output(void)
 {
-    tv5725_output_path_init(s_cur_preset);
+    tv5725_output_path_init(g_tv5725_cfg.cur_preset);
 }
 
 /* ====================================================================
@@ -27,28 +22,35 @@ static void reload_output(void)
    切换输入模式后重载输出路径，使矩阵/同步等配置与新模式匹配。
    ==================================================================== */
 
+void cb_input_auto(xpMenu Menu)
+{
+    (void)Menu;
+    printf("Input: Auto Detect\n");
+    tv5725_input_auto_detect();
+}
+
 void cb_input_rgbs(xpMenu Menu)
 {
     (void)Menu;
     printf("Input: RGBS\n");
-    reload_output();
     tv5725_input_set_mode(TV5725_INPUT_RGBS);
+    reload_output();
 }
 
 void cb_input_rgsb(xpMenu Menu)
 {
     (void)Menu;
     printf("Input: RGSB\n");
-    reload_output();
     tv5725_input_set_mode(TV5725_INPUT_RGSB);
+    reload_output();
 }
 
 void cb_input_vga(xpMenu Menu)
 {
     (void)Menu;
     printf("Input: VGA\n");
-    reload_output();
     tv5725_input_set_mode(TV5725_INPUT_VGA);
+    reload_output();
 }
 
 /* ====================================================================
@@ -107,6 +109,12 @@ void cb_chip_id_show(xpMenu Menu)
     printf("TV5725 Chip ID: 0x%06lX\n", id);
 }
 
+void cb_sdram_diag(xpMenu Menu)
+{
+    (void)Menu;
+    tv5725_sdram_diag();
+}
+
 void cb_ota_show(xpMenu Menu)
 {
     __disable_irq();
@@ -133,7 +141,7 @@ void cb_ota_show(xpMenu Menu)
 void cb_res_480p(xpMenu Menu)
 {
     (void)Menu;
-    s_cur_preset = preset_480p;
+    g_tv5725_cfg.cur_preset = preset_480p;
     printf("Output: 480p\n");
     reload_output();
 }
@@ -141,7 +149,7 @@ void cb_res_480p(xpMenu Menu)
 void cb_res_720p(xpMenu Menu)
 {
     (void)Menu;
-    s_cur_preset = preset_720p;
+    g_tv5725_cfg.cur_preset = preset_720p;
     printf("Output: 720p\n");
     reload_output();
 }
@@ -149,7 +157,7 @@ void cb_res_720p(xpMenu Menu)
 void cb_res_960p(xpMenu Menu)
 {
     (void)Menu;
-    s_cur_preset = preset_960p;
+    g_tv5725_cfg.cur_preset = preset_960p;
     printf("Output: 960p\n");
     reload_output();
 }
@@ -157,7 +165,7 @@ void cb_res_960p(xpMenu Menu)
 void cb_res_1080p(xpMenu Menu)
 {
     (void)Menu;
-    s_cur_preset = preset_1080p;
+    g_tv5725_cfg.cur_preset = preset_1080p;
     printf("Output: 1080p\n");
     reload_output();
 }

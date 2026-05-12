@@ -78,6 +78,7 @@ int32_t main(void)
             if (g_u16_sys_timer >= SYS_TIMEOUT_100MS) // 100ms
             {
                 g_u16_sys_timer = 0;
+                tv5725_sog_auto_tune();
             }
             if (g_u16_key_timer >= SYS_TIMEOUT_50MS) // 50MS
             {

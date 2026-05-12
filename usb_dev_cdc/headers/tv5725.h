@@ -46,17 +46,6 @@ typedef struct
    uint8_t bit_width;
 } tv5725_reg_t;
 
-/* 全局配置结构体 — 用于掉电保存 */
-typedef struct
-{
-   bool asw_01; /* ASW 模拟开关状态 */
-   bool asw_02; /* （asw_02 为兼容性控制，可独立存储） */
-   bool asw_03;
-   bool asw_04;
-} tv5725_config_t;
-
-extern tv5725_config_t g_tv5725_cfg;
-
 typedef enum
 {
    TV5725_INPUT_AUTO = 0,
@@ -65,6 +54,28 @@ typedef enum
    TV5725_INPUT_RGSB, /* RGsB: sync on green */
    TV5725_INPUT_COUNT
 } tv5725_input_mode_t;
+
+/* 全局配置结构体 — 所有 TV5725 相关状态统一管理 */
+typedef struct
+{
+   /* ASW */
+   bool  asw_01;
+   bool  asw_02;
+   bool  asw_03;
+   bool  asw_04;
+   int8_t asw_sweep_combo;
+   bool  asw_sweep_first;
+   /* SOG */
+   int8_t sog_tune_level;   /* 自动调谐当前档位 (-1=空闲) */
+   int8_t sog_tune_best;    /* 自动调谐最佳档位 (-1=未找到) */
+   /* 输入/输出 */
+   tv5725_input_mode_t input_mode;
+   const uint8_t *cur_preset;
+   /* I2C */
+   uint8_t i2c_cur_seg;
+} tv5725_config_t;
+
+extern tv5725_config_t g_tv5725_cfg;
 
 /* Build a register descriptor inline */
 #define TV5725_REG(seg, off, bit, w) ((tv5725_reg_t){(seg), (off), (bit), (w)})
@@ -843,7 +854,10 @@ int32_t tv5725_input_config_rgsb(void);
 int32_t tv5725_input_set_mode(tv5725_input_mode_t mode);
 void tv5725_input_auto_detect(void);
 void tv5725_diag(void);
+void tv5725_sdram_diag(void);
 void tv5725_sog_calibrate(void);
+void tv5725_sog_auto_tune(void);
+bool tv5725_detect_active_input(void);
 void tv5725_asw_sweep_diag(void);
 void tv5725_asw_sweep_reset(void);
 int32_t tv5725_output_path_init(const uint8_t *preset);

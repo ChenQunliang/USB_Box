@@ -42,11 +42,11 @@ xItem HomeHead_Item;
 xItem InputHead_Item, ColorHead_Item, FormatHead_Item, TestHead_Item, OutPutHead_Item;
 xItem Input_Item    , Color_Item    , Format_Item    , Test_Item    , OutPut_Item    ;
 /*signal*/
-xItem RGBS_Item, RGSB_Item, VGA_Item;
+xItem Auto_Input_Item, RGBS_Item, RGSB_Item, VGA_Item;
 /*ChipID*/
 xItem ChipID_Item;
 /*SOG*/
-xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item, SOG_Calibrate_Item, ASW_Step_Item, ASW_Reset_Item, OTA_Item;
+xItem SOG_Item, SOGHead_Item, SOG_Normal_Item, SOG_Force_Item, SOG_Show_Item, SOG_Calibrate_Item, ASW_Step_Item, ASW_Reset_Item, OTA_Item, SDRAM_Item;
 /*Format*/
 xItem Auto_Item, Ntsc_Item, Ntsc443_Item, Pal_Item, Pal_M_Item, Secam_Item;
 /*Color*/
@@ -209,6 +209,7 @@ void Create_MenuTree(xpMenu Menu)
         AddItem(" +Input", PARENTS, logo_allArray[1], &Input_Item, &Home_Page, &Input_Page, NULL);
             AddPage("[Back]", &Input_Page, TEXT);
                 AddItem("[Back]", RETURN, NULL, &InputHead_Item,   &Input_Page, &Home_Page, NULL);
+                AddItem(" -Auto", ONCE_FUNCTION,   NULL, &Auto_Input_Item, &Input_Page, NULL, cb_input_auto);
                 AddItem(" -VGA" , ONCE_FUNCTION,   NULL, &VGA_Item,  &Input_Page, NULL, cb_input_vga);
                 AddItem(" -RGBS", ONCE_FUNCTION,   NULL, &RGBS_Item, &Input_Page, NULL, cb_input_rgbs);
                 AddItem(" -RGSB", ONCE_FUNCTION,   NULL, &RGSB_Item, &Input_Page, NULL, cb_input_rgsb);
@@ -232,6 +233,7 @@ void Create_MenuTree(xpMenu Menu)
             AddPage("[Back]", &Test_Page, TEXT);
                 AddItem("[Back]" , RETURN, NULL, &TestHead_Item, &Test_Page, &Home_Page, NULL);
                 AddItem(" -ChipID", ONCE_FUNCTION, NULL, &ChipID_Item, &Test_Page, NULL, cb_chip_id_show);
+                AddItem(" -SDRAM Diag", ONCE_FUNCTION, NULL, &SDRAM_Item, &Test_Page, NULL, cb_sdram_diag);
                 AddItem(" +SOG Mode", PARENTS, NULL, &SOG_Item, &Test_Page, &SOG_Page, NULL);
                     AddPage("[Back]", &SOG_Page, TEXT);
                         AddItem("[Back]" , RETURN, NULL, &SOGHead_Item, &SOG_Page, &Test_Page, NULL);

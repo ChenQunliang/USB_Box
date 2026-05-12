@@ -4,6 +4,7 @@
 #include "menu.h"
 
 /* Input source selection callbacks */
+void cb_input_auto(xpMenu Menu);
 void cb_input_vga(xpMenu Menu);
 void cb_input_rgbs(xpMenu Menu);
 void cb_input_rgsb(xpMenu Menu);
@@ -24,6 +25,7 @@ void cb_asw_sweep_reset(xpMenu Menu);
 
 /* Chip ID callbacks */
 void cb_chip_id_show(xpMenu Menu);
+void cb_sdram_diag(xpMenu Menu);
 
 /* OTA */
 void cb_ota_show(xpMenu Menu);
